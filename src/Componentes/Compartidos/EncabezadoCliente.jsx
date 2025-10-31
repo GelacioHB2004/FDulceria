@@ -33,7 +33,7 @@ import {
 } from "@mui/material"
 import { motion, AnimatePresence } from "framer-motion"
 
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = "https://backenddulceria.onrender.com"
 
 const EncabezadoCliente = () => {
   const [active, setActive] = useState("inicio")

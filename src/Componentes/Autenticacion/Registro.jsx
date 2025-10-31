@@ -42,7 +42,7 @@ import {
 import { motion } from "framer-motion";
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 // Motion Components
 const MotionPaper = motion(Paper);

@@ -12,7 +12,7 @@ import {
 import { ArrowBack, Security, Email, Lock, QrCode2, Login as LoginIcon, Mail } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 function Login() {
   const navigate = useNavigate();

@@ -11,7 +11,7 @@ import {
 import { Email, ArrowForward, ArrowBack, LockReset } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 function ValidarCorreo() {
   const navigate = useNavigate();

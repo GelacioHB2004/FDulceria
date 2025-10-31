@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
           // SEGUNDO: Validar token con el backend (opcional pero recomendado)
           try {
-            await axios.get('http://localhost:3000/api/login1/check-mfa', {
+            await axios.get('https://backenddulceria.onrender.com/api/login1/check-mfa', {
               headers: { Authorization: `Bearer ${storedToken}` }
             });
             // Si el token es válido, todo bien

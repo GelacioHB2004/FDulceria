@@ -167,7 +167,7 @@ if (name === "telefono") {
 }
 
     if (name === "password") {
-      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{5,20}$/;
+      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{5,20}$/;
       if (!passwordRegex.test(value)) {
         errors[name] = "Tener entre 5 y 20 caracteres.";
       } else {

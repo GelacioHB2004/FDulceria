@@ -6,7 +6,7 @@ import withReactContent from 'sweetalert2-react-content';
 import axios from 'axios';
 import {
   Container, Card, CardContent, TextField, Button, Typography, Box,
-  CircularProgress, Alert, Link
+  CircularProgress, Alert,
 } from '@mui/material';
 import { ArrowForward, ArrowBack, VpnKey, Refresh } from '@mui/icons-material';
 
@@ -75,10 +75,11 @@ function ValidarCodigo() {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/recuperar-password/validar-codigo`, {
+      await axios.post(`${API_BASE_URL}/api/recuperar-password/validar-codigo`, {
         correo: correo,
         codigo: codigo
       });
+
 
       MySwal.fire({
         icon: 'success',
@@ -96,7 +97,7 @@ function ValidarCodigo() {
       const errorMsg = err.response?.data?.error || 'Error al verificar el código.';
       setError(errorMsg);
       setCodigo(''); // Limpiar campo para reintentar
-      
+
       MySwal.fire({
         icon: 'error',
         title: 'Código Inválido',

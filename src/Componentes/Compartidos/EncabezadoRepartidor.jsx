@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const EncabezadoRepartidor = () => {
-  const [active, setActive] = useState('inicio');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');

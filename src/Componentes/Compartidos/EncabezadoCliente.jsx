@@ -46,7 +46,6 @@ const EncabezadoCliente = () => {
   const [mfaError, setMfaError] = useState("")
   const [mfaGAEnabled, setMfaGAEnabled] = useState(false)
   const navigate = useNavigate()
-  const menuRef = useRef(null)
 
   useEffect(() => {
     const fetchData = async () => {

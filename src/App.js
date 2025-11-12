@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route , useParams} from 'react-router-dom';
+import { Routes, Route} from 'react-router-dom';
 import LayoutConEncabezado from './Componentes/Layout/LayoutEncabezado.jsx';
 import PaginaPrincipal from './Paginas/PaginaPrincipal';
 import PaginaPrincipalAdministrativa from './Paginas/PaginaPrincipalAdministrativo';

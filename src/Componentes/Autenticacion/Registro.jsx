@@ -147,27 +147,29 @@ function RegistroUsuarios() {
     let errors = { ...formErrors };
 
     if (name === "nombre" || name === "apellidopa" || name === "apellidoma") {
-      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{4,16}$/;
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]{3,16}$/;
       if (!nameRegex.test(value)) {
-        errors[name] = "Solo letras entre 4 y 16 caracteres.";
+        errors[name] = "Solo letras entre 3 y 16 caracteres.";
       } else {
         delete errors[name];
       }
     }
 
-    if (name === "telefono") {
-      const phoneRegex = /^\d{10}$/;
-      if (!phoneRegex.test(value)) {
-        errors[name] = "Contener exactamente 10 dígitos.";
-      } else {
-        delete errors[name];
-      }
-    }
+if (name === "telefono") {
+  const phoneRegex = /^\d{10}$/;
+  if (!phoneRegex.test(value)) {
+    errors[name] = value.length === 0 
+      ? "El teléfono es requerido." 
+      : "Debe contener exactamente 10 dígitos numéricos.";
+  } else {
+    delete errors[name];
+  }
+}
 
     if (name === "password") {
-      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,15}$/;
+      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{5,20}$/;
       if (!passwordRegex.test(value)) {
-        errors[name] = "Tener entre 8 y 15 caracteres.";
+        errors[name] = "Tener entre 5 y 20 caracteres.";
       } else {
         delete errors[name];
       }
@@ -441,26 +443,37 @@ function RegistroUsuarios() {
             />
 
             <TextField
-              fullWidth
-              label="Teléfono"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              error={!!formErrors.telefono}
-              helperText={formErrors.telefono}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Phone color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
-            />
+  fullWidth
+  label="Teléfono"
+  name="telefono"
+  value={formData.telefono}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Solo permitir dígitos (0-9)
+    if (/^\d*$/.test(value)) {
+      handleChange(e);
+    }
+  }}
+  error={!!formErrors.telefono}
+  helperText={formErrors.telefono || "Ingresa 10 dígitos"}
+  inputProps={{
+    maxLength: 10,
+    inputMode: "numeric",
+    pattern: "[0-9]*",
+  }}
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <Phone color="action" />
+      </InputAdornment>
+    ),
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+    }
+  }}
+/>
           </Box>
         );
 

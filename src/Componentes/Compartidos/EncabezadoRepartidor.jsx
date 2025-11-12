@@ -14,6 +14,7 @@ const EncabezadoRepartidor = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
   const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [active, setActive] = useState(''); // ✅ agregado para evitar error
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
@@ -33,7 +34,7 @@ const EncabezadoRepartidor = () => {
   }, []);
 
   const handleClick = (option) => {
-    setActive(option);
+    setActive(option); // ✅ ahora sí existe setActive
     setIsMobileMenuOpen(false);
     setOpenDropdown(null);
   };
@@ -278,15 +279,12 @@ const EncabezadoRepartidor = () => {
         </div>
         <nav className={`menu ${isMobileMenuOpen ? 'menu-open' : ''}`} ref={menuRef}>
           <ul>
-            <li onClick={() => handleMenuClick('home')}>
+            <li className={active === 'home' ? 'active' : ''} onClick={() => handleMenuClick('home')}>
               <HomeOutlined style={{ color: 'pink' }} />
               Home
             </li>
 
-            <li
-              className="dropdown"
-              onClick={() => toggleDropdown('altapropiedadess')}
-            >
+            <li className="dropdown" onClick={() => toggleDropdown('altapropiedadess')}>
               <span>
                 <ShopOutlined style={{ color: '#00B300' }} />
                 Alta Propiedades
@@ -298,10 +296,7 @@ const EncabezadoRepartidor = () => {
               </ul>
             </li>
 
-            <li
-              className="dropdown"
-              onClick={() => toggleDropdown('GestionReserva')}
-            >
+            <li className="dropdown" onClick={() => toggleDropdown('GestionReserva')}>
               <span>
                 <ShopOutlined style={{ color: '#00B300' }} />
                 Gestion
@@ -312,12 +307,12 @@ const EncabezadoRepartidor = () => {
               </ul>
             </li>
 
-            <li onClick={() => handleMenuClick('Promociones')}>
+            <li className={active === 'Promociones' ? 'active' : ''} onClick={() => handleMenuClick('Promociones')}>
               <ApartmentOutlined style={{ color: 'var(--color-icon)' }} />
               Promociones
             </li>
 
-            <li onClick={() => handleMenuClick('MiPerfil')}>
+            <li className={active === 'MiPerfil' ? 'active' : ''} onClick={() => handleMenuClick('MiPerfil')}>
               <UserOutlined style={{ color: 'var(--color-icon)' }} />
               Perfil
             </li>

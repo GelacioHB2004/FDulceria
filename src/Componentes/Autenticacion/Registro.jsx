@@ -167,9 +167,9 @@ if (name === "telefono") {
 }
 
     if (name === "password") {
-      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{5,20}$/;
+      const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,20}$/;
       if (!passwordRegex.test(value)) {
-        errors[name] = "Tener entre 5 y 20 caracteres.";
+        errors[name] = "Tener entre 8 y 20 caracteres.";
       } else {
         delete errors[name];
       }
@@ -213,7 +213,7 @@ if (name === "telefono") {
 
   const validatePassword = (password) => {
     const minLength = 8;
-    const commonPatterns = ["12345", "password", "qwerty", "abcdef"];
+    const commonPatterns = ["123456", "123456789", "12345678", "password", "qwerty", "abc123", "111111", "123123"];
     let errorMessage = "";
 
     if (password.length < minLength) {

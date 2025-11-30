@@ -45,7 +45,7 @@ function ValidarCorreo() {
       MySwal.fire({
         icon: 'success',
         title: '¡Código Enviado!',
-        text: 'Hemos enviado un código de 6 dígitos a tu correo. Por favor revisa tu bandeja de entrada y spam.',
+        text: 'Si el correo está registrado y la cuenta está activa, recibirás un código de recuperación en breve.',
         confirmButtonText: 'Continuar',
         confirmButtonColor: '#FF6B9D'
       }).then(() => {
@@ -55,16 +55,34 @@ function ValidarCorreo() {
         });
       });
 
-    } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Error al procesar la solicitud. Por favor intenta nuevamente.';
-      setError(errorMsg);
-      
-      MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: errorMsg,
-        confirmButtonColor: '#d33'
-      });
+        } catch (err) {
+      // Detectamos específicamente el error 429 (Too Many Requests)
+      if (err.response?.status === 429) {
+        const errorMsg = err.response.data.error || 'Demasiados intentos. Por favor espera antes de intentarlo nuevamente.';
+
+        MySwal.fire({
+          icon: 'warning',           // Cambiado a warning (naranja)
+          title: 'Espera un momento',
+          text: errorMsg,
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#FF9800',  // Naranja bonito
+          timer: 8000,               // Se cierra solo en 8 segundos (opcional)
+          timerProgressBar: true,
+          allowOutsideClick: false
+        });
+      } else {
+        // Cualquier otro error (500, 400, etc.) sí lo mostramos como error
+        const errorMsg = err.response?.data?.error || 'Error al procesar la solicitud. Por favor intenta nuevamente.';
+        
+        MySwal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorMsg,
+          confirmButtonColor: '#d33'
+        });
+      }
+
+      setError(err.response?.data?.error || 'Ocurrió un problema.');
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +185,7 @@ function ValidarCorreo() {
                 {isLoading ? (
                   <CircularProgress size={24} sx={{ color: 'white' }} />
                 ) : (
-                  'Enviar Código'
+                  'Validar Correo'
                 )}
               </Button>
             </Box>

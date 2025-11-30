@@ -88,9 +88,36 @@ function Login() {
           timer: 3000
         });
       }
-    } catch (err) {
-      setError(err.response?.data?.error || "Error al iniciar sesión.");
-      MySwal.fire({ icon: "error", title: "Error", text: error });
+        } catch (err) {
+      const status = err.response?.status;
+      const mensajeBackend = err.response?.data?.error || "Error al iniciar sesión.";
+
+      if (status === 429 && mensajeBackend.includes('bloqueada')) {
+        MySwal.fire({
+          icon: 'warning',
+          title: 'Cuenta bloqueada temporalmente',
+          html: `
+            <p style="font-size: 1.1rem;">${mensajeBackend}</p>
+            <br>
+            <small style="color: #666;">Por seguridad, debes esperar antes de volver a intentar.</small>
+          `,
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#FF9800',
+          timer: 15000,
+          timerProgressBar: true,
+          allowOutsideClick: false
+        });
+        setError(mensajeBackend);
+        return;
+      }
+
+      setError(mensajeBackend);
+      MySwal.fire({
+        icon: "error",
+        title: "Error",
+        text: mensajeBackend,
+        confirmButtonColor: '#d33'
+      });
     } finally {
       setIsLoading(false);
     }

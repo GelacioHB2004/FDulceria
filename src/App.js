@@ -13,6 +13,8 @@ import VerificarCorreo from './Componentes/Autenticacion/VerificarCorreo';
 import ValidarCorreo from './Componentes/Autenticacion/ValidarCorreo';
 import ValidarCodigo from './Componentes/Autenticacion/ValidarCodigo';
 import CambiarPassword from './Componentes/Autenticacion/CambiarPassword';
+import Productos from './Componentes/Cliente/Productos';
+import ProductoDetalle from './Componentes/Cliente/ProductosDetalle';
 
 const App = () => {
   return (
@@ -28,6 +30,8 @@ const App = () => {
             <Route path="/validarcorreo" element={<ValidarCorreo />} />
             <Route path="/validarcodigo" element={<ValidarCodigo />} />
             <Route path="/cambiarpassword" element={<CambiarPassword />} />
+            <Route path="/productos" element={<Productos />} />
+            <Route path="/detalleproducto/:id" element={<ProductoDetalle />} />
 
 
              {/* Rutas administrador */}

@@ -59,8 +59,8 @@ const EncabezadoPublico = () => {
       case "home":
         navigate("/")
         break
-      case "hoteles":
-        navigate("/hotelesp")
+      case "productos":
+        navigate("/productos")
         break
       case "login":
         navigate("/login")
@@ -88,8 +88,10 @@ const EncabezadoPublico = () => {
 
   const menuItems = [
     { key: "home", label: "Inicio", icon: <HomeOutlined />, color: "#2ECC71" },
+    { key: "productos", label: "Productos", icon: <LoginOutlined />, color: "#E74C3C" },
     // { key: 'hoteles', label: 'Hoteles', icon: <BankOutlined />, color: '#E67E22' },
     { key: "login", label: "Iniciar sesión", icon: <LoginOutlined />, color: "#E74C3C" },
+    
   ]
 
   return (

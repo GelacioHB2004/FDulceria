@@ -66,7 +66,7 @@ const BusquedaSimple = ({
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, []); // allSuggestions is a constant, no need to include it in dependencies
+  }, [allSuggestions]); // Added allSuggestions as a dependency
 
   // Filtrar sugerencias basadas en el término de búsqueda
   useEffect(() => {

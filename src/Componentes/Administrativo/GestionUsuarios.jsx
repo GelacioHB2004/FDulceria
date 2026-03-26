@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 import {
@@ -93,11 +93,11 @@ const GestionUsuarios = () => {
 
   const token = localStorage.getItem("token");
 
-  const config = {
+  const config = useCallback(() => ({
     headers: {
       Authorization: `Bearer ${token}`
     }
-  };
+  }), [token]);
 
   // Estadísticas
   const [stats, setStats] = useState({
@@ -109,57 +109,57 @@ const GestionUsuarios = () => {
     inactivos: 0,
   });
 
+  const obtenerUsuarios = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:3000/api/gestion_usuarios", config());
+      setUsuarios(res.data);
+
+      const total = res.data.length;
+      const clientes = res.data.filter(u => u.TipoUsuario === "Cliente").length;
+      const repartidores = res.data.filter(u => u.TipoUsuario === "Repartidor").length;
+      const admins = res.data.filter(u => u.TipoUsuario === "Administrador").length;
+      const activos = res.data.filter(u => u.Estado === "Activo").length;
+      const inactivos = res.data.filter(u => u.Estado === "Inactivo").length;
+
+      setStats({ total, clientes, repartidores, admins, activos, inactivos });
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [config]);
+
+  const aplicarFiltros = useCallback(() => {
+    let resultado = [...usuarios];
+
+    if (busqueda) {
+      resultado = resultado.filter(u =>
+        `${u.Nombre} ${u.ApellidoP} ${u.Correo}`
+          .toLowerCase()
+          .includes(busqueda.toLowerCase())
+      );
+    }
+
+    if (filtroTipo) {
+      resultado = resultado.filter(u => u.TipoUsuario === filtroTipo);
+    }
+
+    if (filtroEstado) {
+      resultado = resultado.filter(u => u.Estado === filtroEstado);
+    }
+
+    setUsuariosFiltrados(resultado);
+    setPaginaActual(1);
+  }, [usuarios, busqueda, filtroTipo, filtroEstado]);
+
   useEffect(() => {
     obtenerUsuarios();
-  }, []);
+  }, [obtenerUsuarios]);
 
   useEffect(() => {
     aplicarFiltros();
-  }, [usuarios, busqueda, filtroTipo, filtroEstado]);
-
-const obtenerUsuarios = useCallback(async () => {
-  setLoading(true);
-  try {
-    const res = await axios.get("http://localhost:3000/api/gestion_usuarios", config);
-    setUsuarios(res.data);
-
-    const total = res.data.length;
-    const clientes = res.data.filter(u => u.TipoUsuario === "Cliente").length;
-    const repartidores = res.data.filter(u => u.TipoUsuario === "Repartidor").length;
-    const admins = res.data.filter(u => u.TipoUsuario === "Administrador").length;
-    const activos = res.data.filter(u => u.Estado === "Activo").length;
-    const inactivos = res.data.filter(u => u.Estado === "Inactivo").length;
-
-    setStats({ total, clientes, repartidores, admins, activos, inactivos });
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-  } finally {
-    setLoading(false);
-  }
-}, []);
-
-const aplicarFiltros = useCallback(() => {
-  let resultado = [...usuarios];
-
-  if (busqueda) {
-    resultado = resultado.filter(u =>
-      `${u.Nombre} ${u.ApellidoP} ${u.Correo}`
-        .toLowerCase()
-        .includes(busqueda.toLowerCase())
-    );
-  }
-
-  if (filtroTipo) {
-    resultado = resultado.filter(u => u.TipoUsuario === filtroTipo);
-  }
-
-  if (filtroEstado) {
-    resultado = resultado.filter(u => u.Estado === filtroEstado);
-  }
-
-  setUsuariosFiltrados(resultado);
-  setPaginaActual(1);
-}, [usuarios, busqueda, filtroTipo, filtroEstado]);
+  }, [aplicarFiltros]);
 
   const indexUltimo = paginaActual * usuariosPorPagina;
   const indexPrimero = indexUltimo - usuariosPorPagina;
@@ -195,13 +195,13 @@ const aplicarFiltros = useCallback(() => {
         await axios.put(
           `http://localhost:3000/api/gestion_usuarios/${formData.id}`,
           formData,
-          config
+          config()
         );
       } else {
         await axios.post(
           "http://localhost:3000/api/gestion_usuarios",
           formData,
-          config
+          config()
         );
       }
 
@@ -233,7 +233,7 @@ const aplicarFiltros = useCallback(() => {
       await axios.put(
         `http://localhost:3000/api/gestion_usuarios/desactivar/${id}`,
         {},
-        config
+        config()
       );
       obtenerUsuarios();
     } catch (error) {

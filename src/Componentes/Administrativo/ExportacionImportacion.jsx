@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   DownloadOutlined,
   UploadOutlined,
@@ -154,7 +154,7 @@ const ExportacionImportacion = () => {
   /* =========================
      OBTENER DATOS
   ========================= */
-  const obtenerDatos = async () => {
+  const obtenerDatos = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
@@ -174,13 +174,13 @@ const ExportacionImportacion = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tabla, axiosConfig]);
 
   useEffect(() => {
     obtenerDatos();
     setArchivo(null);
     setPreview([]);
-  }, [tabla]);
+  }, [tabla, obtenerDatos]);
 
   /* =========================
      SELECCIONAR

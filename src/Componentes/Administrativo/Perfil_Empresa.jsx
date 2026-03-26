@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -13,7 +13,7 @@ import {
   Box, Button, TextField, Typography, Grid, Paper,
   FormControl, InputLabel, Select, MenuItem, FormHelperText,
   CircularProgress, Divider, IconButton, Tooltip, Chip,
-  Stack, useMediaQuery,
+  Stack,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -183,16 +183,13 @@ const PerfilEmpresa = () => {
   const [logoFile, setLogoFile]     = useState(null);
   const [tabInactivos, setTabInactivos] = useState(false);
 
-  // isMobile is not used in the component, so we'll comment it out or remove it
-  // const isMobile = useMediaQuery('(max-width:700px)');
-
   const { register, handleSubmit, formState: { errors }, reset, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { nombreempresa: '', descripcion: '', telefono: '', correo: '', direccion: '', estado: 'Activo' },
   });
 
   /* ── Fetch ── */
-  const cargarDatos = async () => {
+  const cargarDatos = useCallback(async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_BASE_URL}/api/perfil_empresa`);
@@ -214,9 +211,11 @@ const PerfilEmpresa = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reset]);
 
-  useEffect(() => { cargarDatos(); }, []);
+  useEffect(() => { 
+    cargarDatos(); 
+  }, [cargarDatos]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];

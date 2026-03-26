@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -54,11 +54,11 @@ const BusquedaSimple = ({
     'Bombones'
   ];
 
-  // Filtrar sugerencias basadas en el término de búsqueda
-  useEffect(() => {
-    if (searchTerm.trim().length > 0) {
+  // Función para filtrar sugerencias
+  const filterSuggestions = useCallback((term) => {
+    if (term.trim().length > 0) {
       const filtered = allSuggestions.filter(item =>
-        item.toLowerCase().includes(searchTerm.toLowerCase())
+        item.toLowerCase().includes(term.toLowerCase())
       );
       setSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
@@ -66,7 +66,12 @@ const BusquedaSimple = ({
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [searchTerm]);
+  }, []); // allSuggestions is a constant, no need to include it in dependencies
+
+  // Filtrar sugerencias basadas en el término de búsqueda
+  useEffect(() => {
+    filterSuggestions(searchTerm);
+  }, [searchTerm, filterSuggestions]);
 
   const handleSearch = (term = searchTerm) => {
     if (term.trim()) {

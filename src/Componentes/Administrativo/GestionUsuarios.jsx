@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useCallback } from "react";
 import axios from "axios";
 
 import {
@@ -32,17 +32,14 @@ import {
   CardContent,
   useTheme,
   alpha,
-  Badge,
   Fab,
   Zoom,
-  CircularProgress,
 } from "@mui/material";
 
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
   Search as SearchIcon,
-  FilterList as FilterIcon,
   Refresh as RefreshIcon,
   Edit as EditIcon,
   Block as BlockIcon,
@@ -120,50 +117,49 @@ const GestionUsuarios = () => {
     aplicarFiltros();
   }, [usuarios, busqueda, filtroTipo, filtroEstado]);
 
-  const obtenerUsuarios = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get("http://localhost:3000/api/gestion_usuarios", config);
-      setUsuarios(res.data);
-      
-      // Calcular estadísticas
-      const total = res.data.length;
-      const clientes = res.data.filter(u => u.TipoUsuario === "Cliente").length;
-      const repartidores = res.data.filter(u => u.TipoUsuario === "Repartidor").length;
-      const admins = res.data.filter(u => u.TipoUsuario === "Administrador").length;
-      const activos = res.data.filter(u => u.Estado === "Activo").length;
-      const inactivos = res.data.filter(u => u.Estado === "Inactivo").length;
+const obtenerUsuarios = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await axios.get("http://localhost:3000/api/gestion_usuarios", config);
+    setUsuarios(res.data);
 
-      setStats({ total, clientes, repartidores, admins, activos, inactivos });
-    } catch (error) {
-      console.error("Error al obtener usuarios:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const total = res.data.length;
+    const clientes = res.data.filter(u => u.TipoUsuario === "Cliente").length;
+    const repartidores = res.data.filter(u => u.TipoUsuario === "Repartidor").length;
+    const admins = res.data.filter(u => u.TipoUsuario === "Administrador").length;
+    const activos = res.data.filter(u => u.Estado === "Activo").length;
+    const inactivos = res.data.filter(u => u.Estado === "Inactivo").length;
 
-  const aplicarFiltros = () => {
-    let resultado = [...usuarios];
+    setStats({ total, clientes, repartidores, admins, activos, inactivos });
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
-    if (busqueda) {
-      resultado = resultado.filter(u =>
-        `${u.Nombre} ${u.ApellidoP} ${u.Correo}`
-          .toLowerCase()
-          .includes(busqueda.toLowerCase())
-      );
-    }
+const aplicarFiltros = useCallback(() => {
+  let resultado = [...usuarios];
 
-    if (filtroTipo) {
-      resultado = resultado.filter(u => u.TipoUsuario === filtroTipo);
-    }
+  if (busqueda) {
+    resultado = resultado.filter(u =>
+      `${u.Nombre} ${u.ApellidoP} ${u.Correo}`
+        .toLowerCase()
+        .includes(busqueda.toLowerCase())
+    );
+  }
 
-    if (filtroEstado) {
-      resultado = resultado.filter(u => u.Estado === filtroEstado);
-    }
+  if (filtroTipo) {
+    resultado = resultado.filter(u => u.TipoUsuario === filtroTipo);
+  }
 
-    setUsuariosFiltrados(resultado);
-    setPaginaActual(1);
-  };
+  if (filtroEstado) {
+    resultado = resultado.filter(u => u.Estado === filtroEstado);
+  }
+
+  setUsuariosFiltrados(resultado);
+  setPaginaActual(1);
+}, [usuarios, busqueda, filtroTipo, filtroEstado]);
 
   const indexUltimo = paginaActual * usuariosPorPagina;
   const indexPrimero = indexUltimo - usuariosPorPagina;

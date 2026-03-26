@@ -1,5 +1,5 @@
 // src/Componentes/Autenticacion/AuthContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -14,6 +14,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Definir redirectBasedOnUserType como useCallback para evitar recreaciones innecesarias
+  const redirectBasedOnUserType = useCallback((tipoUsuario) => {
+    switch (tipoUsuario) {
+      case 'Cliente': navigate('/cliente', { replace: true }); break;
+      case 'Administrador': navigate('/admin', { replace: true }); break;
+      case 'Repartidor': navigate('/repartidor', { replace: true }); break;
+      default: navigate('/', { replace: true }); break;
+    }
+  }, [navigate]);
 
   // Validación al cargar la app
   useEffect(() => {
@@ -44,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
     initializeAuth();
-  }, [location.pathname]);
+  }, [location.pathname, redirectBasedOnUserType]); // Added redirectBasedOnUserType to dependencies
 
   // HEARTBEAT (15 MINUTOS)
   useEffect(() => {
@@ -183,16 +193,7 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => axios.interceptors.response.eject(interceptor);
-  }, [navigate, token]);
-
-  const redirectBasedOnUserType = (tipoUsuario) => {
-    switch (tipoUsuario) {
-      case 'Cliente': navigate('/cliente', { replace: true }); break;
-      case 'Administrador': navigate('/admin', { replace: true }); break;
-      case 'Repartidor': navigate('/repartidor', { replace: true }); break;
-      default: navigate('/', { replace: true }); break;
-    }
-  };
+  }, [navigate, token]); // Added token to dependencies
 
   const login = (userData, authToken) => {
     const userToStore = {

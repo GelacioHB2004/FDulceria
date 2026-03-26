@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import axios from "axios";
 import { useAuth } from '../Autenticacion/AuthContext';
 import {
   Container, Card, CardContent, TextField, Button, Typography, Box, Stepper, Step, StepLabel,

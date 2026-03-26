@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -18,14 +18,6 @@ const Catalogo = () => {
 
   const searchQuery = location.state?.searchQuery || "";
 
-  useEffect(() => {
-    obtenerProductos();
-  }, []);
-
-  useEffect(() => {
-    aplicarFiltros();
-  }, [searchQuery, precioMin, precioMax, categoria]);
-
   const obtenerProductos = async () => {
     try {
       const res = await axios.get(
@@ -40,7 +32,7 @@ const Catalogo = () => {
     }
   };
 
-  const aplicarFiltros = () => {
+  const aplicarFiltros = useCallback(() => {
     let data = [...productosOriginales];
 
     // 🔍 Buscar por nombre
@@ -68,7 +60,15 @@ const Catalogo = () => {
     }
 
     setProductos(data);
-  };
+  }, [productosOriginales, searchQuery, precioMin, precioMax, categoria]);
+
+  useEffect(() => {
+    obtenerProductos();
+  }, []);
+
+  useEffect(() => {
+    aplicarFiltros();
+  }, [aplicarFiltros]);
 
   const limpiarFiltros = () => {
     setPrecioMin("");

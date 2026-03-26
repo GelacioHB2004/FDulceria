@@ -1,6 +1,6 @@
 // src/pages/DetalleProducto.jsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -10,18 +10,18 @@ const DetalleProducto = () => {
   const navigate = useNavigate();
   const [producto, setProducto] = useState(null);
 
-  useEffect(() => {
-    obtenerDetalle();
-  }, []);
-
-  const obtenerDetalle = async () => {
+  const obtenerDetalle = useCallback(async () => {
     try {
       const res = await axios.get(`http://localhost:3000/api/productos/catalogo/detalle/${id}`);
       setProducto(res.data);
     } catch (error) {
       console.error("Error al obtener detalle", error);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    obtenerDetalle();
+  }, [obtenerDetalle]);
 
   if (!producto) return <p>Cargando...</p>;
 

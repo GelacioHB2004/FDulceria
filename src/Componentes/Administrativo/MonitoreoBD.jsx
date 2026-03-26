@@ -3,8 +3,8 @@ import axios from "axios";
 import {
   Box, Typography, Grid, Card, CardContent, CircularProgress,
   Chip, Stack, LinearProgress, Divider, Alert, Tooltip,
-  Table, TableBody, TableCell, TableHead, TableRow, Paper,
-  Container, Avatar, IconButton, useTheme, alpha,
+  Table, TableBody, TableCell, TableHead, TableRow,
+  Container, Avatar, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
 } from "@mui/material";
 import {
@@ -12,8 +12,8 @@ import {
   Tooltip as RechartsTooltip, ResponsiveContainer,
 } from "recharts";
 import {
-  Storage, Speed, Memory, People, Refresh, Timer,
-  CheckCircle, Visibility, TableChart, Assessment,
+  Storage, Speed, People, Refresh, Timer,
+  CheckCircle, TableChart,
   Inventory2, Category, Person, Business, Share,
   Gavel, Description, ShoppingCart, MoveToInbox,
 } from "@mui/icons-material";
@@ -50,7 +50,6 @@ const COLORES_TABLAS_MINIMALISTAS = [
 ];
 
 const MonitoreoBD = () => {
-  const theme = useTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,10 +58,10 @@ const MonitoreoBD = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const token = localStorage.getItem("token");
-  const headers = { Authorization: `Bearer ${token}` };
 
   const obtenerDatos = useCallback(async () => {
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(API, { headers });
       setData(res.data);
       setError(null);
@@ -83,6 +82,7 @@ const MonitoreoBD = () => {
 
   const verDetalle = async (nombre) => {
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const res = await axios.get(`${API}/tabla/${nombre}`, { headers });
       setTablaDetalle(res.data);
       setDialogOpen(true);
@@ -275,14 +275,14 @@ const MonitoreoBD = () => {
                             transition: "all 0.2s",
                             "&:hover": {
                               borderColor: COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length],
-                              bgcolor: alpha(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length], 0.04),
+                              bgcolor: `rgba(${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(1,3), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(3,5), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(5,7), 16)}, 0.04)`,
                             },
                           }}
                         >
                           <CardContent sx={{ textAlign: "center", py: 2 }}>
                             <Avatar sx={{
                               width: 36, height: 36, mx: "auto", mb: 1,
-                              bgcolor: alpha(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length], 0.1),
+                              bgcolor: `rgba(${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(1,3), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(3,5), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(5,7), 16)}, 0.1)`,
                               color: COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length],
                             }}>
                               {ICONOS_TABLA[key] || <TableChart />}
@@ -331,7 +331,7 @@ const MonitoreoBD = () => {
                         <YAxis tick={{ fontSize: 11, fill: COLORS.grisOscuro }} unit=" ms" />
                         <RechartsTooltip
                           formatter={(value) => [`${value} ms`, "Velocidad"]}
-                          contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.1)", bgcolor: COLORS.blanco }}
+                          contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 2px 12px rgba(0,0,0,0.1)", backgroundColor: COLORS.blanco }}
                         />
                         <Area
                           type="monotone" dataKey="velocidad_ms"

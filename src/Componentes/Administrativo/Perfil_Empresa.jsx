@@ -13,9 +13,9 @@ import {
   Box, Button, TextField, Typography, Grid, Paper,
   FormControl, InputLabel, Select, MenuItem, FormHelperText,
   CircularProgress, Divider, IconButton, Tooltip, Chip,
-  Avatar, Stack, useMediaQuery,
+  Stack, useMediaQuery,
 } from '@mui/material';
-import { createTheme, ThemeProvider, alpha } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SaveIcon from '@mui/icons-material/Save';
@@ -183,7 +183,8 @@ const PerfilEmpresa = () => {
   const [logoFile, setLogoFile]     = useState(null);
   const [tabInactivos, setTabInactivos] = useState(false);
 
-  const isMobile = useMediaQuery('(max-width:700px)');
+  // isMobile is not used in the component, so we'll comment it out or remove it
+  // const isMobile = useMediaQuery('(max-width:700px)');
 
   const { register, handleSubmit, formState: { errors }, reset, control } = useForm({
     resolver: yupResolver(schema),

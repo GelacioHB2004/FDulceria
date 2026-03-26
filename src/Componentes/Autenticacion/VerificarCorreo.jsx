@@ -23,8 +23,6 @@ import {
   ArrowBack,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import api from '../Utils/axiosInstance';
-
 const MySwal = withReactContent(Swal);
 const API_BASE_URL = "http://localhost:3000";
 

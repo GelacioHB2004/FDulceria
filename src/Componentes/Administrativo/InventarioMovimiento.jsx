@@ -17,18 +17,12 @@ import {
   Card,
   CardContent,
   Stack,
-  IconButton,
-  Tooltip,
   Chip,
   Avatar,
-  Divider,
   InputAdornment,
   useTheme,
   alpha,
   Container,
-  Stepper,
-  Step,
-  StepLabel,
   FormControl,
   InputLabel,
   Select,
@@ -42,8 +36,6 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   SwapHoriz as SwapIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
   Refresh as RefreshIcon,
   Add as AddIcon,
   Remove as RemoveIcon,
@@ -56,8 +48,6 @@ import {
   Notes as NotesIcon,
   LocalShipping as ShippingIcon,
   Store as StoreIcon,
-  Download as DownloadIcon,
-  Print as PrintIcon,
 } from "@mui/icons-material";
 
 const API_BASE_URL = "http://localhost:3000";
@@ -110,7 +100,8 @@ const InventarioMovimientos = () => {
 
     fetchProductos();
     cargarEstadisticas();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const cargarEstadisticas = async () => {
     try {
@@ -185,6 +176,15 @@ const InventarioMovimientos = () => {
 
       cargarHistorial(productoSeleccionado);
       cargarEstadisticas();
+
+      // Actualizar el stock del producto en la lista de productos
+      setProductos(prevProductos => 
+        prevProductos.map(p => 
+          p.id_producto === productoSeleccionado 
+            ? { ...p, stock: res.data.stock_actual }
+            : p
+        )
+      );
 
       // Mostrar notificación de éxito
       setTimeout(() => setSuccess(""), 3000);
@@ -565,71 +565,77 @@ const InventarioMovimientos = () => {
                   </Box>
                 </Stack>
 
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: alpha(theme.palette.info.main, 0.05) }}>
-                      <TableCell>Fecha</TableCell>
-                      <TableCell>Tipo</TableCell>
-                      <TableCell>Cantidad</TableCell>
-                      <TableCell>Antes</TableCell>
-                      <TableCell>Después</TableCell>
-                      <TableCell>Motivo</TableCell>
-                      <TableCell>Referencia</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <AnimatePresence>
-                      {historial.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                            <InfoIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
-                            <Typography color="text.secondary">
-                              No hay movimientos registrados para este producto
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        historial.map((m, index) => (
-                          <MotionBox
-                            component="tr"
-                            key={m.id_movimiento}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.02 }}
-                          >
-                            <TableCell>
-                              <Stack direction="row" alignItems="center" spacing={1}>
-                                <DateIcon fontSize="small" color="action" />
-                                <span>{new Date(m.fecha_creacion).toLocaleString()}</span>
-                              </Stack>
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                icon={getTipoIcon(m.tipo)}
-                                label={m.tipo}
-                                size="small"
-                                color={getTipoColor(m.tipo)}
-                                variant="filled"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Typography
-                                fontWeight="bold"
-                                color={m.tipo === 'ENTRADA' ? 'success.main' : m.tipo === 'SALIDA' ? 'error.main' : 'warning.main'}
-                              >
-                                {m.cantidad}
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                    <Typography>Cargando historial...</Typography>
+                  </Box>
+                ) : (
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: alpha(theme.palette.info.main, 0.05) }}>
+                        <TableCell>Fecha</TableCell>
+                        <TableCell>Tipo</TableCell>
+                        <TableCell>Cantidad</TableCell>
+                        <TableCell>Antes</TableCell>
+                        <TableCell>Después</TableCell>
+                        <TableCell>Motivo</TableCell>
+                        <TableCell>Referencia</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <AnimatePresence>
+                        {historial.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                              <InfoIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
+                              <Typography color="text.secondary">
+                                No hay movimientos registrados para este producto
                               </Typography>
                             </TableCell>
-                            <TableCell>{m.stock_antes}</TableCell>
-                            <TableCell>{m.stock_despues}</TableCell>
-                            <TableCell>{m.motivo || '-'}</TableCell>
-                            <TableCell>{m.referencia || '-'}</TableCell>
-                          </MotionBox>
-                        ))
-                      )}
-                    </AnimatePresence>
-                  </TableBody>
-                </Table>
+                          </TableRow>
+                        ) : (
+                          historial.map((m, index) => (
+                            <MotionBox
+                              component="tr"
+                              key={m.id_movimiento}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.02 }}
+                            >
+                              <TableCell>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <DateIcon fontSize="small" color="action" />
+                                  <span>{new Date(m.fecha_creacion).toLocaleString()}</span>
+                                </Stack>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  icon={getTipoIcon(m.tipo)}
+                                  label={m.tipo}
+                                  size="small"
+                                  color={getTipoColor(m.tipo)}
+                                  variant="filled"
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Typography
+                                  fontWeight="bold"
+                                  color={m.tipo === 'ENTRADA' ? 'success.main' : m.tipo === 'SALIDA' ? 'error.main' : 'warning.main'}
+                                >
+                                  {m.cantidad}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>{m.stock_antes}</TableCell>
+                              <TableCell>{m.stock_despues}</TableCell>
+                              <TableCell>{m.motivo || '-'}</TableCell>
+                              <TableCell>{m.referencia || '-'}</TableCell>
+                            </MotionBox>
+                          ))
+                        )}
+                      </AnimatePresence>
+                    </TableBody>
+                  </Table>
+                )}
               </MotionPaper>
             )}
           </>

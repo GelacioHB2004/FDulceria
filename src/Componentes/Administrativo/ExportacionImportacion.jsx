@@ -5,8 +5,6 @@ import {
   FileExcelOutlined,
   FileTextOutlined,
   CheckCircleOutlined,
-  WarningOutlined,
-  DeleteOutlined,
   EyeOutlined,
   ReloadOutlined,
   ExportOutlined,
@@ -15,7 +13,6 @@ import {
   FilterOutlined,
   ClearOutlined,
   SaveOutlined,
-  CloseOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
@@ -43,21 +40,18 @@ import {
   Divider,
   Alert,
   AlertTitle,
-  Card,
-  CardContent,
   Grid,
   FormControl,
   InputLabel,
   LinearProgress,
   Fade,
-  Zoom,
   Badge,
   TableContainer,
   useMediaQuery,
   Container,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 const MySwal = withReactContent(Swal);
 const API_BASE_URL = "http://localhost:3000";
@@ -196,9 +190,6 @@ const ExportacionImportacion = () => {
       const newSelection = prev.includes(id)
         ? prev.filter((i) => i !== id)
         : [...prev, id];
-      
-      // Actualizar selectAll basado en la nueva selección
-      const idField = getIdField();
       setSelectAll(newSelection.length === datos.length && datos.length > 0);
       
       return newSelection;

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_BASE_URL = "http://localhost:3000";
+
 const DetalleProducto = () => {
 
   const { id } = useParams();
@@ -12,11 +14,13 @@ const DetalleProducto = () => {
 
   useEffect(() => {
     obtenerDetalle();
-  }, []);
+  }, [id]);
 
   const obtenerDetalle = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/productos/catalogo/detalle/${id}`);
+      const res = await axios.get(
+        `${API_BASE_URL}/api/productos/catalogo/detalle/${id}`
+      );
       setProducto(res.data);
     } catch (error) {
       console.error("Error al obtener detalle", error);
@@ -30,11 +34,13 @@ const DetalleProducto = () => {
 
       <button onClick={() => navigate(-1)}>← Volver</button>
 
-      <div style={{
-        display: "flex",
-        gap: "40px",
-        marginTop: "20px"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "40px",
+          marginTop: "20px",
+        }}
+      >
         <img
           src={producto.imagen}
           alt={producto.nombre}
@@ -55,7 +61,7 @@ const DetalleProducto = () => {
               color: "white",
               border: "none",
               borderRadius: "5px",
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
             Agregar al carrito

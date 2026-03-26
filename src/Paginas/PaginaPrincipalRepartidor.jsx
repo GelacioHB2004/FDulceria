@@ -59,7 +59,7 @@ const PaginaPrincipalRepartidor = () => {
 
   // Datos del repartidor
   const datosRepartidor = {
-    nombre: "Carlos Mendoza",
+    nombre: "",
     rating: 4.8,
     entregasCompletadas: 347,
     gananciasSemana: 12500,

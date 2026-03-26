@@ -1,59 +1,99 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
-import { HomeOutlined, LoginOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons"
+import { HomeOutlined, LoginOutlined, MenuOutlined, CloseOutlined, ShopOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  AppBar,
-  Toolbar,
   Box,
   IconButton,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Avatar,
   Typography,
+  AppBar,
+  Toolbar,
+  Chip,
+  Divider,
   Container,
+  Paper,
 } from "@mui/material"
+import { createTheme, ThemeProvider } from "@mui/material/styles"
+import BusquedaSimple from "./BusquedaSimple.jsx"
+
+const API_BASE_URL = "http://localhost:3000"
+
+/* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
+const COLORS = {
+  sidebarBg: "#FFFFFF",
+  sidebarSurface: "#FFF5F7",
+  accent: "#E91E6C",
+  accentLight: "#F06292",
+  accentSoft: "#FCE4EC",
+  accentBg: "rgba(233,30,108,0.08)",
+  gold: "#D4A017",
+  goldLight: "#F5D060",
+  goldBg: "rgba(212,160,23,0.10)",
+  textPrimary: "#2D2D2D",
+  textSecondary: "#6B6B6B",
+  textMuted: "#A0A0A0",
+  hoverBg: "rgba(233,30,108,0.05)",
+  activeBg: "rgba(233,30,108,0.10)",
+  divider: "rgba(0,0,0,0.06)",
+  danger: "#D32F2F",
+  dangerBg: "rgba(211,47,47,0.08)",
+  mobileOverlay: "rgba(0,0,0,0.3)",
+  white: "#FFFFFF",
+}
+
+const sweetTheme = createTheme({
+  palette: {
+    mode: "light",
+    primary: { main: COLORS.accent },
+    background: { default: "#FFFFFF", paper: "#FFFFFF" },
+  },
+  typography: {
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
+  },
+})
 
 const EncabezadoPublico = () => {
-  const [active, setActive] = useState("inicio")
+  const [active, setActive] = useState("home")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [nombreEmpresa, setNombreEmpresa] = useState("")
+  const [nombreEmpresa, setNombreEmpresa] = useState("Dulcería Angelitos")
   const [logoUrl, setLogoUrl] = useState("")
   const navigate = useNavigate()
   const menuRef = useRef(null)
 
   useEffect(() => {
-    const fetchPerfil = async () => {
+    const fetchPerfilActivo = async () => {
       try {
-        const response = await axios.get("https://backenddulceria.onrender.com/api/perfilF")
-        const data = response.data
-        setNombreEmpresa(data.NombreEmpresa || "Nombre no disponible")
-        setLogoUrl(data.Logo ? `data:image/jpeg;base64,${data.Logo}` : "")
+        const response = await axios.get(`${API_BASE_URL}/api/perfil_empresa`)
+        const perfilesActivos = response.data.filter(p => p.estado === 'Activo')
+
+        if (perfilesActivos.length > 0) {
+          const perfil = perfilesActivos[0]
+          setNombreEmpresa(perfil.nombreempresa || "Dulcería Angelitos")
+          setLogoUrl(perfil.logo || "")
+        } else {
+          setNombreEmpresa("Dulcería Angelitos")
+          setLogoUrl("")
+        }
       } catch (error) {
-        console.error("Error al obtener datos del perfil:", error)
+        console.error("Error al obtener perfil activo:", error)
+        setNombreEmpresa("Dulcería Angelitos")
+        setLogoUrl("")
       }
     }
 
-    fetchPerfil()
+    fetchPerfilActivo()
   }, [])
 
-  const handleClick = (option) => {
-    setActive(option)
-    setIsMobileMenuOpen(false)
-  }
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
-
   const handleMenuClick = (key) => {
-    handleClick(key)
+    setActive(key)
+    setIsMobileMenuOpen(false)
 
     switch (key) {
       case "home":
@@ -87,104 +127,166 @@ const EncabezadoPublico = () => {
   }, [])
 
   const menuItems = [
-    { key: "home", label: "Inicio", icon: <HomeOutlined />, color: "#2ECC71" },
-    { key: "productos", label: "Productos", icon: <LoginOutlined />, color: "#E74C3C" },
-    // { key: 'hoteles', label: 'Hoteles', icon: <BankOutlined />, color: '#E67E22' },
-    { key: "login", label: "Iniciar sesión", icon: <LoginOutlined />, color: "#E74C3C" },
-    
+    { key: "home", label: "Inicio", icon: <HomeOutlined /> },
+    { key: "productos", label: "Productos", icon: <ShopOutlined /> },
+    { key: "login", label: "Iniciar sesión", icon: <LoginOutlined /> },
   ]
 
   return (
-    <>
+    <ThemeProvider theme={sweetTheme}>
+      {/* Barra superior */}
       <AppBar
         position="sticky"
+        elevation={0}
         sx={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          background: COLORS.white,
+          borderBottom: `1px solid ${COLORS.divider}`,
+          boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
         }}
       >
         <Container maxWidth="xl">
-          <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+          <Toolbar sx={{ justifyContent: "space-between", py: 1, px: { xs: 1, sm: 2 } }}>
             {/* Logo y nombre de empresa */}
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-              <Box
-                display="flex"
-                alignItems="center"
-                gap={2}
-                onClick={() => handleMenuClick("home")}
-                sx={{ cursor: "pointer" }}
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1.5}
+              onClick={() => handleMenuClick("home")}
+              sx={{ cursor: "pointer" }}
+            >
+              <Avatar
+                src={logoUrl}
+                alt="Logo"
+                sx={{
+                  width: 46,
+                  height: 46,
+                  bgcolor: COLORS.accent,
+                  fontSize: "1.1rem",
+                  fontWeight: 700,
+                  boxShadow: `0 4px 14px rgba(233,30,108,0.25)`,
+                  border: `2px solid ${COLORS.accentSoft}`,
+                }}
               >
-                {logoUrl && (
-                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} transition={{ type: "spring", stiffness: 300 }}>
-                    <Avatar
-                      src={logoUrl}
-                      alt="Logo Empresa"
-                      sx={{
-                        width: 50,
-                        height: 50,
-                        border: "3px solid rgba(255,255,255,0.3)",
-                      }}
-                    />
-                  </motion.div>
-                )}
+                {!logoUrl && (nombreEmpresa.charAt(0) || "D")}
+              </Avatar>
+              <Box sx={{ display: { xs: "none", sm: "block" } }}>
                 <Typography
-                  variant="h6"
                   sx={{
                     fontWeight: 700,
-                    color: "white",
-                    textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
+                    fontSize: "1rem",
+                    color: COLORS.textPrimary,
+                    lineHeight: 1.2,
                   }}
                 >
                   {nombreEmpresa}
                 </Typography>
+                <Chip
+                  label="Tienda Online"
+                  size="small"
+                  sx={{
+                    mt: 0.5,
+                    height: 20,
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                    backgroundColor: COLORS.accentBg,
+                    color: COLORS.accent,
+                    border: `1px solid ${COLORS.accentLight}`,
+                    borderRadius: "6px",
+                  }}
+                />
               </Box>
-            </motion.div>
+            </Box>
+
+            {/* Búsqueda Simple - Desktop */}
+            <Box sx={{ display: { xs: "none", md: "flex" }, flex: 1, maxWidth: 400, mx: 3 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  width: "100%",
+                  borderRadius: "10px",
+                  border: `1px solid ${COLORS.divider}`,
+                  overflow: "hidden",
+                  "&:hover": {
+                    borderColor: COLORS.accentLight,
+                  },
+                }}
+              >
+                <BusquedaSimple
+                  placeholder="Buscar productos..."
+                  fullWidth
+                  onSearch={(term) => {
+  navigate('/productos', { state: { busqueda: term } })
+}}
+                />
+              </Paper>
+            </Box>
 
             {/* Menu Desktop */}
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
-              {menuItems.map((item, index) => (
-                <motion.div
-                  key={item.key}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.95 }}>
+              {menuItems.map((item, index) => {
+                const isActive = active === item.key
+                return (
+                  <motion.div
+                    key={item.key}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
                     <Box
                       onClick={() => handleMenuClick(item.key)}
                       sx={{
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
-                        px: 3,
-                        py: 1.5,
-                        borderRadius: 2,
+                        px: 2.5,
+                        py: 1.2,
+                        borderRadius: "10px",
                         cursor: "pointer",
-                        backgroundColor: active === item.key ? "rgba(255,255,255,0.25)" : "transparent",
-                        color: "white",
-                        transition: "all 0.3s ease",
+                        backgroundColor: isActive ? COLORS.activeBg : "transparent",
+                        color: isActive ? COLORS.accent : COLORS.textSecondary,
+                        transition: "all 0.2s ease",
+                        position: "relative",
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.2)",
+                          backgroundColor: isActive ? COLORS.activeBg : COLORS.hoverBg,
                         },
+                        ...(isActive && {
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            bottom: -8,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            width: 4,
+                            height: 4,
+                            borderRadius: "50%",
+                            backgroundColor: COLORS.accent,
+                          },
+                        }),
                       }}
                     >
-                      <Box sx={{ fontSize: "1.2rem", color: item.color }}>{item.icon}</Box>
-                      <Typography sx={{ fontWeight: 600 }}>{item.label}</Typography>
+                      <Box sx={{ fontSize: "1.1rem", color: "inherit" }}>{item.icon}</Box>
+                      <Typography sx={{ fontSize: "0.85rem", fontWeight: isActive ? 600 : 500 }}>
+                        {item.label}
+                      </Typography>
                     </Box>
                   </motion.div>
-                </motion.div>
-              ))}
+                )
+              })}
             </Box>
 
             {/* Hamburger Menu Icon */}
             <IconButton
               sx={{
                 display: { xs: "flex", md: "none" },
-                color: "white",
+                color: COLORS.accent,
+                backgroundColor: COLORS.accentBg,
+                "&:hover": {
+                  backgroundColor: COLORS.activeBg,
+                },
               }}
-              onClick={toggleMobileMenu}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+              {isMobileMenuOpen ? <CloseOutlined style={{ fontSize: 20 }} /> : <MenuOutlined style={{ fontSize: 20 }} />}
             </IconButton>
           </Toolbar>
         </Container>
@@ -194,92 +296,206 @@ const EncabezadoPublico = () => {
       <Drawer
         anchor="left"
         open={isMobileMenuOpen}
-        onClose={toggleMobileMenu}
+        onClose={() => setIsMobileMenuOpen(false)}
         ref={menuRef}
         sx={{
           "& .MuiDrawer-paper": {
-            width: "70%",
-            maxWidth: 300,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            width: "85%",
+            maxWidth: 320,
+            background: COLORS.white,
+            borderRight: `1px solid ${COLORS.divider}`,
+          },
+          "& .MuiBackdrop-root": {
+            backgroundColor: COLORS.mobileOverlay,
           },
         }}
       >
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ x: -300 }}
+              initial={{ x: -320 }}
               animate={{ x: 0 }}
-              exit={{ x: -300 }}
+              exit={{ x: -320 }}
               transition={{ type: "spring", damping: 25 }}
+              style={{ height: "100%", display: "flex", flexDirection: "column" }}
             >
-              <Box sx={{ p: 3 }}>
-                {logoUrl && (
-                  <Box display="flex" justifyContent="center" mb={3}>
-                    <Avatar
-                      src={logoUrl}
-                      alt="Logo Empresa"
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        border: "3px solid rgba(255,255,255,0.3)",
-                      }}
-                    />
-                  </Box>
-                )}
-                <Typography
-                  variant="h6"
-                  align="center"
+              {/* Header del Drawer */}
+              <Box
+                sx={{
+                  px: 2.5,
+                  pt: 3,
+                  pb: 2.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  background: `linear-gradient(135deg, ${COLORS.accentSoft} 0%, #FFFFFF 100%)`,
+                }}
+              >
+                <Avatar
+                  src={logoUrl}
+                  alt="Logo"
                   sx={{
-                    color: "white",
-                    mb: 3,
+                    width: 46,
+                    height: 46,
+                    bgcolor: COLORS.accent,
+                    fontSize: "1.1rem",
                     fontWeight: 700,
+                    boxShadow: `0 4px 14px rgba(233,30,108,0.25)`,
                   }}
                 >
-                  {nombreEmpresa}
-                </Typography>
+                  {!logoUrl && (nombreEmpresa.charAt(0) || "D")}
+                </Avatar>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                      color: COLORS.textPrimary,
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: 160,
+                    }}
+                  >
+                    {nombreEmpresa}
+                  </Typography>
+                  <Chip
+                    label="Tienda Online"
+                    size="small"
+                    sx={{
+                      mt: 0.5,
+                      height: 20,
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      backgroundColor: COLORS.goldBg,
+                      color: COLORS.gold,
+                      border: `1px solid ${COLORS.goldLight}`,
+                      borderRadius: "6px",
+                    }}
+                  />
+                </Box>
               </Box>
 
-              <List>
-                {menuItems.map((item, index) => (
-                  <motion.div
-                    key={item.key}
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <ListItem
+              <Divider sx={{ borderColor: COLORS.divider }} />
+
+              {/* Búsqueda en móvil */}
+              <Box sx={{ p: 2 }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    borderRadius: "10px",
+                    border: `1px solid ${COLORS.divider}`,
+                    overflow: "hidden",
+                  }}
+                >
+                  <BusquedaSimple
+                    placeholder="Buscar productos..."
+                    fullWidth
+                    onSearch={(term) => {
+                      navigate('/productos', { state: { searchQuery: term } })
+                      setIsMobileMenuOpen(false)
+                    }}
+                  />
+                </Paper>
+              </Box>
+
+              {/* Menú móvil */}
+              <List sx={{ px: 1.5, flex: 1 }} disablePadding>
+                {menuItems.map((item) => {
+                  const isActive = active === item.key
+                  return (
+                    <ListItemButton
+                      key={item.key}
                       onClick={() => handleMenuClick(item.key)}
                       sx={{
-                        py: 2,
-                        px: 3,
-                        cursor: "pointer",
-                        backgroundColor: active === item.key ? "rgba(255,255,255,0.2)" : "transparent",
-                        borderLeft: active === item.key ? "4px solid white" : "4px solid transparent",
+                        borderRadius: "10px",
+                        mb: 0.4,
+                        py: 1.2,
+                        px: 1.5,
+                        backgroundColor: isActive ? COLORS.activeBg : "transparent",
+                        color: isActive ? COLORS.accent : COLORS.textSecondary,
                         "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.15)",
+                          backgroundColor: isActive ? COLORS.activeBg : COLORS.hoverBg,
                         },
+                        transition: "all 0.2s ease",
+                        position: "relative",
+                        ...(isActive && {
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            left: 0,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            width: 3,
+                            height: "60%",
+                            borderRadius: "0 4px 4px 0",
+                            backgroundColor: COLORS.accent,
+                          },
+                        }),
                       }}
                     >
-                      <ListItemIcon sx={{ color: item.color, minWidth: 40 }}>{item.icon}</ListItemIcon>
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 36,
+                          color: "inherit",
+                          fontSize: "1.1rem",
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
                       <ListItemText
                         primary={item.label}
-                        sx={{
-                          "& .MuiTypography-root": {
-                            color: "white",
-                            fontWeight: 600,
-                          },
+                        primaryTypographyProps={{
+                          fontSize: "0.85rem",
+                          fontWeight: isActive ? 600 : 500,
                         }}
                       />
-                    </ListItem>
-                  </motion.div>
-                ))}
+                    </ListItemButton>
+                  )
+                })}
               </List>
+
+              {/* Footer del Drawer */}
+              <Box
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  borderTop: `1px solid ${COLORS.divider}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  background: COLORS.sidebarSurface,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: "0.65rem",
+                    color: COLORS.textMuted,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  Tienda v1.0
+                </Typography>
+                <Chip
+                  label="Público"
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                    backgroundColor: COLORS.goldBg,
+                    color: COLORS.gold,
+                    border: `1px solid ${COLORS.goldLight}`,
+                  }}
+                />
+              </Box>
             </motion.div>
           )}
         </AnimatePresence>
       </Drawer>
-    </>
+    </ThemeProvider>
   )
 }
 
-export default EncabezadoPublico
+export default EncabezadoPublico;

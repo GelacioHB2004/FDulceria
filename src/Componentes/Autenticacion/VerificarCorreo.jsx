@@ -23,9 +23,10 @@ import {
   ArrowBack,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import api from '../Utils/axiosInstance';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+const API_BASE_URL = "http://localhost:3000";
 
 const MotionPaper = motion(Paper);
 const MotionBox = motion(Box);
@@ -47,7 +48,7 @@ function VerificacionCorreo() {
     setIsLoading(true);
     setError("");
 
-    if (!verificationCode) {
+    if (!verificationCode?.trim()) {
       MySwal.fire({
         icon: "error",
         title: "Código requerido",
@@ -58,39 +59,61 @@ function VerificacionCorreo() {
     }
 
     try {
-      console.log('Enviando solicitud de verificación para el código:', verificationCode);
-      await axios.get(`${API_BASE_URL}/api/registro1/verify/${verificationCode}`);
-      
-      MySwal.fire({
+      await axios.get(
+        `${API_BASE_URL}/api/registro1/verify/${verificationCode.trim()}`
+      );
+
+      await MySwal.fire({
         icon: "success",
         title: "¡Correo verificado!",
         text: "Tu correo electrónico ha sido verificado exitosamente.",
         confirmButtonColor: theme.palette.primary.main,
-      }).then(() => {
-        navigate("/login");
       });
+
+      navigate("/login");
+
     } catch (error) {
-      console.error("Error al verificar el código:", error.response ? error.response.data : error.message);
-      const errorMessage = error.response?.data?.error || "Ocurrió un error al verificar el código. Por favor, intenta de nuevo.";
-      
-      if (errorMessage === "La cuenta ya está verificada. Inicia sesión para continuar.") {
-        MySwal.fire({
-          icon: "info",
-          title: "Cuenta ya verificada",
-          text: "Redirigiendo al login.",
-          confirmButtonColor: theme.palette.info.main,
-        }).then(() => {
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        "Ocurrió un error al verificar el código. Intenta de nuevo.";
+
+      // 400 → errores controlados
+      if (status === 400) {
+        if (message === "La cuenta ya está verificada. Inicia sesión para continuar.") {
+          await MySwal.fire({
+            icon: "info",
+            title: "Cuenta ya verificada",
+            text: message,
+            confirmButtonColor: theme.palette.info.main,
+          });
           navigate("/login");
-        });
-      } else {
-        setError(errorMessage);
+          return;
+        }
+
+        setError(message);
         MySwal.fire({
           icon: "error",
           title: "Error de verificación",
-          text: errorMessage,
+          text: message,
           confirmButtonColor: theme.palette.error.main,
         });
+        return;
       }
+
+      // 500 → error del servidor
+      if (status === 500) {
+        navigate("/500");
+        return;
+      }
+
+      // Otros errores (red, timeout, etc.)
+      MySwal.fire({
+        icon: "error",
+        title: "Error inesperado",
+        text: "No se pudo verificar el correo. Intenta más tarde.",
+      });
+
     } finally {
       setIsLoading(false);
     }
@@ -198,8 +221,8 @@ function VerificacionCorreo() {
                       onChange={handleChange}
                       inputProps={{
                         maxLength: 6,
-                        style: { 
-                          textAlign: 'center', 
+                        style: {
+                          textAlign: 'center',
                           fontSize: '1.5rem',
                           letterSpacing: '0.5em',
                           fontFamily: 'monospace'
@@ -276,7 +299,7 @@ function VerificacionCorreo() {
                 >
                   ¿No recibiste el código? Reenviar
                 </Button>
-                
+
                 <Button
                   startIcon={<ArrowBack />}
                   onClick={() => navigate("/login")}
@@ -305,10 +328,10 @@ function VerificacionCorreo() {
         >
           <Typography variant="body2" color="text.secondary">
             ¿Necesitas ayuda?{" "}
-            <Button 
-              variant="text" 
-              size="small" 
-              sx={{ 
+            <Button
+              variant="text"
+              size="small"
+              sx={{
                 fontWeight: 'bold',
                 color: 'primary.main'
               }}

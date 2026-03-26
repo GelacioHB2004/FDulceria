@@ -10,9 +10,10 @@ import {
   CircularProgress, Alert, RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
 import { ArrowBack, Security, Email, Lock, QrCode2, Login as LoginIcon, Mail } from '@mui/icons-material';
+import api from '../Utils/axiosInstance';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+const API_BASE_URL = "http://localhost:3000";
 
 function Login() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ function Login() {
     setError("");
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/login1`, {
+      const res = await api.post(`${API_BASE_URL}/api/login1`, {
         correo: formData.correo,
         password: formData.password,
       });
@@ -76,7 +77,7 @@ function Login() {
         setStep(2);
 
         if (metodoSeleccionado === 'Correo') {
-          await axios.post(`${API_BASE_URL}/api/login1/generate-email-code`, { userId: res.data.userId });
+          await api.post(`${API_BASE_URL}/api/login1/generate-email-code`, { userId: res.data.userId });
         }
 
         MySwal.fire({
@@ -134,7 +135,7 @@ function Login() {
     }
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/login1/verify-mfa`, {
+      const res = await api.post(`${API_BASE_URL}/api/login1/verify-mfa`, {
         userId: formData.userId,
         mfaCode: formData.mfaCode,
         metodo: metodoSeleccionado

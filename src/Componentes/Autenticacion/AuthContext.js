@@ -20,14 +20,13 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       const storedUser = localStorage.getItem("user");
       const storedToken = localStorage.getItem("token");
-
       if (storedUser && storedToken) {
         try {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
           setToken(storedToken);
 
-          await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
+          await axios.get('http://localhost:3000/api/login1/ping', {
             headers: { Authorization: `Bearer ${storedToken}` },
             timeout: 8000
           });
@@ -112,7 +111,7 @@ export const AuthProvider = ({ children }) => {
 
     const pingInterval = setInterval(async () => {
       try {
-        await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
+        await axios.get('http://localhost:3000/api/login1/ping', {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 6000
         });
@@ -132,10 +131,10 @@ export const AuthProvider = ({ children }) => {
         const isLogoutRequest = error.config?.url?.includes('/logout');
         const wasIntentionalLogout = localStorage.getItem('intentional_logout') === 'true';
 
-        // Solo mostrar SweetAlert si:
-        // - Es 401
-        // - NO es una petición de logout
-        // - NO fue un logout intencional
+        // ───────────────────────────────────────────────────────────────
+        // BLOQUE COMENTADO → No muestra el mensaje de "otro dispositivo"
+        // ───────────────────────────────────────────────────────────────
+        /*
         if (
           (error.response?.status === 401 || !error.response) &&
           token &&
@@ -172,6 +171,7 @@ export const AuthProvider = ({ children }) => {
             window.location.reload();
           });
         }
+        */
 
         // Siempre limpiamos la bandera si existe (por seguridad)
         if (wasIntentionalLogout || isLogoutRequest) {
@@ -221,7 +221,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('intentional_logout', 'true');
 
     try {
-      await axios.post('https://backenddulceria.onrender.com/api/login1/logout', {}, {
+      await axios.post('http://localhost:3000/api/login1/logout', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {

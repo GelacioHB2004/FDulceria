@@ -1,15 +1,16 @@
 import React from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import EncabezadoPublico from '../Compartidos/EncabezadoPublico';
-import EncabezadoAdministrativo from '../Compartidos/EncabezadoAdministrador';
-import EncabezadoCliente from '../Compartidos/EncabezadoCliente';
-import EncabezadoRepartidor from '../Compartidos/EncabezadoRepartidor';
-import PieDePaginaCliente from '../Compartidos/PieDePaginaCliente';
-import PieDePaginaAdmin from '../Compartidos/PieDePaginaAdministrador';
-import PieDePagina from '../Compartidos/PieDePaginaPublico';
-import PieDePaginaRepartidor from '../Compartidos/PieDePaginaRepartidor';
-import { useTheme } from '../Temas/ThemeContext';
-import { useAuth } from '../Autenticacion/AuthContext';
+import EncabezadoPublico from '../Compartidos/EncabezadoPublico.jsx';
+import EncabezadoAdministrativo from '../Compartidos/EncabezadoAdministrador.jsx';
+import EncabezadoCliente from '../Compartidos/EncabezadoCliente.jsx';
+import EncabezadoRepartidor from '../Compartidos/EncabezadoRepartidor.jsx';
+import PieDePaginaCliente from '../Compartidos/PieDePaginaCliente.jsx';
+import PieDePaginaAdmin from '../Compartidos/PieDePaginaAdministrador.jsx';
+import PieDePagina from '../Compartidos/PieDePaginaPublico.jsx';
+import PieDePaginaRepartidor from '../Compartidos/PieDePaginaRepartidor.jsx';
+import Breadcrumbs from '../Compartidos/Breadcrumbs.jsx';
+import { useTheme } from '../Temas/ThemeContext.jsx';
+import { useAuth } from '../Autenticacion/AuthContext.js';
 
 const LayoutConEncabezado = ({ children }) => {
   const location = useLocation();
@@ -96,21 +97,29 @@ const LayoutConEncabezado = ({ children }) => {
 
   return (
     <div className={`layout-container ${theme}`}>
-      <header>{encabezado}</header>
-      <main className="content">{children}</main>
-      <footer>{pieDePagina}</footer>
+   {encabezado}
+
+<main className="content">
+  <Breadcrumbs />
+  {children}
+</main>
+
+    <footer style={{ marginLeft: location.pathname.startsWith('/admin') ? '250px' : '0' }}>
+      {pieDePagina}
+    </footer>
 
       <style>{`
         :root {
           --min-header-footer-height: 60px; 
         }
 
-        body, html {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          width: 100%;
-        }
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
 
         .layout-container {
           display: flex;
@@ -118,19 +127,25 @@ const LayoutConEncabezado = ({ children }) => {
           min-height: 100vh;
         }
 
-        .content {
-          flex-grow: 1;
-          background-color: ${theme === 'dark' ? '#1d1d1d' : '#ffffff'};
-          color: ${theme === 'dark' ? '#ffffff' : '#000000'};
-          padding: 20px;
-        }
+.content {
+  flex-grow: 1;
+  background-color: ${theme === 'dark' ? '#1d1d1d' : '#ffffff'};
+  color: ${theme === 'dark' ? '#ffffff' : '#000000'};
+  padding: 10px;
+  margin-left: ${location.pathname.startsWith('/admin') ? '250px' : '0'};
+  transition: margin-left 0.3s ease;
+}
 
-        header, footer {
-          width: 100%;
-          min-height: var(--min-header-footer-height);
-          box-sizing: border-box;
-          background-color: ${theme === 'dark' ? '#333' : '#FFA500'};
-        }
+header {
+  width: 100%;
+  margin-left: ${location.pathname.startsWith('/admin') ? '250px' : '0'};
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+footer {
+  width: 100%;
+}
 
         footer {
           background-color: ${theme === 'dark' ? '#d45d00' : '#d45d00'};

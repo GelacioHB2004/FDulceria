@@ -1,387 +1,601 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { LogoutOutlined, HomeOutlined, FileTextOutlined, UserOutlined, TeamOutlined, ShopOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+  LogoutOutlined,
+  HomeOutlined,
+  FileTextOutlined,
+  UserOutlined,
+  TeamOutlined,
+  ShopOutlined,
+  MenuOutlined,
+  CloseOutlined,
+  DatabaseOutlined,
+  DownOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  Box,
+  IconButton,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Avatar,
+  Collapse,
+  Divider,
+  Chip,
+  useMediaQuery,
+} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+const API_BASE_URL = "http://localhost:3000";
+
+/* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
+const COLORS = {
+  sidebarBg: "#FFFFFF",
+  sidebarSurface: "#FFF5F7",
+  accent: "#E91E6C",
+  accentLight: "#F06292",
+  accentSoft: "#FCE4EC",
+  accentBg: "rgba(233,30,108,0.08)",
+  gold: "#D4A017",
+  goldLight: "#F5D060",
+  goldBg: "rgba(212,160,23,0.10)",
+  textPrimary: "#2D2D2D",
+  textSecondary: "#6B6B6B",
+  textMuted: "#A0A0A0",
+  hoverBg: "rgba(233,30,108,0.05)",
+  activeBg: "rgba(233,30,108,0.10)",
+  divider: "rgba(0,0,0,0.06)",
+  danger: "#D32F2F",
+  dangerBg: "rgba(211,47,47,0.08)",
+  mobileOverlay: "rgba(0,0,0,0.3)",
+};
+
+const SIDEBAR_WIDTH = 270;
+
+const sweetTheme = createTheme({
+  palette: {
+    mode: "light",
+    primary: { main: COLORS.accent },
+    background: { default: "#FFFFFF", paper: "#FFFFFF" },
+  },
+  typography: {
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
+  },
+});
+
+/* ───────── Menu ───────── */
+const menuItems = [
+  { key: "home", label: "Inicio", icon: <HomeOutlined /> },
+  {
+    key: "empresa",
+    label: "Empresa",
+    icon: <FileTextOutlined />,
+    submenu: [
+      { key: "perfil", label: "Perfil Empresa" },
+      { key: "redes", label: "Redes Sociales" },
+      { key: "terminos", label: "Terminos" },
+      { key: "politicas", label: "Politicas" },
+      { key: "mision", label: "Mision" },
+      { key: "vision", label: "Vision" },
+    ],
+  },
+  {
+    key: "gestiongeneral",
+    label: "Inventario",
+    icon: <ShopOutlined />,
+    submenu: [
+      { key: "inventario", label: "Inventario" },
+      { key: "categorias", label: "Categorias" },
+      { key: "productos", label: "Productos" },
+    ],
+  },
+  {
+    key: "gestionbasededatos",
+    label: "Base de Datos",
+    icon: <DatabaseOutlined />,
+    submenu: [
+      { key: "respaldobd", label: "Respaldo BD" },
+      { key: "exportacionimportacion", label: "Exportación/Importación" },
+      { key: "monitoreobd", label: "Monitoreo BD" },
+    ],
+  },
+  { key: "gestionusuarios", label: "Usuarios", icon: <TeamOutlined /> },
+  { key: "perfilusuarioadmin", label: "Mi Perfil", icon: <UserOutlined /> },
+];
+
+const logoutItem = {
+  key: "cerrarSesion",
+  label: "Cerrar Sesion",
+  icon: <LogoutOutlined />,
+};
+
+const routes = {
+  home: "/admin",
+  perfil: "/admin/perfil_empresa",
+  redes: "/admin/redes_sociales",
+  categorias: "/admin/categorias",
+  productos: "/admin/productos",
+  terminos: "/admin/terminosempresa",
+  politicas: "/admin/politicasempresa",
+  mision: "/admin/misionempresa",
+  vision: "/admin/visionempresa",
+  inventario: "/admin/inventario",
+  respaldobd: "/admin/respaldo_bd",
+  gestionusuarios: "/admin/gestion_usuarios",
+  perfilusuarioadmin: "/admin/perfilusuarioadmin",
+  exportacionimportacion: "/admin/exportacion_importacion",
+  monitoreobd: "/admin/monitoreo_bd",
+};
+
+/* ─────────────────────────────────────── */
+/*            COMPONENTE PRINCIPAL         */
+/* ─────────────────────────────────────── */
 const EncabezadoAdministrativo = () => {
-  const [active, setActive] = useState('inicio');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [logoUrl, setLogoUrl] = useState('');
-  const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [active, setActive] = useState("home");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMenus, setOpenMenus] = useState({});
+  const [logoUrl, setLogoUrl] = useState("");
+  const [nombreEmpresa, setNombreEmpresa] = useState("Panel Admin");
   const navigate = useNavigate();
-  const menuRef = useRef(null);
+  const isMobile = useMediaQuery("(max-width:900px)");
 
+  /* ── Fetch perfil empresa ── */
   useEffect(() => {
     const fetchPerfil = async () => {
       try {
-        const response = await axios.get('https://backenddulceria.onrender.com/api/perfilF');
-        const data = response.data;
-
-        console.log('Datos recibidos del backend:', data); // Depuración
-
-        setNombreEmpresa(data.NombreEmpresa || 'Nombre no disponible');
-        setLogoUrl(data.Logo ? `data:image/jpeg;base64,${data.Logo}` : '');
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/");
+          return;
+        }
+        const response = await axios.get(`${API_BASE_URL}/api/perfil_empresa`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const perfilesActivos = response.data.filter(
+          (p) => p.estado === "Activo"
+        );
+        if (perfilesActivos.length > 0) {
+          setNombreEmpresa(
+            perfilesActivos[0].nombreempresa || "Panel Administrativo"
+          );
+          setLogoUrl(perfilesActivos[0].logo || "");
+        }
       } catch (error) {
-        console.error('Error al obtener datos del perfil:', error);
+        console.error("Error al obtener perfil de empresa:", error);
+        if (error.response?.status === 401) {
+          localStorage.clear();
+          navigate("/");
+        }
       }
     };
-
     fetchPerfil();
-  }, []);
+  }, [navigate]);
 
-  const handleClick = (option) => {
-    setActive(option);
-    setIsMobileMenuOpen(false);
-    setOpenDropdown(null);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleDropdown = (menu) => {
-    setOpenDropdown(openDropdown === menu ? null : menu);
-  };
-
-  const handleMenuClick = (key) => {
-    switch (key) {
-      case "politicas":
-        navigate('/admin/politicas');
-        break;
-      case "home":
-        navigate('/admin/');
-        break;
-      case "terminos":
-        navigate('/admin/terminos');
-        break;
-      case "perfil":
-        navigate('/admin/perfil');
-        break;
-      case "mision":
-        navigate('/admin/mision');
-        break;
-      case "vision":
-        navigate('/admin/vision');
-        break;
-      case "Alojamientos":
-        navigate('/admin/gestionhoteles');
-        break;
-      case "Usuarios":
-        navigate('/admin/gestionusuarios');
-        break;
-      case "Reservas":
-        navigate('/admin/gestionreservasad');
-        break;
-      case "Estadisticas":
-        navigate('/admin/estadisticas');
-        break;
-      case "Promociones":
-        navigate('/admin/gestionpromociones');
-        break;
-      case "MetodoPago":
-        navigate('/admin/metodopago');
-        break;
-      case "PerfilUsuario":
-        navigate('/admin/perfilusuario');
-        break;
-      case "cerrarSesion":
-        handleLogout();
-        break;
-      default:
-        console.log("No se reconoce la acción del menú");
+  /* ── Handlers ── */
+  const handleNavigate = (key) => {
+    if (key === "cerrarSesion") {
+      localStorage.clear();
+      navigate("/");
+      return;
     }
+    setActive(key);
+    if (routes[key]) navigate(routes[key]);
+    if (isMobile) setMobileOpen(false);
   };
 
-  const handleLogout = () => {
-    console.log('Cerrando sesión...');
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    navigate('/');
+  const toggleSubmenu = (key) => {
+    setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setIsMobileMenuOpen(false);
-      setOpenDropdown(null);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <>
-      {/* Backdrop para mobile */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-      
-      <header className="flex justify-between items-center px-4 py-5 bg-gradient-to-r from-slate-800 to-blue-900 text-white relative shadow-lg z-50">
-        {/* Logo */}
-        <div className="flex items-center flex-1">
-          {logoUrl && <img src={logoUrl} alt="Logo de la Empresa" className="w-12 h-12 rounded-full mr-3 shadow-md" />}
-          <h3 className="text-xl font-bold tracking-wide">{nombreEmpresa}</h3>
-        </div>
-
-        {/* Nav Desktop */}
-        <nav className="hidden md:flex flex-1 justify-end ml-8" ref={menuRef}>
-          <ul className="flex items-center gap-2 list-none m-0 p-0">
-            <li 
-              className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-emerald-400/20 hover:shadow-md active:bg-blue-600 ${active === 'home' ? 'bg-blue-600 shadow-md' : ''}`}
-              onClick={() => handleMenuClick('home')}
-            >
-              <HomeOutlined style={{ color: '#ec4899' }} />
-              Home
-            </li>
-            
-            {/* Dropdown Empresa */}
-            <li className="group relative cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-emerald-400/20 hover:shadow-md">
-              <span onClick={() => toggleDropdown('empresa')}>
-                <FileTextOutlined style={{ color: '#f97316' }} />
-                Datos de la Empresa
-              </span>
-              <ul className="absolute left-0 top-full hidden group-hover:block bg-slate-800 rounded-lg shadow-xl mt-2 min-w-[200px] py-2 z-50 border border-slate-700">
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}
-                >
-                  Perfil
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}
-                >
-                  Términos
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}
-                >
-                  Políticas
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('mision'); handleMenuClick('mision'); }}
-                >
-                  Misión
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('vision'); handleMenuClick('vision'); }}
-                >
-                  Visión
-                </li>
-              </ul>
-            </li>
-
-            {/* Dropdown Gestión General */}
-            <li className="group relative cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-emerald-400/20 hover:shadow-md">
-              <span onClick={() => toggleDropdown('gestiongeneral')}>
-                <ShopOutlined style={{ color: '#0de222' }} />
-                Gestión General
-              </span>
-              <ul className="absolute left-0 top-full hidden group-hover:block bg-slate-800 rounded-lg shadow-xl mt-2 min-w-[200px] py-2 z-50 border border-slate-700">
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('Alojamientos'); handleMenuClick('Alojamientos'); }}
-                >
-                  Hoteles
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('Reservas'); handleMenuClick('Reservas'); }}
-                >
-                  Reservas
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('Estadisticas'); handleMenuClick('Estadisticas'); }}
-                >
-                  Estadísticas
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('Promociones'); handleMenuClick('Promociones'); }}
-                >
-                  Promociones
-                </li>
-                <li 
-                  className="px-4 py-2 cursor-pointer hover:bg-emerald-400/30 transition-colors rounded"
-                  onClick={() => { handleClick('MetodoPago'); handleMenuClick('MetodoPago'); }}
-                >
-                  Método de Pago
-                </li>
-              </ul>
-            </li>
-
-            <li 
-              className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-emerald-400/20 hover:shadow-md ${active === 'Usuarios' ? 'bg-blue-600 shadow-md' : ''}`}
-              onClick={() => handleMenuClick('Usuarios')}
-            >
-              <TeamOutlined style={{ color: '#afb91e' }} />
-              Gestión de Usuarios
-            </li>
-
-            <li 
-              className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-emerald-400/20 hover:shadow-md ${active === 'PerfilUsuario' ? 'bg-blue-600 shadow-md' : ''}`}
-              onClick={() => handleMenuClick('PerfilUsuario')}
-            >
-              <UserOutlined style={{ color: '#91079d' }} />
-              Perfil
-            </li>
-
-            <li 
-              className="cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 ease-in-out flex items-center gap-2 text-base font-medium hover:bg-red-500/20 hover:shadow-md"
-              onClick={() => handleMenuClick('cerrarSesion')}
-            >
-              <LogoutOutlined style={{ color: '#ef4444' }} />
-              Cerrar Sesión
-            </li>
-          </ul>
-        </nav>
-
-        {/* Mobile Menu */}
-        <div className="md:hidden flex flex-col gap-1.5 cursor-pointer z-50" onClick={toggleMobileMenu}>
-          <div className="w-6 h-0.5 bg-white rounded transition-transform duration-300"></div>
-          <div className="w-6 h-0.5 bg-white rounded transition-transform duration-300"></div>
-          <div className="w-6 h-0.5 bg-white rounded transition-transform duration-300"></div>
-        </div>
-
-        {/* Mobile Nav */}
-        <nav 
-          className={`md:hidden fixed top-0 left-0 w-3/4 h-full bg-slate-800 p-6 transform transition-transform duration-300 ease-in-out shadow-2xl z-50 overflow-y-auto flex flex-col ${
-            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`} 
-          ref={menuRef}
+  /* ─────────── Sidebar Content ─────────── */
+  const sidebarContent = (
+    <Box
+      sx={{
+        width: SIDEBAR_WIDTH,
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: COLORS.sidebarBg,
+        borderRight: `1px solid ${COLORS.divider}`,
+        overflowY: "auto",
+        overflowX: "hidden",
+        "&::-webkit-scrollbar": { width: 4 },
+        "&::-webkit-scrollbar-thumb": {
+          background: COLORS.textMuted,
+          borderRadius: 2,
+        },
+      }}
+    >
+      {/* ── Branding ── */}
+      <Box
+        sx={{
+          px: 2.5,
+          pt: 3,
+          pb: 2.5,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          background: `linear-gradient(135deg, ${COLORS.accentSoft} 0%, #FFFFFF 100%)`,
+        }}
+      >
+        <Avatar
+          src={logoUrl}
+          alt="Logo"
+          sx={{
+            width: 46,
+            height: 46,
+            bgcolor: COLORS.accent,
+            fontSize: "1.1rem",
+            fontWeight: 700,
+            boxShadow: `0 4px 14px rgba(233,30,108,0.25)`,
+          }}
         >
-          <ul className="flex flex-col gap-2 list-none m-0 p-0 mt-20">
-            <li 
-              className={`cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-emerald-400/30 ${active === 'home' ? 'bg-blue-600' : ''}`}
-              onClick={() => handleMenuClick('home')}
-            >
-              <HomeOutlined style={{ color: '#ec4899' }} />
-              Home
-            </li>
-            
-            {/* Mobile Dropdown Empresa */}
-            <li className="relative cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-emerald-400/30">
-              <span onClick={() => toggleDropdown('empresa')}>
-                <FileTextOutlined style={{ color: '#f97316' }} />
-                Datos de la Empresa
-              </span>
-              {openDropdown === 'empresa' && (
-                <ul className="mt-2 ml-4 bg-slate-700 rounded-lg py-2 border-l-2 border-emerald-400">
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('perfil'); handleMenuClick('perfil'); }}
-                  >
-                    Perfil
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('terminos'); handleMenuClick('terminos'); }}
-                  >
-                    Términos
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('politicas'); handleMenuClick('politicas'); }}
-                  >
-                    Políticas
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('mision'); handleMenuClick('mision'); }}
-                  >
-                    Misión
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('vision'); handleMenuClick('vision'); }}
-                  >
-                    Visión
-                  </li>
-                </ul>
+          {!logoUrl && (nombreEmpresa.charAt(0) || "A")}
+        </Avatar>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: "1rem",
+              color: COLORS.textPrimary,
+              lineHeight: 1.2,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: 160,
+            }}
+          >
+            {nombreEmpresa}
+          </Typography>
+          <Chip
+            label="Administrador"
+            size="small"
+            sx={{
+              mt: 0.5,
+              height: 20,
+              fontSize: "0.6rem",
+              fontWeight: 700,
+              backgroundColor: COLORS.goldBg,
+              color: COLORS.gold,
+              border: `1px solid ${COLORS.goldLight}`,
+              borderRadius: "6px",
+            }}
+          />
+        </Box>
+      </Box>
+
+      <Divider sx={{ borderColor: COLORS.divider }} />
+
+      {/* ── Seccion principal ── */}
+      <Box sx={{ px: 1.5, pt: 2, pb: 0.5 }}>
+        <Typography
+          sx={{
+            fontSize: "0.65rem",
+            fontWeight: 700,
+            color: COLORS.textMuted,
+            textTransform: "uppercase",
+            letterSpacing: 1.2,
+            px: 1,
+            mb: 0.5,
+          }}
+        >
+          Navegacion
+        </Typography>
+      </Box>
+
+      <List sx={{ px: 1.5, flex: 1 }} disablePadding>
+        {menuItems.map((item) => {
+          const isActive = active === item.key;
+          const isOpen = !!openMenus[item.key];
+          const hasSubmenu = !!item.submenu;
+          const isParentActive =
+            hasSubmenu && item.submenu.some((s) => active === s.key);
+
+          return (
+            <React.Fragment key={item.key}>
+              <ListItemButton
+                onClick={() =>
+                  hasSubmenu ? toggleSubmenu(item.key) : handleNavigate(item.key)
+                }
+                sx={{
+                  borderRadius: "10px",
+                  mb: 0.4,
+                  py: 1,
+                  px: 1.5,
+                  backgroundColor:
+                    isActive || isParentActive
+                      ? COLORS.activeBg
+                      : "transparent",
+                  color:
+                    isActive || isParentActive
+                      ? COLORS.accent
+                      : COLORS.textSecondary,
+                  "&:hover": {
+                    backgroundColor:
+                      isActive || isParentActive
+                        ? COLORS.activeBg
+                        : COLORS.hoverBg,
+                  },
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                  ...(isActive || isParentActive
+                    ? {
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          left: 0,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          width: 3,
+                          height: "60%",
+                          borderRadius: "0 4px 4px 0",
+                          backgroundColor: COLORS.accent,
+                        },
+                      }
+                    : {}),
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 36,
+                    color: "inherit",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.85rem",
+                    fontWeight: isActive || isParentActive ? 600 : 500,
+                  }}
+                />
+                {hasSubmenu &&
+                  (isOpen ? (
+                    <DownOutlined
+                      style={{ fontSize: 10, color: COLORS.textMuted }}
+                    />
+                  ) : (
+                    <RightOutlined
+                      style={{ fontSize: 10, color: COLORS.textMuted }}
+                    />
+                  ))}
+              </ListItemButton>
+
+              {/* ── Submenu ── */}
+              {hasSubmenu && (
+                <Collapse in={isOpen} timeout={250} unmountOnExit>
+                  <List disablePadding sx={{ pl: 2, pb: 0.5 }}>
+                    {item.submenu.map((sub) => {
+                      const subActive = active === sub.key;
+                      return (
+                        <ListItemButton
+                          key={sub.key}
+                          onClick={() => handleNavigate(sub.key)}
+                          sx={{
+                            borderRadius: "8px",
+                            py: 0.7,
+                            px: 1.5,
+                            mb: 0.3,
+                            ml: 1.5,
+                            backgroundColor: subActive
+                              ? COLORS.accentBg
+                              : "transparent",
+                            color: subActive
+                              ? COLORS.accent
+                              : COLORS.textMuted,
+                            "&:hover": {
+                              backgroundColor: subActive
+                                ? COLORS.accentBg
+                                : COLORS.hoverBg,
+                              color: COLORS.textPrimary,
+                            },
+                            transition: "all 0.2s ease",
+                            position: "relative",
+                            "&::before": {
+                              content: '""',
+                              position: "absolute",
+                              left: -8,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              width: 5,
+                              height: 5,
+                              borderRadius: "50%",
+                              backgroundColor: subActive
+                                ? COLORS.accent
+                                : COLORS.textMuted,
+                              opacity: subActive ? 1 : 0.4,
+                              transition: "all 0.2s ease",
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={sub.label}
+                            primaryTypographyProps={{
+                              fontSize: "0.8rem",
+                              fontWeight: subActive ? 600 : 400,
+                            }}
+                          />
+                        </ListItemButton>
+                      );
+                    })}
+                  </List>
+                </Collapse>
               )}
-            </li>
+            </React.Fragment>
+          );
+        })}
+      </List>
 
-            {/* Mobile Dropdown Gestión General */}
-            <li className="relative cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-emerald-400/30">
-              <span onClick={() => toggleDropdown('gestiongeneral')}>
-                <ShopOutlined style={{ color: '#0de222' }} />
-                Gestión General
-              </span>
-              {openDropdown === 'gestiongeneral' && (
-                <ul className="mt-2 ml-4 bg-slate-700 rounded-lg py-2 border-l-2 border-emerald-400">
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('Alojamientos'); handleMenuClick('Alojamientos'); }}
-                  >
-                    Hoteles
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('Reservas'); handleMenuClick('Reservas'); }}
-                  >
-                    Reservas
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('Estadisticas'); handleMenuClick('Estadisticas'); }}
-                  >
-                    Estadísticas
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('Promociones'); handleMenuClick('Promociones'); }}
-                  >
-                    Promociones
-                  </li>
-                  <li 
-                    className="px-4 py-2 cursor-pointer hover:bg-emerald-400/50 transition-colors rounded"
-                    onClick={() => { handleClick('MetodoPago'); handleMenuClick('MetodoPago'); }}
-                  >
-                    Método de Pago
-                  </li>
-                </ul>
-              )}
-            </li>
+      {/* ── Logout ── */}
+      <Box sx={{ px: 1.5, pb: 2, pt: 1 }}>
+        <Divider sx={{ borderColor: COLORS.divider, mb: 1.5 }} />
+        <ListItemButton
+          onClick={() => handleNavigate("cerrarSesion")}
+          sx={{
+            borderRadius: "10px",
+            py: 1,
+            px: 1.5,
+            color: COLORS.textSecondary,
+            "&:hover": {
+              backgroundColor: COLORS.dangerBg,
+              color: COLORS.danger,
+            },
+            transition: "all 0.2s ease",
+          }}
+        >
+          <ListItemIcon
+            sx={{ minWidth: 36, color: "inherit", fontSize: "1.1rem" }}
+          >
+            {logoutItem.icon}
+          </ListItemIcon>
+          <ListItemText
+            primary={logoutItem.label}
+            primaryTypographyProps={{ fontSize: "0.85rem", fontWeight: 500 }}
+          />
+        </ListItemButton>
+      </Box>
 
-            <li 
-              className={`cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-emerald-400/30 ${active === 'Usuarios' ? 'bg-blue-600' : ''}`}
-              onClick={() => handleMenuClick('Usuarios')}
+      {/* ── Footer del sidebar ── */}
+      <Box
+        sx={{
+          px: 2.5,
+          py: 1.5,
+          borderTop: `1px solid ${COLORS.divider}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: COLORS.sidebarSurface,
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: "0.65rem",
+            color: COLORS.textMuted,
+            letterSpacing: 0.3,
+          }}
+        >
+          Panel v2.0
+        </Typography>
+        <Chip
+          label="Admin"
+          size="small"
+          sx={{
+            height: 20,
+            fontSize: "0.6rem",
+            fontWeight: 700,
+            backgroundColor: COLORS.accentBg,
+            color: COLORS.accent,
+            border: `1px solid rgba(233,30,108,0.2)`,
+          }}
+        />
+      </Box>
+    </Box>
+  );
+
+  /* ─────────── Render ─────────── */
+  return (
+    <ThemeProvider theme={sweetTheme}>
+      {/* ── Sidebar Desktop ── */}
+      {!isMobile && (
+        <Box
+          component="nav"
+          sx={{
+            width: SIDEBAR_WIDTH,
+            flexShrink: 0,
+            position: "fixed",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            zIndex: 1200,
+            boxShadow: "2px 0 20px rgba(0,0,0,0.06)",
+          }}
+        >
+          {sidebarContent}
+        </Box>
+      )}
+
+      {/* ── Top Bar Mobile ── */}
+      {isMobile && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 56,
+            zIndex: 1300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            background: "#FFFFFF",
+            borderBottom: `1px solid ${COLORS.divider}`,
+            boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Avatar
+              src={logoUrl}
+              alt="Logo"
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: COLORS.accent,
+                fontSize: "0.85rem",
+                fontWeight: 700,
+              }}
             >
-              <TeamOutlined style={{ color: '#afb91e' }} />
-              Gestión de Usuarios
-            </li>
-
-            <li 
-              className={`cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-emerald-400/30 ${active === 'PerfilUsuario' ? 'bg-blue-600' : ''}`}
-              onClick={() => handleMenuClick('PerfilUsuario')}
+              {!logoUrl && (nombreEmpresa.charAt(0) || "A")}
+            </Avatar>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                color: COLORS.textPrimary,
+              }}
             >
-              <UserOutlined style={{ color: '#91079d' }} />
-              Perfil
-            </li>
+              {nombreEmpresa}
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setMobileOpen(!mobileOpen)}
+            sx={{ color: COLORS.accent }}
+          >
+            {mobileOpen ? (
+              <CloseOutlined style={{ fontSize: 20 }} />
+            ) : (
+              <MenuOutlined style={{ fontSize: 20 }} />
+            )}
+          </IconButton>
+        </Box>
+      )}
 
-            <li 
-              className="cursor-pointer py-4 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2 text-base font-medium hover:bg-red-500/30"
-              onClick={() => handleMenuClick('cerrarSesion')}
-            >
-              <LogoutOutlined style={{ color: '#ef4444' }} />
-              Cerrar Sesión
-            </li>
-          </ul>
-        </nav>
-      </header>
-    </>
+      {/* ── Drawer Mobile ── */}
+      <Drawer
+        anchor="left"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            background: "transparent",
+            boxShadow: "none",
+            border: "none",
+          },
+          "& .MuiBackdrop-root": {
+            backgroundColor: COLORS.mobileOverlay,
+          },
+        }}
+      >
+        {sidebarContent}
+      </Drawer>
+    </ThemeProvider>
   );
 };
 

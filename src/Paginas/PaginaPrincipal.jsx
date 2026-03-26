@@ -1117,7 +1117,7 @@ export default function DulceriaPage() {
             </Grid>
 
             {/* Mapa */}
-            <Grid item xs={12} md={6}>
+            <Grid item xs={16} md={8}>
               <MotionBox
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -1131,23 +1131,28 @@ export default function DulceriaPage() {
                     borderRadius: 4,
                     overflow: "hidden",
                     height: "100%",
-                    minHeight: { xs: 400, md: 500 },
+                    minHeight: { xs: 400, md: 600 }, // más alto y ancho
                     border: "1px solid",
                     borderColor: "divider",
                     position: "relative",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.1)", // sombra suave extra
                   }}
                   elevation={0}
                 >
-                  {/* Simulación de mapa */}
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      background: `url(/placeholder.svg?height=500&width=600&query=map location pin store) no-repeat center/cover`,
-                      position: "relative",
-                    }}
-                  >
-                    {/* Overlay con botón */}
+                  {/* Mapa real con iframe */}
+                  <Box sx={{ width: "100%", height: "100%" }}>
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d358.66318466450014!2d-98.41402442755476!3d21.146134113039626!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d727a8740b7165%3A0x6cf6585e6367182e!2sNutripets!5e1!3m2!1ses!2smx!4v1769317754137!5m2!1ses!2smx"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Mapa de ubicación de Nutripets"
+                    ></iframe>
+
+                    {/* Overlay con botón (sin cambios) */}
                     <Box
                       sx={{
                         position: "absolute",
@@ -1183,159 +1188,6 @@ export default function DulceriaPage() {
               </MotionBox>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
-
-      <Box
-        sx={{
-          py: { xs: 12, md: 20 },
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage:
-              "url(/placeholder.svg?height=800&width=1920&query=luxury confectionery workspace artisan chocolate making)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background:
-                "linear-gradient(135deg, rgba(44, 24, 16, 0.92) 0%, rgba(58, 42, 35, 0.88) 50%, rgba(35, 25, 20, 0.92) 100%)",
-            },
-          }}
-        />
-
-        {/* Elementos decorativos */}
-        <MotionBox
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-          sx={{
-            position: "absolute",
-            top: "20%",
-            left: "15%",
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%)",
-            filter: "blur(60px)",
-            zIndex: 1,
-          }}
-        />
-
-        <Container maxWidth="md" sx={{ position: "relative", zIndex: 2 }}>
-          <MotionBox
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            sx={{ textAlign: "center" }}
-          >
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              <Typography
-                variant="overline"
-                sx={{
-                  color: "#D4AF37",
-                  letterSpacing: "4px",
-                  fontSize: "0.9rem",
-                  mb: 3,
-                  display: "block",
-                  fontWeight: 600,
-                }}
-              >
-                EXPERIENCIA PREMIUM
-              </Typography>
-            </MotionBox>
-
-            <Typography
-              variant="h2"
-              sx={{
-                fontFamily: "var(--font-serif)",
-                fontWeight: 700,
-                fontSize: { xs: "2.5rem", md: "4rem" },
-                color: "white",
-                mb: 4,
-                letterSpacing: "-0.02em",
-                lineHeight: 1.2,
-              }}
-            >
-              ¿Listo para una{" "}
-              <Box
-                component="span"
-                sx={{
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F4E5C3 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                experiencia única
-              </Box>
-              ?
-            </Typography>
-
-            <Typography
-              variant="h6"
-              sx={{
-                color: "rgba(255, 255, 255, 0.85)",
-                mb: 6,
-                fontWeight: 300,
-                maxWidth: "550px",
-                mx: "auto",
-                lineHeight: 1.8,
-                fontSize: { xs: "1.1rem", md: "1.3rem" },
-              }}
-            >
-              Descubre nuestra colección completa y déjate sorprender por sabores que transforman momentos ordinarios en
-              extraordinarios
-            </Typography>
-
-            <MotionBox whileHover={{ scale: 1.05, y: -3 }} whileTap={{ scale: 0.98 }} sx={{ display: "inline-block" }}>
-              <Button
-                variant="contained"
-                size="large"
-                endIcon={<ArrowForwardIcon />}
-                sx={{
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F4E5C3 100%)",
-                  color: "#2C1810",
-                  px: 6,
-                  py: 2.5,
-                  fontSize: "1.15rem",
-                  fontWeight: 700,
-                  borderRadius: "50px",
-                  boxShadow: "0 12px 40px rgba(212, 175, 55, 0.4)",
-                  "&:hover": {
-                    background: "linear-gradient(135deg, #F4E5C3 0%, #D4AF37 100%)",
-                    boxShadow: "0 16px 50px rgba(212, 175, 55, 0.5)",
-                  },
-                }}
-              >
-                Ver Catálogo Completo
-              </Button>
-            </MotionBox>
-          </MotionBox>
         </Container>
       </Box>
     </Box>

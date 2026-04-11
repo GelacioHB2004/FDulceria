@@ -10,6 +10,7 @@ import {
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip as RechartsTooltip, ResponsiveContainer,
+  BarChart, Bar, Cell,
 } from "recharts";
 import {
   Storage, Speed, People, Refresh, Timer,
@@ -255,52 +256,92 @@ const MonitoreoBD = () => {
               </Card>
             </Grid>
 
-            {/* ══════════ 5. REGISTROS POR TABLA ══════════ */}
+            {/* ══════════ 5. GRÁFICA DE REGISTROS POR TABLA ══════════ */}
             <Grid item xs={12}>
               <Card sx={{ borderRadius: 2, border: `1px solid ${COLORS.grisOscuro}20`, boxShadow: "none" }}>
-                <Box sx={{ p: 2.5, borderBottom: `1px solid ${COLORS.grisOscuro}20` }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: COLORS.textoOscuro }}>
-                    Registros por tabla
-                  </Typography>
+                <Box sx={{ p: 2.5, borderBottom: `1px solid ${COLORS.grisOscuro}20`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: COLORS.textoOscuro }}>
+                      Registros por tabla
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: COLORS.grisOscuro }}>
+                      Volumen de datos comparativo entre módulos
+                    </Typography>
+                  </Box>
                 </Box>
-                <CardContent>
-                  <Grid container spacing={1.5}>
-                    {registros.map(([key, val], index) => (
-                      <Grid item xs={6} sm={4} md={3} key={key}>
-                        <Card
-                          onClick={() => verDetalle(key)}
-                          sx={{
-                            cursor: "pointer", borderRadius: 1.5,
-                            border: `1px solid ${COLORS.grisOscuro}20`,
-                            transition: "all 0.2s",
-                            "&:hover": {
-                              borderColor: COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length],
-                              bgcolor: `rgba(${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(1,3), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(3,5), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(5,7), 16)}, 0.04)`,
-                            },
-                          }}
+                <CardContent sx={{ pt: 4 }}>
+                  <Box sx={{ height: 400, width: "100%" }}>
+                    <ResponsiveContainer>
+                      <BarChart
+                        data={registros.map(([key, val]) => ({
+                          name: val.label,
+                          total: val.total,
+                          originalKey: key
+                        }))}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                        onClick={(data) => {
+                          if (data && data.activePayload) {
+                            verDetalle(data.activePayload[0].payload.originalKey);
+                          }
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={`${COLORS.grisOscuro}20`} />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          interval={0} 
+                          tick={{ fontSize: 12, fill: COLORS.textoOscuro, fontWeight: 500 }}
+                          height={80}
+                        />
+                        <YAxis tick={{ fontSize: 12, fill: COLORS.grisOscuro }} />
+                        <RechartsTooltip
+                          cursor={{ fill: COLORS.gris, opacity: 0.4 }}
+                          contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}
+                          formatter={(value) => [fmt(value), "Registros"]}
+                        />
+                        <Bar 
+                          dataKey="total" 
+                          radius={[6, 6, 0, 0]} 
+                          barSize={40}
                         >
-                          <CardContent sx={{ textAlign: "center", py: 2 }}>
-                            <Avatar sx={{
-                              width: 36, height: 36, mx: "auto", mb: 1,
-                              bgcolor: `rgba(${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(1,3), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(3,5), 16)}, ${parseInt(COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length].slice(5,7), 16)}, 0.1)`,
-                              color: COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length],
-                            }}>
-                              {ICONOS_TABLA[key] || <TableChart />}
-                            </Avatar>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: COLORS.textoOscuro }}>
-                              {fmt(val.total)}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: COLORS.grisOscuro, fontSize: 12, mt: 0.5 }}>
-                              {val.label}
-                            </Typography>
-                            {val.noExiste && (
-                              <Chip label="No creada" size="small" sx={{ mt: 0.5, height: 20, fontSize: 10, bgcolor: "#F5F5F5" }} />
-                            )}
-                          </CardContent>
-                        </Card>
-                      </Grid>
+                          {registros.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length]} 
+                              style={{ cursor: 'pointer', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.05))' }}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  
+                  {/* Leyenda rápida interactiva debajo */}
+                  <Stack 
+                    direction="row" 
+                    flexWrap="wrap" 
+                    justifyContent="center" 
+                    gap={1.5} 
+                    sx={{ mt: 2, px: 2 }}
+                  >
+                    {registros.map(([key, val], index) => (
+                      <Chip
+                        key={key}
+                        icon={React.cloneElement(ICONOS_TABLA[key] || <TableChart />, { style: { fontSize: 14, color: COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length] } })}
+                        label={`${val.label}: ${fmt(val.total)}`}
+                        onClick={() => verDetalle(key)}
+                        size="small"
+                        sx={{
+                          bgcolor: "white",
+                          border: `1px solid ${COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length]}40`,
+                          fontWeight: 600,
+                          fontSize: 11,
+                          "&:hover": { bgcolor: COLORS.gris }
+                        }}
+                      />
                     ))}
-                  </Grid>
+                  </Stack>
                 </CardContent>
               </Card>
             </Grid>

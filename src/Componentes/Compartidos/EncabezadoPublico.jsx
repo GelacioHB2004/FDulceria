@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { HomeOutlined, LoginOutlined, MenuOutlined, CloseOutlined, ShopOutlined } from "@ant-design/icons"
+import { HomeOutlined, LoginOutlined, MenuOutlined, CloseOutlined, ShopOutlined, ShoppingCartOutlined } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { motion, AnimatePresence } from "framer-motion"
@@ -19,6 +19,7 @@ import {
   Divider,
   Container,
   Paper,
+  Badge,
 } from "@mui/material"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import BusquedaSimple from "./BusquedaSimple.jsx"
@@ -64,6 +65,7 @@ const EncabezadoPublico = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [nombreEmpresa, setNombreEmpresa] = useState("Dulcería Angelitos")
   const [logoUrl, setLogoUrl] = useState("")
+  const [cartCount, setCartCount] = useState(0)
   const navigate = useNavigate()
   const menuRef = useRef(null)
 
@@ -91,6 +93,17 @@ const EncabezadoPublico = () => {
     fetchPerfilActivo()
   }, [])
 
+  useEffect(() => {
+    const updateCartCount = () => {
+      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      const count = carrito.reduce((acc, curr) => acc + curr.cantidad, 0);
+      setCartCount(count);
+    };
+    updateCartCount();
+    window.addEventListener('carritoActualizado', updateCartCount);
+    return () => window.removeEventListener('carritoActualizado', updateCartCount);
+  }, [])
+
   const handleMenuClick = (key) => {
     setActive(key)
     setIsMobileMenuOpen(false)
@@ -101,6 +114,9 @@ const EncabezadoPublico = () => {
         break
       case "productos":
         navigate("/productos")
+        break
+      case "carrito":
+        navigate("/carrito")
         break
       case "login":
         navigate("/login")
@@ -129,6 +145,7 @@ const EncabezadoPublico = () => {
   const menuItems = [
     { key: "home", label: "Inicio", icon: <HomeOutlined /> },
     { key: "productos", label: "Productos", icon: <ShopOutlined /> },
+    { key: "carrito", label: "Carrito", icon: <Badge badgeContent={cartCount} color="error"><ShoppingCartOutlined style={{ fontSize: 'inherit' }} /></Badge> },
     { key: "login", label: "Iniciar sesión", icon: <LoginOutlined /> },
   ]
 
@@ -215,8 +232,8 @@ const EncabezadoPublico = () => {
                   placeholder="Buscar productos..."
                   fullWidth
                   onSearch={(term) => {
-  navigate('/productos', { state: { busqueda: term } })
-}}
+                    navigate('/productos', { state: { searchQuery: term } })
+                  }}
                 />
               </Paper>
             </Box>

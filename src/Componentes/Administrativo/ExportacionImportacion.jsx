@@ -11,44 +11,18 @@ import {
   ImportOutlined,
   DatabaseOutlined,
   FilterOutlined,
-  ClearOutlined,
   SaveOutlined,
   PlusOutlined,
+  ClearOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Select,
-  MenuItem,
-  Stack,
-  CircularProgress,
-  Chip,
-  IconButton,
-  Tooltip,
-  Avatar,
-  Divider,
-  Alert,
-  AlertTitle,
-  Grid,
-  FormControl,
-  InputLabel,
-  LinearProgress,
-  Fade,
-  Badge,
-  TableContainer,
-  useMediaQuery,
-  Container,
+  Box, Button, Typography, Paper, Checkbox, Table, TableBody, TableCell, TableHead, TableRow,
+  Select, MenuItem, Stack, CircularProgress, Chip, IconButton, Tooltip, Avatar, Divider,
+  Alert, AlertTitle, Grid, FormControl, InputLabel, LinearProgress, Fade, Badge, TableContainer,
+  useMediaQuery, Container
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -56,7 +30,6 @@ import { motion } from "framer-motion";
 const MySwal = withReactContent(Swal);
 const API_BASE_URL = "http://localhost:3000";
 
-/* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {
   accent: "#E91E6C",
   accentLight: "#F06292",
@@ -68,69 +41,19 @@ const COLORS = {
   textPrimary: "#2D2D2D",
   textSecondary: "#6B6B6B",
   textMuted: "#A0A0A0",
-  hoverBg: "rgba(233,30,108,0.05)",
-  activeBg: "rgba(233,30,108,0.10)",
   divider: "rgba(0,0,0,0.06)",
   success: "#4CAF50",
   successBg: "rgba(76,175,80,0.08)",
   warning: "#FF9800",
   warningBg: "rgba(255,152,0,0.08)",
   error: "#D32F2F",
-  errorBg: "rgba(211,47,47,0.08)",
-  info: "#2196F3",
-  infoBg: "rgba(33,150,243,0.08)",
   white: "#FFFFFF",
 };
 
 const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: COLORS.accent },
-    secondary: { main: COLORS.gold },
-    background: { default: "#F8F9FA", paper: COLORS.white },
-  },
-  typography: {
-    fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
-    h4: { fontWeight: 700, fontSize: "2rem" },
-    h5: { fontWeight: 600, fontSize: "1.5rem" },
-    h6: { fontWeight: 600, fontSize: "1.2rem" },
-  },
-  shape: { borderRadius: 12 },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
-          border: `1px solid ${COLORS.divider}`,
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
-          borderRadius: 10,
-          fontWeight: 500,
-          padding: "8px 20px",
-        },
-        containedPrimary: {
-          background: `linear-gradient(135deg, ${COLORS.accent} 0%, ${COLORS.accentLight} 100%)`,
-          "&:hover": {
-            background: `linear-gradient(135deg, ${COLORS.accentLight} 0%, ${COLORS.accent} 100%)`,
-          },
-        },
-      },
-    },
-    MuiTableCell: {
-      styleOverrides: {
-        head: {
-          fontWeight: 600,
-          backgroundColor: COLORS.accentSoft,
-          color: COLORS.textPrimary,
-        },
-      },
-    },
-  },
+  palette: { primary: { main: COLORS.accent }, secondary: { main: COLORS.gold } },
+  typography: { fontFamily: "'Inter', sans-serif" },
+  shape: { borderRadius: 12 }
 });
 
 const ExportacionImportacion = () => {
@@ -146,745 +69,236 @@ const ExportacionImportacion = () => {
 
   const token = localStorage.getItem("token");
   const isMobile = useMediaQuery("(max-width:600px)");
+  const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
-  const axiosConfig = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
-
-  /* =========================
-     OBTENER DATOS
-  ========================= */
   const obtenerDatos = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(
-        `${API_BASE_URL}/api/exportacion_importacion/tabla/${tabla}`,
-        axiosConfig
-      );
+      const { data } = await axios.get(`${API_BASE_URL}/api/exportacion_importacion/tabla/${tabla}`, axiosConfig);
       setDatos(data || []);
       setSeleccionados([]);
       setSelectAll(false);
     } catch (error) {
-      MySwal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudieron cargar los datos",
-        confirmButtonColor: COLORS.accent,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [tabla, axiosConfig]);
+      MySwal.fire({ icon: "error", title: "Error", text: "No se pudieron cargar los datos", confirmButtonColor: COLORS.accent });
+    } finally { setLoading(false); }
+  }, [tabla]);
 
-  useEffect(() => {
-    obtenerDatos();
-    setArchivo(null);
-    setPreview([]);
-  }, [tabla, obtenerDatos]);
+  useEffect(() => { obtenerDatos(); setPreview([]); setArchivo(null); }, [tabla, obtenerDatos]);
 
-  /* =========================
-     SELECCIONAR
-  ========================= */
   const toggleSeleccion = (id) => {
-    setSeleccionados((prev) => {
-      const newSelection = prev.includes(id)
-        ? prev.filter((i) => i !== id)
-        : [...prev, id];
-      setSelectAll(newSelection.length === datos.length && datos.length > 0);
-      
-      return newSelection;
+    setSeleccionados(prev => {
+      const news = prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id];
+      setSelectAll(news.length === datos.length && datos.length > 0);
+      return news;
     });
   };
 
   const toggleSeleccionTodos = () => {
-    if (selectAll) {
-      setSeleccionados([]);
-      setSelectAll(false);
-    } else {
-      const idField = getIdField();
-      const todos = datos.map((d) => d[idField]);
-      setSeleccionados(todos);
+    if (selectAll) { setSeleccionados([]); setSelectAll(false); }
+    else {
+      const idField = tabla === "productos" ? "id_producto" : "id_categoria";
+      setSeleccionados(datos.map(d => d[idField]));
       setSelectAll(true);
     }
   };
 
-  const getIdField = () => (tabla === "productos" ? "id_producto" : "id_categoria");
-
-  /* =========================
-     EXPORTAR
-  ========================= */
   const exportar = async (todos = false) => {
-    let ids = seleccionados;
-    
-    if (todos) {
-      if (!datos.length) {
-        return MySwal.fire({
-          icon: "warning",
-          title: "No hay datos para exportar",
-          confirmButtonColor: COLORS.accent,
-        });
-      }
-      const idField = getIdField();
-      ids = datos.map((d) => d[idField]);
-    } else {
-      if (seleccionados.length === 0) {
-        return MySwal.fire({
-          icon: "warning",
-          title: "Selecciona registros para exportar",
-          confirmButtonColor: COLORS.accent,
-        });
-      }
-    }
+    let ids = todos ? datos.map(d => d[tabla === "productos" ? "id_producto" : "id_categoria"]) : seleccionados;
+    if (!ids.length) return MySwal.fire({ icon: "warning", title: "Sin selección", text: "Selecciona registros para exportar", confirmButtonColor: COLORS.accent });
 
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${API_BASE_URL}/api/exportacion_importacion/exportar`,
-        { tabla, ids, formato },
-        { ...axiosConfig, responseType: "blob" }
-      );
-
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
+      const response = await axios.post(`${API_BASE_URL}/api/exportacion_importacion/exportar`, { tabla, ids, formato }, { ...axiosConfig, responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const a = document.createElement("a");
       a.href = url;
-      a.download = todos ? `${tabla}_todos.${formato}` : `${tabla}_${ids.length}.${formato}`;
+      a.download = `${tabla}.${formato}`;
       a.click();
-
-      MySwal.fire({
-        icon: "success",
-        title: "Exportación completada",
-        text: `Se exportaron ${ids.length} registros`,
-        confirmButtonColor: COLORS.accent,
-      });
-    } catch (error) {
-      MySwal.fire({
-        icon: "error",
-        title: "Error al exportar",
-        confirmButtonColor: COLORS.accent,
-      });
-    } finally {
-      setLoading(false);
-    }
+      MySwal.fire({ icon: "success", title: "Exportación exitosa", confirmButtonColor: COLORS.accent });
+    } catch (e) { MySwal.fire({ icon: "error", title: "Error al exportar", confirmButtonColor: COLORS.accent }); }
+    finally { setLoading(false); }
   };
 
-  /* =========================
-     DESCARGAR PLANTILLA
-  ========================= */
-  const descargarPlantilla = async () => {
+  const descargarPlantilla = async (tipoFormato = 'csv') => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/exportacion_importacion/plantilla/${tabla}`,
-        { ...axiosConfig, responseType: "blob" }
-      );
-
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
+      const response = await axios.get(`${API_BASE_URL}/api/exportacion_importacion/plantilla/${tabla}?formato=${tipoFormato}`, { ...axiosConfig, responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const a = document.createElement("a");
       a.href = url;
-      a.download = `plantilla_${tabla}.csv`;
+      a.download = `plantilla_${tabla}.${tipoFormato}`;
       a.click();
-
-      MySwal.fire({
-        icon: "success",
-        title: "Plantilla descargada",
-        confirmButtonColor: COLORS.accent,
-      });
-    } catch (error) {
-      MySwal.fire({
-        icon: "error",
-        title: "Error descargando plantilla",
-        confirmButtonColor: COLORS.accent,
-      });
-    }
+    } catch (e) { MySwal.fire({ icon: "error", title: "Error", text: "Error al bajar plantilla" }); }
   };
 
-  /* =========================
-     ANALIZAR ARCHIVO
-  ========================= */
   const analizarArchivo = async () => {
-    if (!archivo) {
-      return MySwal.fire({
-        icon: "warning",
-        title: "Selecciona un archivo CSV",
-        confirmButtonColor: COLORS.accent,
-      });
-    }
-
+    if (!archivo) return MySwal.fire({ icon: "warning", title: "Selecciona un archivo" });
     try {
       setImportLoading(true);
       const formData = new FormData();
       formData.append("archivo", archivo);
-
-      const { data } = await axios.post(
-        `${API_BASE_URL}/api/exportacion_importacion/importar/${tabla}`,
-        formData,
-        axiosConfig
-      );
-
+      const { data } = await axios.post(`${API_BASE_URL}/api/exportacion_importacion/importar/${tabla}`, formData, axiosConfig);
       setPreview(data.preview || []);
-      
-      MySwal.fire({
-        icon: "success",
-        title: "Archivo analizado",
-        text: `Se encontraron ${data.preview?.length || 0} registros para importar`,
-        confirmButtonColor: COLORS.accent,
-      });
-    } catch (error) {
-      MySwal.fire({
-        icon: "error",
-        title: "Error analizando archivo",
-        confirmButtonColor: COLORS.accent,
-      });
-    } finally {
-      setImportLoading(false);
-    }
+      MySwal.fire({ icon: "info", title: "Archivo analizado", text: `Se detectaron ${data.preview.length} registros.`, confirmButtonColor: COLORS.accent });
+    } catch (e) { MySwal.fire({ icon: "error", title: "Error", text: e.response?.data?.error || "Error al analizar" }); }
+    finally { setImportLoading(false); }
   };
 
-  /* =========================
-     APLICAR IMPORTACIÓN
-  ========================= */
   const aplicarImportacion = async () => {
-    if (!archivo) return;
-
     try {
       setImportLoading(true);
       const formData = new FormData();
       formData.append("archivo", archivo);
-
-      const { data } = await axios.post(
-        `${API_BASE_URL}/api/exportacion_importacion/importar/${tabla}/aplicar`,
-        formData,
-        axiosConfig
-      );
-
-      MySwal.fire({
-        icon: "success",
-        title: "Importación completada",
-        html: `
-          <div style="text-align: center;">
-            <p><strong style="color: ${COLORS.success};">Insertados: ${data.insertados}</strong></p>
-            <p><strong style="color: ${COLORS.gold};">Actualizados: ${data.actualizados}</strong></p>
-          </div>
-        `,
-        confirmButtonColor: COLORS.accent,
-      });
-
-      setPreview([]);
-      setArchivo(null);
-      obtenerDatos();
-      
-      // Reset file input
-      const fileInput = document.getElementById('file-input');
-      if (fileInput) fileInput.value = '';
-      
-    } catch (error) {
-      MySwal.fire({
-        icon: "error",
-        title: "Error al importar",
-        confirmButtonColor: COLORS.accent,
-      });
-    } finally {
-      setImportLoading(false);
-    }
+      const { data } = await axios.post(`${API_BASE_URL}/api/exportacion_importacion/importar/${tabla}/aplicar`, formData, axiosConfig);
+      MySwal.fire({ icon: "success", title: "¡Éxito!", html: `<p>Insertados: ${data.insertados}</p><p>Actualizados: ${data.actualizados}</p>`, confirmButtonColor: COLORS.accent });
+      setPreview([]); setArchivo(null); obtenerDatos();
+    } catch (e) { MySwal.fire({ icon: "error", title: "Error", text: "Error en importación" }); }
+    finally { setImportLoading(false); }
   };
 
-  const limpiarPreview = () => {
+  const cancelarImportacion = () => {
     setPreview([]);
     setArchivo(null);
-    const fileInput = document.getElementById('file-input');
+    const fileInput = document.getElementById('imp-file');
     if (fileInput) fileInput.value = '';
+    showToast("Importación cancelada", "info");
   };
 
-  /* =========================
-     RENDER COLUMNAS
-  ========================= */
-  const renderColumnas = () => {
-    if (!datos.length) return null;
-
-    let columnas = Object.keys(datos[0]);
-    if (tabla === "categorias") {
-      columnas = columnas.filter(col => col !== "estado" && col !== "fecha_creacion");
-    }
-
-    return columnas.map(col => (
-      <TableCell key={col}>
-        <strong>{col.replace(/_/g, ' ').toUpperCase()}</strong>
-      </TableCell>
-    ));
-  };
-
-  const renderFilas = () => {
-    if (!datos.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={10} align="center" sx={{ py: 8 }}>
-            <Box textAlign="center">
-              <DatabaseOutlined style={{ fontSize: 48, color: COLORS.textMuted, marginBottom: 16 }} />
-              <Typography color="textSecondary">No hay datos disponibles</Typography>
-            </Box>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    const idField = getIdField();
-
-    return datos.map((row, index) => {
-      let columnas = Object.keys(row);
-      if (tabla === "categorias") {
-        columnas = columnas.filter(col => col !== "estado" && col !== "fecha_creacion");
-      }
-
-      return (
-        <motion.tr
-          key={row[idField]}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.02 }}
-          style={{ backgroundColor: seleccionados.includes(row[idField]) ? COLORS.accentBg : 'inherit' }}
-        >
-          <TableCell>
-            <Checkbox
-              checked={seleccionados.includes(row[idField])}
-              onChange={() => toggleSeleccion(row[idField])}
-              sx={{
-                color: COLORS.accent,
-                '&.Mui-checked': { color: COLORS.accent },
-              }}
-            />
-          </TableCell>
-          {columnas.map(col => (
-            <TableCell key={col}>
-              {col.toLowerCase().includes('precio') || col.toLowerCase().includes('total') ? (
-                <Chip
-                  label={`$${row[col]}`}
-                  size="small"
-                  sx={{ bgcolor: COLORS.goldBg, color: COLORS.gold }}
-                />
-              ) : (
-                row[col]
-              )}
-            </TableCell>
-          ))}
-        </motion.tr>
-      );
-    });
+  const showToast = (msg, icon = "success") => {
+    MySwal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon, title: msg });
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ 
-        minHeight: "100vh", 
-        bgcolor: "#F8F9FA",
-        py: 4,
-        px: { xs: 2, sm: 3, md: 4 }
-      }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "#F8F9FA", py: 4 }}>
         <Container maxWidth="xl">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <Box display="flex" alignItems="center" gap={2} mb={4}>
-              <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 56, height: 56 }}>
-                <DatabaseOutlined style={{ fontSize: 28 }} />
-              </Avatar>
+              <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 60, height: 60 }}><DatabaseOutlined style={{ fontSize: 32 }} /></Avatar>
               <Box>
-                <Typography variant="h4" sx={{ color: COLORS.textPrimary }}>
-                  Exportación e Importación
-                </Typography>
-                <Typography variant="body2" sx={{ color: COLORS.textMuted }}>
-                  Gestiona la exportación e importación de datos de tu sistema
-                </Typography>
+                <Typography variant="h4" fontWeight={800} color={COLORS.textPrimary}>Gestión de Datos (No Relacional/Relacional)</Typography>
+                <Typography variant="body1" color={COLORS.textSecondary}>Exporta e Importa información en formatos JSON y CSV</Typography>
               </Box>
             </Box>
           </motion.div>
 
-          {/* Selector de Tabla */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Paper sx={{ p: 3, mb: 4 }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} md={6}>
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 40, height: 40 }}>
-                      <FilterOutlined />
-                    </Avatar>
-                    <FormControl fullWidth variant="outlined" size="small">
-                      <InputLabel>Seleccionar tabla</InputLabel>
-                      <Select
-                        value={tabla}
-                        onChange={(e) => setTabla(e.target.value)}
-                        label="Seleccionar tabla"
-                      >
-                        <MenuItem value="productos">
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Chip label="📦" size="small" sx={{ bgcolor: COLORS.accentBg }} />
-                            Productos
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value="categorias">
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Chip label="📁" size="small" sx={{ bgcolor: COLORS.goldBg }} />
-                            Categorías
-                          </Box>
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Box display="flex" gap={2} justifyContent={{ xs: 'flex-start', md: 'flex-end' }}>
-                    <Tooltip title="Descargar plantilla CSV">
-                      <Button
-                        variant="outlined"
-                        startIcon={<FileExcelOutlined />}
-                        onClick={descargarPlantilla}
-                        sx={{ borderColor: COLORS.divider, color: COLORS.textSecondary }}
-                      >
-                        Plantilla
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Refrescar datos">
-                      <IconButton 
-                        onClick={obtenerDatos}
-                        sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent }}
-                      >
-                        <ReloadOutlined />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Grid>
+          <Paper sx={{ p: 3, mb: 4, borderRadius: 4 }}>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Tabla de Origen</InputLabel>
+                  <Select value={tabla} label="Tabla de Origen" onChange={e => setTabla(e.target.value)}>
+                    <MenuItem value="productos">📦 Productos</MenuItem>
+                    <MenuItem value="categorias">📁 Categorías</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
-            </Paper>
-          </motion.div>
+              <Grid item xs={12} md={8} sx={{ textAlign: 'right' }}>
+                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                  <Button variant="outlined" startIcon={<FileExcelOutlined />} onClick={() => descargarPlantilla('csv')}>CSV Plantilla</Button>
+                  <Button variant="outlined" startIcon={<FileTextOutlined />} onClick={() => descargarPlantilla('json')}>JSON Plantilla</Button>
+                  <IconButton onClick={obtenerDatos} sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent }}><ReloadOutlined /></IconButton>
+                </Stack>
+              </Grid>
+            </Grid>
+          </Paper>
 
-          {/* Tabla de Datos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Paper sx={{ mb: 4, overflow: 'hidden' }}>
-              <Box sx={{ p: 2, bgcolor: COLORS.accentSoft, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Badge
-                    badgeContent={seleccionados.length}
-                    color="primary"
-                    sx={{ '& .MuiBadge-badge': { bgcolor: COLORS.accent } }}
-                  >
-                    <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 32, height: 32 }}>
-                      <DatabaseOutlined />
-                    </Avatar>
-                  </Badge>
-                  <Typography variant="h6">
-                    Datos de {tabla === 'productos' ? 'Productos' : 'Categorías'}
-                  </Typography>
+          <Grid container spacing={4}>
+            {/* PANEL IZQUIERDO: EXPORTACIÓN */}
+            <Grid item xs={12} lg={7}>
+              <Paper sx={{ mb: 4, overflow: 'hidden', borderRadius: 4 }}>
+                <Box sx={{ p: 2, bgcolor: COLORS.accentSoft, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6" fontWeight={700}><DatabaseOutlined /> Registros Disponibles</Typography>
+                  <Checkbox checked={selectAll} onChange={toggleSeleccionTodos} color="primary" />
                 </Box>
-                {datos.length > 0 && (
-                  <Tooltip title={selectAll ? "Deseleccionar todos" : "Seleccionar todos"}>
-                    <Checkbox
-                      checked={selectAll}
-                      onChange={toggleSeleccionTodos}
-                      sx={{ color: COLORS.accent, '&.Mui-checked': { color: COLORS.accent } }}
-                    />
-                  </Tooltip>
-                )}
-              </Box>
-
-              {loading ? (
-                <Box sx={{ p: 8, textAlign: "center" }}>
-                  <CircularProgress sx={{ color: COLORS.accent }} />
-                  <Typography sx={{ mt: 2, color: COLORS.textSecondary }}>
-                    Cargando datos...
-                  </Typography>
-                </Box>
-              ) : (
-                <TableContainer sx={{ maxHeight: 400 }}>
+                <TableContainer sx={{ maxHeight: 450 }}>
                   <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ width: 50 }}></TableCell>
-                        {renderColumnas()}
+                        {datos.length > 0 && Object.keys(datos[0]).map(k => (
+                          <TableCell key={k}><strong>{k.toUpperCase()}</strong></TableCell>
+                        ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {renderFilas()}
+                      {loading ? <TableRow><TableCell colSpan={10} align="center"><CircularProgress sx={{ my: 4 }} /></TableCell></TableRow> :
+                        datos.map(row => {
+                          const id = row[tabla === "productos" ? "id_producto" : "id_categoria"];
+                          return (
+                            <TableRow key={id} sx={{ bgcolor: seleccionados.includes(id) ? COLORS.accentBg : 'transparent' }}>
+                              <TableCell><Checkbox checked={seleccionados.includes(id)} onChange={() => toggleSeleccion(id)} /></TableCell>
+                              {Object.values(row).map((v, i) => <TableCell key={i}>{String(v)}</TableCell>)}
+                            </TableRow>
+                          );
+                        })
+                      }
                     </TableBody>
                   </Table>
                 </TableContainer>
-              )}
-            </Paper>
-          </motion.div>
-
-          {/* Sección de Exportación */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Paper sx={{ p: 3, mb: 4 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={3}>
-                <Avatar sx={{ bgcolor: COLORS.goldBg, color: COLORS.gold, width: 32, height: 32 }}>
-                  <ExportOutlined />
-                </Avatar>
-                <Typography variant="h6">Exportar Datos</Typography>
-              </Box>
-
-              <Grid container spacing={3} alignItems="center">
-                <Grid item xs={12} md={3}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Formato</InputLabel>
-                    <Select
-                      value={formato}
-                      onChange={(e) => setFormato(e.target.value)}
-                      label="Formato"
-                    >
-                      <MenuItem value="csv">
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <FileExcelOutlined style={{ color: COLORS.success }} />
-                          CSV
-                        </Box>
-                      </MenuItem>
-                      <MenuItem value="json">
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <FileTextOutlined style={{ color: COLORS.accent }} />
-                          JSON
-                        </Box>
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={12} md={9}>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DownloadOutlined />}
-                      onClick={() => exportar(false)}
-                      disabled={seleccionados.length === 0 || loading}
-                      fullWidth={isMobile}
-                    >
-                      Exportar seleccionados ({seleccionados.length})
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<DownloadOutlined />}
-                      onClick={() => exportar(true)}
-                      disabled={datos.length === 0 || loading}
-                      fullWidth={isMobile}
-                      sx={{ borderColor: COLORS.divider, color: COLORS.textSecondary }}
-                    >
-                      Exportar todos ({datos.length})
-                    </Button>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
-          </motion.div>
-
-          {/* Sección de Importación */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Paper sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={3}>
-                <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 32, height: 32 }}>
-                  <ImportOutlined />
-                </Avatar>
-                <Typography variant="h6">
-                  Importar {tabla === 'productos' ? 'Productos' : 'Categorías'}
-                </Typography>
-              </Box>
-
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      border: `2px dashed ${COLORS.divider}`,
-                      borderRadius: 3,
-                      p: 3,
-                      textAlign: 'center',
-                      bgcolor: archivo ? COLORS.accentBg : 'transparent',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        borderColor: COLORS.accent,
-                        bgcolor: COLORS.accentBg,
-                      },
-                    }}
-                    onClick={() => document.getElementById('file-input').click()}
-                  >
-                    <input
-                      id="file-input"
-                      type="file"
-                      accept=".csv"
-                      onChange={(e) => setArchivo(e.target.files[0])}
-                      style={{ display: 'none' }}
-                    />
-                    <UploadOutlined style={{ fontSize: 48, color: archivo ? COLORS.accent : COLORS.textMuted, marginBottom: 16 }} />
-                    <Typography variant="h6" gutterBottom>
-                      {archivo ? archivo.name : 'Seleccionar archivo CSV'}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {archivo ? 'Haz clic para cambiar el archivo' : 'Arrastra o haz clic para seleccionar'}
-                    </Typography>
-                    {archivo && (
-                      <Chip
-                        icon={<CheckCircleOutlined />}
-                        label="Archivo listo"
-                        size="small"
-                        sx={{ mt: 2, bgcolor: COLORS.successBg, color: COLORS.success }}
-                      />
-                    )}
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <Stack spacing={2} height="100%" justifyContent="center">
-                    <Button
-                      variant="outlined"
-                      startIcon={<EyeOutlined />}
-                      onClick={analizarArchivo}
-                      disabled={!archivo || importLoading}
-                      fullWidth
-                      sx={{ borderColor: COLORS.divider, color: COLORS.textSecondary }}
-                    >
-                      Analizar archivo
-                    </Button>
-                    
-                    {preview.length > 0 && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<SaveOutlined />}
-                        onClick={aplicarImportacion}
-                        disabled={importLoading}
-                        fullWidth
-                      >
-                        Confirmar importación
-                      </Button>
-                    )}
-                    
-                    {archivo && preview.length === 0 && (
-                      <Button
-                        variant="text"
-                        startIcon={<ClearOutlined />}
-                        onClick={limpiarPreview}
-                        sx={{ color: COLORS.textMuted }}
-                      >
-                        Cancelar
-                      </Button>
-                    )}
-                  </Stack>
-                </Grid>
-              </Grid>
-
-              {importLoading && (
-                <Box sx={{ mt: 3 }}>
-                  <LinearProgress sx={{ bgcolor: COLORS.accentSoft, '& .MuiLinearProgress-bar': { bgcolor: COLORS.accent } }} />
-                  <Typography align="center" sx={{ mt: 1, color: COLORS.textSecondary }}>
-                    Procesando archivo...
-                  </Typography>
+                <Divider />
+                <Box sx={{ p: 3, bgcolor: '#fafafa' }}>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={4}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Formato</InputLabel>
+                        <Select value={formato} label="Formato" onChange={e => setFormato(e.target.value)}>
+                          <MenuItem value="csv">Excel / CSV</MenuItem>
+                          <MenuItem value="json">No-SQL / JSON</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                      <Stack direction="row" spacing={2} justifyContent="flex-end">
+                        <Button variant="contained" onClick={() => exportar(false)} disabled={!seleccionados.length}>Exportar ({seleccionados.length})</Button>
+                        <Button variant="outlined" onClick={() => exportar(true)}>Exportar Todo</Button>
+                      </Stack>
+                    </Grid>
+                  </Grid>
                 </Box>
-              )}
+              </Paper>
+            </Grid>
 
-              {/* Vista Previa */}
-              {preview.length > 0 && (
-                <Fade in={preview.length > 0}>
+            {/* PANEL DERECHO: IMPORTACIÓN */}
+            <Grid item xs={12} lg={5}>
+              <Paper sx={{ p: 3, borderRadius: 4, height: 'fit-content' }}>
+                <Typography variant="h6" fontWeight={700} mb={3}><ImportOutlined /> Importar Datos (JSON/CSV)</Typography>
+                <Box 
+                  sx={{ border: `2px dashed ${COLORS.divider}`, borderRadius: 3, p: 4, textAlign: 'center', bgcolor: archivo ? COLORS.accentBg : 'transparent', mb: 3 }}
+                  onClick={() => document.getElementById('imp-file').click()}
+                >
+                  <input id="imp-file" type="file" accept=".csv,.json" style={{ display: 'none' }} onChange={e => setArchivo(e.target.files[0])} />
+                  <UploadOutlined style={{ fontSize: 40, color: COLORS.accent, marginBottom: 16 }} />
+                  <Typography variant="h6">{archivo ? archivo.name : "Subir Archivo"}</Typography>
+                  <Typography variant="body2" color="textSecondary">Formatos admitidos: .csv, .json (No-Relacional)</Typography>
+                </Box>
+                <Stack spacing={2}>
+                  <Button fullWidth variant="outlined" startIcon={<EyeOutlined />} disabled={!archivo || importLoading} onClick={analizarArchivo}>Previsualizar Cambios</Button>
+                  {preview.length > 0 && (
+                    <>
+                      <Button fullWidth variant="contained" startIcon={<SaveOutlined />} onClick={aplicarImportacion} disabled={importLoading}>Confirmar e Importar</Button>
+                      <Button fullWidth variant="text" color="error" startIcon={<ClearOutlined />} onClick={cancelarImportacion}>Cancelar Importación</Button>
+                    </>
+                  )}
+                </Stack>
+
+                {importLoading && <LinearProgress sx={{ mt: 2 }} />}
+
+                {preview.length > 0 && (
                   <Box sx={{ mt: 4 }}>
-                    <Divider sx={{ my: 3 }} />
-                    
-                    <Box display="flex" alignItems="center" gap={1} mb={2}>
-                      <Avatar sx={{ bgcolor: COLORS.infoBg, color: COLORS.info, width: 28, height: 28 }}>
-                        <EyeOutlined />
-                      </Avatar>
-                      <Typography variant="h6">Vista previa de cambios</Typography>
-                      <Chip
-                        label={`${preview.length} registros`}
-                        size="small"
-                        sx={{ ml: 1, bgcolor: COLORS.infoBg, color: COLORS.info }}
-                      />
+                    <Typography variant="subtitle1" fontWeight={700} mb={2}>Vista Previa ({preview.length} filas)</Typography>
+                    <Box sx={{ maxHeight: 300, overflow: 'auto', border: `1px solid ${COLORS.divider}`, borderRadius: 2 }}>
+                      {preview.map((p, i) => (
+                        <Box key={i} sx={{ p: 1.5, display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${COLORS.divider}`, bgcolor: p.tipo.toLowerCase() === 'insertar' ? COLORS.successBg : COLORS.warningBg }}>
+                          <Typography variant="body2" fontWeight={600}>{p.nombre}</Typography>
+                          <Chip label={p.tipo} size="small" color={p.tipo.toLowerCase() === 'insertar' ? "success" : "warning"} />
+                        </Box>
+                      ))}
                     </Box>
-
-                    <TableContainer component={Paper} variant="outlined">
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Nombre</TableCell>
-                            {tabla === "categorias" && <TableCell>Descripción</TableCell>}
-                            <TableCell>Acción</TableCell>
-                            <TableCell>Estado</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {preview.map((p, i) => (
-                            <TableRow key={i}>
-                              <TableCell>
-                                <Typography fontWeight={500}>{p.nombre}</Typography>
-                              </TableCell>
-                              {tabla === "categorias" && (
-                                <TableCell>{p.descripcion || '-'}</TableCell>
-                              )}
-                              <TableCell>
-                                <Chip
-                                  label={p.tipo}
-                                  size="small"
-                                  sx={{
-                                    bgcolor: p.tipo === 'insertar' ? COLORS.successBg : COLORS.warningBg,
-                                    color: p.tipo === 'insertar' ? COLORS.success : COLORS.warning,
-                                  }}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                {p.tipo === 'insertar' ? (
-                                  <Tooltip title="Nuevo registro">
-                                    <Chip
-                                      icon={<PlusOutlined />}
-                                      label="Nuevo"
-                                      size="small"
-                                      sx={{ bgcolor: COLORS.successBg, color: COLORS.success }}
-                                    />
-                                  </Tooltip>
-                                ) : (
-                                  <Tooltip title="Actualizar existente">
-                                    <Chip
-                                      icon={<ReloadOutlined />}
-                                      label="Actualizar"
-                                      size="small"
-                                      sx={{ bgcolor: COLORS.warningBg, color: COLORS.warning }}
-                                    />
-                                  </Tooltip>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-
-                    <Alert 
-                      severity="info" 
-                      sx={{ mt: 2, borderRadius: 2 }}
-                      icon={<EyeOutlined />}
-                    >
-                      <AlertTitle>Revisa los datos antes de confirmar</AlertTitle>
-                      Se importarán {preview.filter(p => p.tipo === 'insertar').length} nuevos registros 
-                      y se actualizarán {preview.filter(p => p.tipo === 'actualizar').length} existentes.
-                    </Alert>
                   </Box>
-                </Fade>
-              )}
-            </Paper>
-          </motion.div>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
     </ThemeProvider>

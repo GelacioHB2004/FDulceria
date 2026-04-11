@@ -40,14 +40,14 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Componente de Búsqueda Avanzada con Filtros
  * Panel lateral con múltiples opciones de filtrado
  */
-const BusquedaAvanzada = ({ 
-  open, 
-  onClose, 
+const BusquedaAvanzada = ({
+  open,
+  onClose,
   onApplyFilters,
   initialFilters = {}
 }) => {
   const theme = useTheme();
-  
+
   const [filters, setFilters] = useState({
     searchTerm: initialFilters.searchTerm || '',
     categoria: initialFilters.categoria || '',

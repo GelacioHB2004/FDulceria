@@ -3,12 +3,51 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const DetalleProducto = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
   const [producto, setProducto] = useState(null);
+  const [cantidad, setCantidad] = useState(1);
+
+  const agregarAlCarrito = () => {
+    if (cantidad <= 0 || cantidad > producto.stock) {
+      Swal.fire('Atención', 'Cantidad no válida o superior al stock', 'warning');
+      return;
+    }
+
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const index = carrito.findIndex(item => item.id_producto === producto.id_producto);
+
+    if (index >= 0) {
+      if (carrito[index].cantidad + cantidad > producto.stock) {
+        Swal.fire('Sin stock suficiente', 'No puedes superar el stock al sumar con lo que ya tienes en el carrito.', 'warning');
+        return;
+      }
+      carrito[index].cantidad += cantidad;
+    } else {
+      carrito.push({
+        id_producto: producto.id_producto,
+        nombre: producto.nombre,
+        precio: parseFloat(producto.precio),
+        imagen: producto.imagen,
+        cantidad: cantidad
+      });
+    }
+
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    window.dispatchEvent(new Event('carritoActualizado'));
+    
+    Swal.fire({
+      icon: 'success',
+      title: '¡Agregado!',
+      text: `${producto.nombre} se agregó a tu carrito`,
+      timer: 1500,
+      showConfirmButton: false
+    });
+  };
 
   const obtenerDetalle = useCallback(async () => {
     try {
@@ -48,18 +87,29 @@ const DetalleProducto = () => {
           <h3>${producto.precio}</h3>
           <p>Stock disponible: {producto.stock}</p>
 
-          <button
-            style={{
-              padding: "10px 20px",
-              background: "green",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              marginTop: "20px"
-            }}
-          >
-            Agregar al carrito
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "15px" }}>
+            <input 
+              type="number" 
+              min="1" 
+              max={producto.stock} 
+              value={cantidad} 
+              onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
+              style={{ width: "60px", padding: "5px" }}
+            />
+            <button
+              onClick={agregarAlCarrito}
+              style={{
+                padding: "10px 20px",
+                background: "green",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer"
+              }}
+            >
+              Agregar al carrito
+            </button>
+          </div>
         </div>
       </div>
 

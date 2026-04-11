@@ -20,6 +20,7 @@ import ErrorBoundary from './Componentes/Utils/ErrorBoundary.jsx';
 import ProductosPublico from './Componentes/Publico/ProductosPublico.jsx';
 import ProductosDetallePublico from './Componentes/Publico/ProductosDetallePublico.jsx';
 import PoliticasDePrivacidad from './Componentes/Publico/PoliticasDePrivacidad.jsx';
+import CarritoComprasPublico from './Componentes/Publico/CarritoCompras.jsx';
 
 //Rutas Repartidor
 import PerfilRepartidor from './Componentes/Repartidor/PerfilRepartidor.jsx';
@@ -28,6 +29,8 @@ import PerfilRepartidor from './Componentes/Repartidor/PerfilRepartidor.jsx';
 import PerfilUsuario from './Componentes/Cliente/PerfilUsuario.jsx';
 import Productos from './Componentes/Cliente/Productos.jsx';
 import ProductoDetalle from './Componentes/Cliente/ProductosDetalle.jsx';
+import CarritoComprasCliente from './Componentes/Cliente/CarritoCompras.jsx';
+import MisPedidos from './Componentes/Cliente/MisPedidos.jsx';
 
 //rutas administrativas
 import PerfilEmpresa from './Componentes/Administrativo/Perfil_Empresa';
@@ -35,6 +38,8 @@ import PerfilUsuarioAdmin from './Componentes/Administrativo/PerfilUsuario.jsx';
 import RedesSociales from './Componentes/Administrativo/RedesSociales.jsx';
 import Categorias from './Componentes/Administrativo/Categorias.jsx';
 import ProductosAdmin from './Componentes/Administrativo/Productos.jsx';
+import Reportes from './Componentes/Administrativo/Reportes.jsx';
+import GestionPedidos from './Componentes/Administrativo/GestionPedidos.jsx';
 import InventarioMovimientos from './Componentes/Administrativo/InventarioMovimiento.jsx'; 
 import GestionUsuarios from './Componentes/Administrativo/GestionUsuarios.jsx';
 import RespaldoBD from './Componentes/Administrativo/RespaldoBD.jsx';
@@ -73,6 +78,7 @@ const App = () => {
               <Route path="/productos" element={<ProductosPublico />} />
               <Route path="/detalleproducto/:id" element={<ProductosDetallePublico />} />
               <Route path="/politicas" element={<PoliticasDePrivacidad />} />
+              <Route path="/carrito" element={<CarritoComprasPublico />} />
               
 
               {/* Rutas administrador */}
@@ -82,6 +88,8 @@ const App = () => {
               <Route path="/admin/redes_sociales" element={<RedesSociales />} />
               <Route path="/admin/categorias" element={<Categorias />} />
               <Route path="/admin/productos" element={<ProductosAdmin />} />
+              <Route path="/admin/reportes" element={<Reportes />} />
+              <Route path="/admin/pedidos" element={<GestionPedidos />} />
               <Route path="/admin/inventario" element={<InventarioMovimientos />} />
               <Route path="/admin/gestion_usuarios" element={<GestionUsuarios />} />
               <Route path="/admin/respaldo_bd" element={<RespaldoBD />} />
@@ -102,6 +110,8 @@ const App = () => {
               <Route path="/cliente/perfilusuario" element={<PerfilUsuario />} />
               <Route path="/cliente/productos" element={<Productos />} />
               <Route path="/cliente/detalleproducto/:id" element={<ProductoDetalle />} />
+              <Route path="/cliente/carrito" element={<CarritoComprasCliente />} />
+              <Route path="/cliente/mispedidos" element={<MisPedidos />} />
 
               {/* Rutas repartidor */}
               <Route path="/repartidor" element={<PaginaPrincipalRepartidor />} />

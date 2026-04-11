@@ -7,6 +7,7 @@ import {
   CalendarOutlined,
   SecurityScanOutlined,
   MenuOutlined,
+  ShoppingCartOutlined,
 } from "@ant-design/icons"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -26,6 +27,7 @@ import {
   Divider,
   Container,
   Paper,
+  Badge,
 } from "@mui/material"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
@@ -76,6 +78,7 @@ const EncabezadoCliente = () => {
   const [nombreEmpresa, setNombreEmpresa] = useState("Dulcería Angelitos")
   const [logoUrl, setLogoUrl] = useState("")
   const [mfaGAEnabled, setMfaGAEnabled] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   /* ===============================
         OBTENER DATOS INICIALES
   =============================== */
@@ -87,13 +90,16 @@ const EncabezadoCliente = () => {
           navigate("/")
           return
         }
-        const [perfilRes, mfaRes] = await Promise.all([
+        const [perfilRes, mfaRes, cartRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/perfil_empresa`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
           axios.get(`${API_BASE_URL}/api/login1/check-mfa`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
+          axios.get(`${API_BASE_URL}/api/carrito/sync`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
         ])
         const perfilActivo = perfilRes.data.find((p) => p.estado === "Activo")
         if (perfilActivo) {
@@ -101,12 +107,54 @@ const EncabezadoCliente = () => {
           setLogoUrl(perfilActivo.logo || "")
         }
         setMfaGAEnabled(mfaRes.data.mfaGAEnabled)
+
+        // --- Lógica Sincronización del Carrito ---
+        const localCart = JSON.parse(localStorage.getItem('carrito')) || [];
+        const dbCart = cartRes.data.carrito || [];
+
+        if (localCart.length > 0 && dbCart.length === 0) {
+          // El usuario tenia productos localmente y su bd esta vacia (Ej. Agregó de invitado y logueó)
+          await axios.post(`${API_BASE_URL}/api/carrito/sync`, { carrito: localCart }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } else if (dbCart.length > 0) {
+          // Restauramos a la hora de Iniciar Sesión lo que estaba en la DB
+          localStorage.setItem('carrito', JSON.stringify(dbCart));
+          window.dispatchEvent(new Event('carritoActualizado')); // Para forzar UI update
+        }
+
       } catch (error) {
         console.error("Error al cargar datos iniciales", error)
       }
     }
     fetchData()
   }, [navigate])
+
+  useEffect(() => {
+    const syncToDB = async (carritoArray) => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const itemsReducidos = carritoArray.map(it => ({
+          id_producto: it.id_producto,
+          cantidad: it.cantidad
+        }));
+        await axios.post(`${API_BASE_URL}/api/carrito/sync`, { carrito: itemsReducidos }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (err) { }
+    };
+
+    const updateCartCount = () => {
+      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      const count = carrito.reduce((acc, curr) => acc + curr.cantidad, 0);
+      setCartCount(count);
+      syncToDB(carrito);
+    };
+    updateCartCount();
+    window.addEventListener('carritoActualizado', updateCartCount);
+    return () => window.removeEventListener('carritoActualizado', updateCartCount);
+  }, [])
 
   /* ===============================
         MANEJO DE MENÚ
@@ -124,6 +172,9 @@ const EncabezadoCliente = () => {
         break
       case "mispedidos":
         navigate("/cliente/mispedidos")
+        break
+      case "carrito":
+        navigate("/cliente/carrito")
         break
       case "Perfilusuario":
         navigate("/cliente/perfilusuario")
@@ -178,6 +229,7 @@ const EncabezadoCliente = () => {
   const menuItems = [
     { key: "home", label: "Inicio", icon: <HomeOutlined /> },
     { key: "productos", label: "Productos", icon: <ShopOutlined /> },
+    { key: "carrito", label: "Carrito", icon: <Badge badgeContent={cartCount} color="error"><ShoppingCartOutlined style={{fontSize: 'inherit'}} /></Badge> },
     { key: "mispedidos", label: "Mis Pedidos", icon: <CalendarOutlined /> },
     { key: "Perfilusuario", label: "Perfil", icon: <UserOutlined /> },
     {

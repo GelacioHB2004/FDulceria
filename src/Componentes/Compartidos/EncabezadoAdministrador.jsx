@@ -92,8 +92,18 @@ const menuItems = [
       { key: "inventario", label: "Inventario" },
       { key: "categorias", label: "Categorias" },
       { key: "productos", label: "Productos" },
+      { key: "pedidos", label: "Gestión Pedidos" },
     ],
   },
+  {
+    key: "EstadisticasP",
+    label: "Estadisticas",
+    icon: <FileTextOutlined />,
+    submenu: [
+      { key: "reportes", label: "Ventas" }
+    ],
+  },
+
   {
     key: "gestionbasededatos",
     label: "Base de Datos",
@@ -125,6 +135,8 @@ const routes = {
   mision: "/admin/misionempresa",
   vision: "/admin/visionempresa",
   inventario: "/admin/inventario",
+  reportes: "/admin/reportes",
+  pedidos: "/admin/pedidos",
   respaldobd: "/admin/respaldo_bd",
   gestionusuarios: "/admin/gestion_usuarios",
   perfilusuarioadmin: "/admin/perfilusuarioadmin",
@@ -325,18 +337,18 @@ const EncabezadoAdministrativo = () => {
                   position: "relative",
                   ...(isActive || isParentActive
                     ? {
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          left: 0,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          width: 3,
-                          height: "60%",
-                          borderRadius: "0 4px 4px 0",
-                          backgroundColor: COLORS.accent,
-                        },
-                      }
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: 3,
+                        height: "60%",
+                        borderRadius: "0 4px 4px 0",
+                        backgroundColor: COLORS.accent,
+                      },
+                    }
                     : {}),
                 }}
               >

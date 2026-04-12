@@ -11,7 +11,7 @@ import {
 import { Email, ArrowForward, ArrowBack, LockReset } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 function ValidarCorreo() {
   const navigate = useNavigate();
@@ -50,12 +50,12 @@ function ValidarCorreo() {
         confirmButtonColor: '#FF6B9D'
       }).then(() => {
         // Navegar al siguiente paso pasando el correo
-        navigate('/validarcodigo', { 
-          state: { correo: response.data.correo } 
+        navigate('/validarcodigo', {
+          state: { correo: response.data.correo }
         });
       });
 
-        } catch (err) {
+    } catch (err) {
       // Detectamos específicamente el error 429 (Too Many Requests)
       if (err.response?.status === 429) {
         const errorMsg = err.response.data.error || 'Demasiados intentos. Por favor espera antes de intentarlo nuevamente.';
@@ -73,7 +73,7 @@ function ValidarCorreo() {
       } else {
         // Cualquier otro error (500, 400, etc.) sí lo mostramos como error
         const errorMsg = err.response?.data?.error || 'Error al procesar la solicitud. Por favor intenta nuevamente.';
-        
+
         MySwal.fire({
           icon: 'error',
           title: 'Error',
@@ -92,21 +92,21 @@ function ValidarCorreo() {
     <Container component="main" maxWidth="sm" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: 4 }}>
       <Card elevation={8} sx={{ width: '100%', borderRadius: 3, overflow: 'hidden' }}>
         {/* Header con gradiente */}
-        <Box sx={{ 
+        <Box sx={{
           background: 'linear-gradient(135deg, #FF6B9D 0%, #FFA500 100%)',
           padding: '40px 20px',
           textAlign: 'center',
           color: 'white'
         }}>
-          <Box sx={{ 
+          <Box sx={{
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(10px)',
-            width: 80, 
-            height: 80, 
-            borderRadius: '50%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             margin: '0 auto 16px',
             border: '3px solid white',
             boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
@@ -209,10 +209,10 @@ function ValidarCorreo() {
           </Box>
 
           {/* Información adicional */}
-          <Box sx={{ 
-            mt: 4, 
-            p: 2, 
-            backgroundColor: '#f5f5f5', 
+          <Box sx={{
+            mt: 4,
+            p: 2,
+            backgroundColor: '#f5f5f5',
             borderRadius: 2,
             border: '1px dashed #FF6B9D'
           }}>

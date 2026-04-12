@@ -29,7 +29,7 @@ import AddLinkIcon from '@mui/icons-material/AddLink';
 import BusinessIcon from '@mui/icons-material/Business';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://backenddulceria.onrender.com';
 
 /* ───────── Paleta: Rosa + Blanco + Dorado ───────── */
 const COLORS = {
@@ -93,13 +93,13 @@ const schema = yup.object().shape({
 /* ── Detecta ícono/color por nombre de red ── */
 const getRedMeta = (nombre = '') => {
   const n = nombre.toLowerCase();
-  if (n.includes('facebook'))  return { color: '#1877F2', emoji: '📘' };
+  if (n.includes('facebook')) return { color: '#1877F2', emoji: '📘' };
   if (n.includes('instagram')) return { color: '#E1306C', emoji: '📸' };
-  if (n.includes('twitter') || n.includes('x'))   return { color: '#1DA1F2', emoji: '🐦' };
-  if (n.includes('tiktok'))    return { color: '#010101', emoji: '🎵' };
-  if (n.includes('youtube'))   return { color: '#FF0000', emoji: '▶️' };
-  if (n.includes('linkedin'))  return { color: '#0A66C2', emoji: '💼' };
-  if (n.includes('whatsapp'))  return { color: '#25D366', emoji: '💬' };
+  if (n.includes('twitter') || n.includes('x')) return { color: '#1DA1F2', emoji: '🐦' };
+  if (n.includes('tiktok')) return { color: '#010101', emoji: '🎵' };
+  if (n.includes('youtube')) return { color: '#FF0000', emoji: '▶️' };
+  if (n.includes('linkedin')) return { color: '#0A66C2', emoji: '💼' };
+  if (n.includes('whatsapp')) return { color: '#25D366', emoji: '💬' };
   return { color: COLORS.accent, emoji: '🔗' };
 };
 
@@ -117,14 +117,14 @@ const MotionBox = motion.create(Box);
         COMPONENTE PRINCIPAL
 ══════════════════════════════════════════ */
 const RedesSociales = () => {
-  const [loading, setLoading]     = useState(true);
-  const [redes, setRedes]         = useState([]);
-  const [empresas, setEmpresas]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [redes, setRedes] = useState([]);
+  const [empresas, setEmpresas] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [editMode, setEditMode]   = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [currentRed, setCurrentRed] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [filtro, setFiltro]       = useState('todos'); // 'todos' | 'Activo' | 'Inactivo'
+  const [filtro, setFiltro] = useState('todos'); // 'todos' | 'Activo' | 'Inactivo'
 
   const { register, handleSubmit, formState: { errors }, reset, control } = useForm({
     resolver: yupResolver(schema),
@@ -228,7 +228,7 @@ const RedesSociales = () => {
 
   /* ── Filtrado ── */
   const redesFiltradas = redes.filter(r => filtro === 'todos' ? true : r.estado === filtro);
-  const totalActivas   = redes.filter(r => r.estado === 'Activo').length;
+  const totalActivas = redes.filter(r => r.estado === 'Activo').length;
   const totalInactivas = redes.filter(r => r.estado === 'Inactivo').length;
 
   /* ── Loading ── */

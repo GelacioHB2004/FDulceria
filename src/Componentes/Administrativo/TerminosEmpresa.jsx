@@ -26,7 +26,7 @@ import {
 } from "@ant-design/icons";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 /* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {
@@ -561,11 +561,10 @@ const TerminosAdmin = () => {
                             t.estado === "Activo"
                               ? COLORS.success
                               : COLORS.danger,
-                          border: `1px solid ${
-                            t.estado === "Activo"
-                              ? "rgba(46,125,50,0.3)"
-                              : "rgba(211,47,47,0.3)"
-                          }`,
+                          border: `1px solid ${t.estado === "Activo"
+                            ? "rgba(46,125,50,0.3)"
+                            : "rgba(211,47,47,0.3)"
+                            }`,
                         }}
                       />
                     </TableCell>

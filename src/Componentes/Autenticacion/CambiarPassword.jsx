@@ -9,13 +9,13 @@ import {
   CircularProgress, Alert, InputAdornment, IconButton, LinearProgress,
   List, ListItem, ListItemIcon, ListItemText
 } from '@mui/material';
-import { 
-  Lock, Visibility, VisibilityOff, CheckCircle, Cancel, 
-  LockReset, Login as LoginIcon 
+import {
+  Lock, Visibility, VisibilityOff, CheckCircle, Cancel,
+  LockReset, Login as LoginIcon
 } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 function CambiarPassword() {
   const navigate = useNavigate();
@@ -136,7 +136,7 @@ function CambiarPassword() {
     } catch (err) {
       const errorMsg = err.response?.data?.error || 'Error al cambiar la contraseña.';
       setError(errorMsg);
-      
+
       MySwal.fire({
         icon: 'error',
         title: 'Error',
@@ -265,9 +265,9 @@ function CambiarPassword() {
               )}
 
               {/* Requisitos */}
-              <Box sx={{ 
-                backgroundColor: '#f5f5f5', 
-                borderRadius: 2, 
+              <Box sx={{
+                backgroundColor: '#f5f5f5',
+                borderRadius: 2,
                 p: 2,
                 border: '1px solid #e0e0e0'
               }}>
@@ -277,14 +277,14 @@ function CambiarPassword() {
                 <List dense sx={{ py: 0 }}>
                   <ListItem sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 30 }}>
-                      {validaciones.longitud ? 
-                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> : 
+                      {validaciones.longitud ?
+                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> :
                         <Cancel sx={{ fontSize: 20, color: '#ccc' }} />
                       }
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="Al menos 8 caracteres" 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary="Al menos 8 caracteres"
+                      primaryTypographyProps={{
                         fontSize: '0.875rem',
                         color: validaciones.longitud ? '#4CAF50' : 'text.secondary'
                       }}
@@ -292,14 +292,14 @@ function CambiarPassword() {
                   </ListItem>
                   <ListItem sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 30 }}>
-                      {validaciones.mayuscula ? 
-                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> : 
+                      {validaciones.mayuscula ?
+                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> :
                         <Cancel sx={{ fontSize: 20, color: '#ccc' }} />
                       }
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="Una letra mayúscula (A-Z)" 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary="Una letra mayúscula (A-Z)"
+                      primaryTypographyProps={{
                         fontSize: '0.875rem',
                         color: validaciones.mayuscula ? '#4CAF50' : 'text.secondary'
                       }}
@@ -307,14 +307,14 @@ function CambiarPassword() {
                   </ListItem>
                   <ListItem sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 30 }}>
-                      {validaciones.minuscula ? 
-                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> : 
+                      {validaciones.minuscula ?
+                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> :
                         <Cancel sx={{ fontSize: 20, color: '#ccc' }} />
                       }
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="Una letra minúscula (a-z)" 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary="Una letra minúscula (a-z)"
+                      primaryTypographyProps={{
                         fontSize: '0.875rem',
                         color: validaciones.minuscula ? '#4CAF50' : 'text.secondary'
                       }}
@@ -322,14 +322,14 @@ function CambiarPassword() {
                   </ListItem>
                   <ListItem sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 30 }}>
-                      {validaciones.numero ? 
-                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> : 
+                      {validaciones.numero ?
+                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> :
                         <Cancel sx={{ fontSize: 20, color: '#ccc' }} />
                       }
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="Un número (0-9)" 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary="Un número (0-9)"
+                      primaryTypographyProps={{
                         fontSize: '0.875rem',
                         color: validaciones.numero ? '#4CAF50' : 'text.secondary'
                       }}
@@ -337,14 +337,14 @@ function CambiarPassword() {
                   </ListItem>
                   <ListItem sx={{ py: 0.5 }}>
                     <ListItemIcon sx={{ minWidth: 30 }}>
-                      {validaciones.especial ? 
-                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> : 
+                      {validaciones.especial ?
+                        <CheckCircle sx={{ fontSize: 20, color: '#4CAF50' }} /> :
                         <Cancel sx={{ fontSize: 20, color: '#ccc' }} />
                       }
                     </ListItemIcon>
-                    <ListItemText 
-                      primary="Un carácter especial (!@#$%...)" 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary="Un carácter especial (!@#$%...)"
+                      primaryTypographyProps={{
                         fontSize: '0.875rem',
                         color: validaciones.especial ? '#4CAF50' : 'text.secondary'
                       }}
@@ -431,10 +431,10 @@ function CambiarPassword() {
           </form>
 
           {/* Información de seguridad */}
-          <Box sx={{ 
-            mt: 4, 
-            p: 2, 
-            backgroundColor: '#f5f5f5', 
+          <Box sx={{
+            mt: 4,
+            p: 2,
+            backgroundColor: '#f5f5f5',
             borderRadius: 2,
             border: '1px dashed #9C27B0'
           }}>

@@ -28,7 +28,7 @@ import {
   GiftOutlined
 } from "@ant-design/icons";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 const DetalleProducto = () => {
   const { id } = useParams();

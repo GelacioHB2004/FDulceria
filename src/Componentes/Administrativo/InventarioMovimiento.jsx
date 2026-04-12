@@ -50,7 +50,7 @@ import {
   Store as StoreIcon,
 } from "@mui/icons-material";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 const MotionCard = motion(Card);
 const MotionPaper = motion(Paper);
 const MotionBox = motion(Box);
@@ -89,7 +89,7 @@ const InventarioMovimientos = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setProductos(res.data);
-        
+
         // Calcular productos bajo stock
         const bajoStock = res.data.filter(p => p.stock <= p.stock_minimo).length;
         setStats(prev => ({ ...prev, productosBajoStock: bajoStock }));
@@ -178,9 +178,9 @@ const InventarioMovimientos = () => {
       cargarEstadisticas();
 
       // Actualizar el stock del producto en la lista de productos
-      setProductos(prevProductos => 
-        prevProductos.map(p => 
-          p.id_producto === productoSeleccionado 
+      setProductos(prevProductos =>
+        prevProductos.map(p =>
+          p.id_producto === productoSeleccionado
             ? { ...p, stock: res.data.stock_actual }
             : p
         )
@@ -212,31 +212,31 @@ const InventarioMovimientos = () => {
   };
 
   const statsCards = [
-    { 
-      label: 'Entradas Hoy', 
-      value: stats.entradasHoy || 0, 
-      icon: <TrendingUpIcon />, 
+    {
+      label: 'Entradas Hoy',
+      value: stats.entradasHoy || 0,
+      icon: <TrendingUpIcon />,
       color: theme.palette.success.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Salidas Hoy', 
-      value: stats.salidasHoy || 0, 
-      icon: <TrendingDownIcon />, 
+    {
+      label: 'Salidas Hoy',
+      value: stats.salidasHoy || 0,
+      icon: <TrendingDownIcon />,
       color: theme.palette.error.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.1)} 0%, ${alpha(theme.palette.error.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Movimientos', 
-      value: stats.totalMovimientos || 0, 
-      icon: <HistoryIcon />, 
+    {
+      label: 'Movimientos',
+      value: stats.totalMovimientos || 0,
+      icon: <HistoryIcon />,
       color: theme.palette.info.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.1)} 0%, ${alpha(theme.palette.info.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Stock Bajo', 
-      value: stats.productosBajoStock || 0, 
-      icon: <ErrorIcon />, 
+    {
+      label: 'Stock Bajo',
+      value: stats.productosBajoStock || 0,
+      icon: <ErrorIcon />,
       color: theme.palette.warning.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.dark, 0.1)} 100%)`,
     },
@@ -375,9 +375,9 @@ const InventarioMovimientos = () => {
                       <MenuItem key={p.id_producto} value={p.id_producto}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: '100%' }}>
                           <span>{p.nombre}</span>
-                          <Chip 
-                            label={`Stock: ${p.stock}`} 
-                            size="small" 
+                          <Chip
+                            label={`Stock: ${p.stock}`}
+                            size="small"
                             color={p.stock <= p.stock_minimo ? 'error' : 'success'}
                             variant="outlined"
                           />
@@ -520,8 +520,8 @@ const InventarioMovimientos = () => {
               </Grid>
 
               {error && (
-                <Alert 
-                  severity="error" 
+                <Alert
+                  severity="error"
                   sx={{ mt: 3, borderRadius: 2 }}
                   icon={<ErrorIcon />}
                   onClose={() => setError("")}
@@ -529,10 +529,10 @@ const InventarioMovimientos = () => {
                   {error}
                 </Alert>
               )}
-              
+
               {success && (
-                <Alert 
-                  severity="success" 
+                <Alert
+                  severity="success"
                   sx={{ mt: 3, borderRadius: 2 }}
                   icon={<CheckCircleIcon />}
                   onClose={() => setSuccess("")}

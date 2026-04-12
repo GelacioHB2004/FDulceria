@@ -11,7 +11,7 @@ import {
 import { ArrowForward, ArrowBack, VpnKey, Refresh } from '@mui/icons-material';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 function ValidarCodigo() {
   const navigate = useNavigate();

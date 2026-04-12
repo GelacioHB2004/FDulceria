@@ -39,7 +39,7 @@ const DetalleProducto = () => {
 
     localStorage.setItem('carrito', JSON.stringify(carrito));
     window.dispatchEvent(new Event('carritoActualizado'));
-    
+
     Swal.fire({
       icon: 'success',
       title: '¡Agregado!',
@@ -51,7 +51,7 @@ const DetalleProducto = () => {
 
   const obtenerDetalle = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/productos/catalogo/detalle/${id}`);
+      const res = await axios.get(`https://backenddulceria.onrender.com/api/productos/catalogo/detalle/${id}`);
       setProducto(res.data);
     } catch (error) {
       console.error("Error al obtener detalle", error);
@@ -88,11 +88,11 @@ const DetalleProducto = () => {
           <p>Stock disponible: {producto.stock}</p>
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "15px" }}>
-            <input 
-              type="number" 
-              min="1" 
-              max={producto.stock} 
-              value={cantidad} 
+            <input
+              type="number"
+              min="1"
+              max={producto.stock}
+              value={cantidad}
               onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
               style={{ width: "60px", padding: "5px" }}
             />

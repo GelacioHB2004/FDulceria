@@ -38,7 +38,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://backenddulceria.onrender.com';
 
 /* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {
@@ -126,9 +126,9 @@ const scaleFade = {
 /* ─── Chip de estado ─── */
 const EstadoChip = ({ estado }) => {
   const cfg = {
-    Activo:   { bg: COLORS.successBg, color: COLORS.success, border: 'rgba(46,125,50,0.25)',  icon: <CheckCircleIcon sx={{ fontSize: 12 }} /> },
-    Inactivo: { bg: COLORS.dangerBg,  color: COLORS.danger,  border: 'rgba(211,47,47,0.25)', icon: <CancelIcon sx={{ fontSize: 12 }} /> },
-    Pendiente:{ bg: COLORS.warningBg, color: COLORS.warning, border: 'rgba(230,81,0,0.25)',  icon: <PendingIcon sx={{ fontSize: 12 }} /> },
+    Activo: { bg: COLORS.successBg, color: COLORS.success, border: 'rgba(46,125,50,0.25)', icon: <CheckCircleIcon sx={{ fontSize: 12 }} /> },
+    Inactivo: { bg: COLORS.dangerBg, color: COLORS.danger, border: 'rgba(211,47,47,0.25)', icon: <CancelIcon sx={{ fontSize: 12 }} /> },
+    Pendiente: { bg: COLORS.warningBg, color: COLORS.warning, border: 'rgba(230,81,0,0.25)', icon: <PendingIcon sx={{ fontSize: 12 }} /> },
   };
   const c = cfg[estado] || cfg.Pendiente;
   return (
@@ -174,13 +174,13 @@ const InfoRow = ({ icon, label, value, color }) => (
         COMPONENTE PRINCIPAL
 ═══════════════════════════════════════════ */
 const PerfilEmpresa = () => {
-  const [loading, setLoading]       = useState(true);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [perfilActivo, setPerfilActivo]   = useState(null);
+  const [perfilActivo, setPerfilActivo] = useState(null);
   const [perfilesInactivos, setPerfilesInactivos] = useState([]);
-  const [preview, setPreview]       = useState(null);
+  const [preview, setPreview] = useState(null);
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [logoFile, setLogoFile]     = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
   const [tabInactivos, setTabInactivos] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, reset, control } = useForm({
@@ -198,9 +198,11 @@ const PerfilEmpresa = () => {
       setPerfilActivo(activo);
       setPerfilesInactivos(inactivos);
       if (activo) {
-        reset({ nombreempresa: activo.nombreempresa || '', descripcion: activo.descripcion || '',
+        reset({
+          nombreempresa: activo.nombreempresa || '', descripcion: activo.descripcion || '',
           telefono: activo.telefono || '', correo: activo.correo || '',
-          direccion: activo.direccion || '', estado: activo.estado || 'Activo' });
+          direccion: activo.direccion || '', estado: activo.estado || 'Activo'
+        });
         setPreview(activo.logo?.startsWith('data:image') ? activo.logo : null);
         setModoEdicion(false);
       } else {
@@ -213,8 +215,8 @@ const PerfilEmpresa = () => {
     }
   }, [reset]);
 
-  useEffect(() => { 
-    cargarDatos(); 
+  useEffect(() => {
+    cargarDatos();
   }, [cargarDatos]);
 
   const handleLogoChange = (e) => {
@@ -450,10 +452,10 @@ const PerfilEmpresa = () => {
                     {/* Info en grid */}
                     <Grid container spacing={1.5} sx={{ mt: 2 }}>
                       {[
-                        { icon: <PhoneIcon />,       label: 'Teléfono',        value: perfilActivo.telefono,  color: COLORS.accent },
-                        { icon: <EmailIcon />,        label: 'Correo',          value: perfilActivo.correo,    color: '#1565C0' },
-                        { icon: <LocationOnIcon />,   label: 'Dirección',       value: perfilActivo.direccion, color: COLORS.warning },
-                        { icon: <CalendarTodayIcon />,label: 'Fecha de Creación',value: new Date(perfilActivo.fechacreacion).toLocaleDateString('es-MX'), color: COLORS.gold },
+                        { icon: <PhoneIcon />, label: 'Teléfono', value: perfilActivo.telefono, color: COLORS.accent },
+                        { icon: <EmailIcon />, label: 'Correo', value: perfilActivo.correo, color: '#1565C0' },
+                        { icon: <LocationOnIcon />, label: 'Dirección', value: perfilActivo.direccion, color: COLORS.warning },
+                        { icon: <CalendarTodayIcon />, label: 'Fecha de Creación', value: new Date(perfilActivo.fechacreacion).toLocaleDateString('es-MX'), color: COLORS.gold },
                       ].map((item, i) => (
                         <Grid item xs={12} sm={6} key={i}>
                           <InfoRow {...item} />
@@ -631,8 +633,8 @@ const PerfilEmpresa = () => {
                               render={({ field }) => (
                                 <Select {...field} label="Estado" sx={{ borderRadius: '10px' }}>
                                   {[
-                                    { v: 'Activo',    icon: <CheckCircleIcon sx={{ fontSize: 16, color: COLORS.success }} /> },
-                                    { v: 'Inactivo',  icon: <CancelIcon sx={{ fontSize: 16, color: COLORS.danger }} /> },
+                                    { v: 'Activo', icon: <CheckCircleIcon sx={{ fontSize: 16, color: COLORS.success }} /> },
+                                    { v: 'Inactivo', icon: <CancelIcon sx={{ fontSize: 16, color: COLORS.danger }} /> },
                                     { v: 'Pendiente', icon: <PendingIcon sx={{ fontSize: 16, color: COLORS.warning }} /> },
                                   ].map(({ v, icon }) => (
                                     <MenuItem key={v} value={v}>

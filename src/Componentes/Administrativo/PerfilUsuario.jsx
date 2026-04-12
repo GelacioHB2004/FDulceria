@@ -34,7 +34,7 @@ const PerfilUsuario = () => {
 
   const obtenerPerfil = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/perfil_usuario", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get("https://backenddulceria.onrender.com/api/perfil_usuario", { headers: { Authorization: `Bearer ${token}` } });
       setPerfil(res.data.perfil);
       setLoading(false);
     } catch (error) { console.error(error); setLoading(false); }
@@ -44,7 +44,7 @@ const PerfilUsuario = () => {
 
   const guardarCambios = async () => {
     try {
-      await axios.put("http://localhost:3000/api/perfil_usuario", {
+      await axios.put("https://backenddulceria.onrender.com/api/perfil_usuario", {
         nombre: perfil.nombre, apellidoP: perfil.apellidoP, apellidoM: perfil.apellidoM, telefono: perfil.telefono,
       }, { headers: { Authorization: `Bearer ${token}` } });
       setMensaje("Perfil actualizado correctamente");

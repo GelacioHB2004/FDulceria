@@ -44,7 +44,7 @@ const CarritoCompras = () => {
         id_producto: it.id_producto,
         cantidad: it.cantidad
       }));
-      const resp = await axios.post('http://localhost:3000/api/carrito/validar', { carrito: itemsReducidos });
+      const resp = await axios.post('https://backenddulceria.onrender.com/api/carrito/validar', { carrito: itemsReducidos });
       setCarrito(resp.data.items);
       setTotales({
         subtotal: resp.data.subtotal,
@@ -112,8 +112,8 @@ const CarritoCompras = () => {
         id_producto: it.id_producto,
         cantidad: it.cantidad
       }));
-      
-      const res = await axios.post('http://localhost:3000/api/carrito/checkout', {
+
+      const res = await axios.post('https://backenddulceria.onrender.com/api/carrito/checkout', {
         carrito: itemsReducidos,
         direccion_entrega: direccion,
         notas: ''

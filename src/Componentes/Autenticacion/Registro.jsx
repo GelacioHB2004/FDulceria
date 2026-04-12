@@ -24,32 +24,29 @@ import {
   Alert,
   Stepper,
   Step,
-  StepLabel,
-  useTheme,
-  alpha,
+  StepLabel
 } from "@mui/material";
 import {
   Visibility,
   VisibilityOff,
-  Person,
-  Email,
-  Phone,
-  Lock,
-  Security,
-  AssignmentInd,
-  QuestionAnswer,
+  PersonOutline,
+  MailOutline,
+  PhoneOutlined,
+  LockOutlined,
+  SecurityOutlined,
+  BadgeOutlined,
+  ChatBubbleOutline
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 // Motion Components
 const MotionPaper = motion(Paper);
 
 function RegistroUsuarios() {
   const navigate = useNavigate();
-  const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [formErrors, setFormErrors] = useState({});
@@ -69,13 +66,12 @@ function RegistroUsuarios() {
     respuestaSecreta: "",
   });
 
-  const steps = ['Información Personal', 'Credenciales', 'Seguridad'];
+  const steps = ['Datos Personales', 'Credenciales', 'Seguridad'];
 
   const handleNext = (e) => {
-    e.preventDefault(); // IMPORTANTE: Prevenir el submit del formulario
-    e.stopPropagation(); // Detener la propagación del evento
-    
-    // Validar los campos del paso actual antes de avanzar
+    e.preventDefault();
+    e.stopPropagation();
+
     const isStepValid = validateCurrentStep();
     if (isStepValid) {
       setActiveStep((prevStep) => prevStep + 1);
@@ -84,43 +80,44 @@ function RegistroUsuarios() {
         icon: "warning",
         title: "Campos incompletos",
         text: "Por favor completa todos los campos correctamente antes de continuar.",
+        confirmButtonColor: "#111827"
       });
     }
   };
 
   const handleBack = (e) => {
-    e.preventDefault(); // IMPORTANTE: Prevenir el submit del formulario
-    e.stopPropagation(); // Detener la propagación del evento
+    e.preventDefault();
+    e.stopPropagation();
     setActiveStep((prevStep) => prevStep - 1);
   };
 
   const validateCurrentStep = () => {
     switch (activeStep) {
-      case 0: // Información Personal
-        return !formErrors.nombre && 
-               !formErrors.apellidopa && 
-               !formErrors.apellidoma && 
-               !formErrors.telefono &&
-               formData.nombre && 
-               formData.apellidopa && 
-               formData.apellidoma && 
-               formData.telefono;
-      
-      case 1: // Credenciales
-        return !formErrors.correo && 
-               !formErrors.password && 
-               !formErrors.tipousuario &&
-               !passwordError &&
-               formData.correo && 
-               formData.password && 
-               formData.tipousuario;
-      
-      case 2: // Seguridad
-        return !formErrors.preguntaSecreta && 
-               !formErrors.respuestaSecreta &&
-               formData.preguntaSecreta && 
-               formData.respuestaSecreta;
-      
+      case 0:
+        return !formErrors.nombre &&
+          !formErrors.apellidopa &&
+          !formErrors.apellidoma &&
+          !formErrors.telefono &&
+          formData.nombre &&
+          formData.apellidopa &&
+          formData.apellidoma &&
+          formData.telefono;
+
+      case 1:
+        return !formErrors.correo &&
+          !formErrors.password &&
+          !formErrors.tipousuario &&
+          !passwordError &&
+          formData.correo &&
+          formData.password &&
+          formData.tipousuario;
+
+      case 2:
+        return !formErrors.preguntaSecreta &&
+          !formErrors.respuestaSecreta &&
+          formData.preguntaSecreta &&
+          formData.respuestaSecreta;
+
       default:
         return false;
     }
@@ -155,16 +152,16 @@ function RegistroUsuarios() {
       }
     }
 
-if (name === "telefono") {
-  const phoneRegex = /^\d{10}$/;
-  if (!phoneRegex.test(value)) {
-    errors[name] = value.length === 0 
-      ? "El teléfono es requerido." 
-      : "Debe contener exactamente 10 dígitos numéricos.";
-  } else {
-    delete errors[name];
-  }
-}
+    if (name === "telefono") {
+      const phoneRegex = /^\d{10}$/;
+      if (!phoneRegex.test(value)) {
+        errors[name] = value.length === 0
+          ? "El teléfono es requerido."
+          : "Debe contener exactamente 10 dígitos numéricos.";
+      } else {
+        delete errors[name];
+      }
+    }
 
     if (name === "password") {
       const passwordRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,20}$/;
@@ -222,16 +219,10 @@ if (name === "telefono") {
 
     for (const pattern of commonPatterns) {
       if (password.toLowerCase().includes(pattern)) {
-        errorMessage = "Evita usar secuencias comunes como '12345' o 'password'.";
-        MySwal.fire({
-          icon: "error",
-          title: "Contraseña no válida",
-          text: errorMessage,
-        });
+        errorMessage = "Evita secuencias comunes como '12345' o 'password'.";
         break;
       }
     }
-
     setPasswordError(errorMessage);
   };
 
@@ -249,30 +240,25 @@ if (name === "telefono") {
       const compromised = response.data.includes(suffix.toUpperCase());
       return compromised;
     } catch (error) {
-      console.error("Error al verificar la contraseña en HIBP:", error);
       return false;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validar que estamos en el paso 3 (índice 2)
-    if (activeStep !== 2) {
-      console.log("No se puede enviar el formulario. Paso actual:", activeStep);
-      return;
-    }
+
+    if (activeStep !== 2) return;
 
     setIsLoading(true);
-    console.log("Datos enviados al backend:", formData);
 
     const isValidForm = Object.keys(formErrors).length === 0;
 
     if (!isValidForm || passwordError) {
       MySwal.fire({
         icon: "error",
-        title: "Errores en el formulario",
+        title: "Revisa tus datos",
         text: passwordError || "Por favor, corrige los errores antes de continuar.",
+        confirmButtonColor: "#111827"
       });
       setIsLoading(false);
       return;
@@ -282,8 +268,9 @@ if (name === "telefono") {
     if (isCompromised) {
       MySwal.fire({
         icon: "error",
-        title: "Contraseña comprometida",
-        text: "Esta contraseña ha sido filtrada en brechas de datos. Por favor, elige otra.",
+        title: "Contraseña insegura",
+        text: "Tu contraseña actual ha sido filtrada en internet, por favor elige una distinta.",
+        confirmButtonColor: "#111827"
       });
       setIsLoading(false);
       return;
@@ -302,34 +289,32 @@ if (name === "telefono") {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/registro1`, dataToSend);
-      console.log("Respuesta del backend:", response.data);
-      
+      await axios.post(`${API_BASE_URL}/api/registro1`, dataToSend);
+
       await MySwal.fire({
-        title: "¡Registro exitoso!",
-        html: `
-          <p>Tu registro se realizó correctamente como <strong>${response.data.tipousuario || formData.tipousuario}</strong>.</p>
-          <p>Por favor revisa tu correo para verificar tu cuenta.</p>
-        `,
+        title: "¡Logrado!",
+        html: `<p>Bienvenido. Tu registro se guardó correctamente.</p>`,
         icon: "success",
         confirmButtonText: "Ir a verificar correo",
+        confirmButtonColor: "#111827"
       });
-      
+
       navigate("/verificar-correo");
-      
+
     } catch (error) {
-      console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);
       if (error.response && error.response.data.error) {
         MySwal.fire({
           icon: "error",
-          title: "Error en el registro",
+          title: "Oops",
           text: error.response.data.error,
+          confirmButtonColor: "#111827"
         });
       } else {
         MySwal.fire({
           icon: "error",
-          title: "Error de conexión",
-          text: "No te pudiste registrar. Por favor, intenta de nuevo.",
+          title: "Error de red",
+          text: "No se pudo conectar al servidor.",
+          confirmButtonColor: "#111827"
         });
       }
     } finally {
@@ -339,35 +324,36 @@ if (name === "telefono") {
 
   const getPasswordStrengthText = (strength) => {
     switch (strength) {
-      case 0:
-        return "Muy Débil";
-      case 1:
-        return "Débil";
-      case 2:
-        return "Regular";
-      case 3:
-        return "Fuerte";
-      case 4:
-        return "Muy Fuerte";
-      default:
-        return "";
+      case 0: return "Muy Débil";
+      case 1: return "Débil";
+      case 2: return "Regular";
+      case 3: return "Fuerte";
+      case 4: return "Muy Fuerte";
+      default: return "";
     }
   };
 
   const getStrengthColor = (strength) => {
     switch (strength) {
-      case 0:
-        return theme.palette.error.main;
-      case 1:
-        return theme.palette.warning.main;
-      case 2:
-        return "#eab308";
-      case 3:
-        return theme.palette.info.main;
-      case 4:
-        return theme.palette.success.main;
-      default:
-        return theme.palette.grey[300];
+      case 0: return "#ef4444";
+      case 1: return "#f97316";
+      case 2: return "#eab308";
+      case 3: return "#3b82f6";
+      case 4: return "#22c55e";
+      default: return "#e5e7eb";
+    }
+  };
+
+  const inputStyles = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '8px',
+      backgroundColor: '#f9fafb',
+      '& fieldset': { borderColor: '#e5e7eb' },
+      '&:hover fieldset': { borderColor: '#d1d5db' },
+      '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: '1px' },
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: '#111827'
     }
   };
 
@@ -375,111 +361,68 @@ if (name === "telefono") {
     switch (step) {
       case 0:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField
               fullWidth
               label="Nombre"
               name="nombre"
+              variant="outlined"
               value={formData.nombre}
               onChange={handleChange}
               error={!!formErrors.nombre}
               helperText={formErrors.nombre}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person color="action" />
-                  </InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start"><PersonOutline fontSize="small" /></InputAdornment>,
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
+              sx={inputStyles}
             />
+
+            <Box sx={{ display: 'flex', gap: 2.5 }}>
+              <TextField
+                fullWidth
+                label="Apellido Paterno"
+                name="apellidopa"
+                value={formData.apellidopa}
+                onChange={handleChange}
+                error={!!formErrors.apellidopa}
+                helperText={formErrors.apellidopa}
+                sx={inputStyles}
+              />
+              <TextField
+                fullWidth
+                label="Apellido Materno"
+                name="apellidoma"
+                value={formData.apellidoma}
+                onChange={handleChange}
+                error={!!formErrors.apellidoma}
+                helperText={formErrors.apellidoma}
+                sx={inputStyles}
+              />
+            </Box>
 
             <TextField
               fullWidth
-              label="Apellido Paterno"
-              name="apellidopa"
-              value={formData.apellidopa}
-              onChange={handleChange}
-              error={!!formErrors.apellidopa}
-              helperText={formErrors.apellidopa}
+              label="Teléfono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) handleChange(e);
+              }}
+              error={!!formErrors.telefono}
+              helperText={formErrors.telefono || "10 dígitos numéricos"}
+              inputProps={{ maxLength: 10, inputMode: "numeric" }}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person color="action" />
-                  </InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start"><PhoneOutlined fontSize="small" /></InputAdornment>,
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
+              sx={inputStyles}
             />
-
-            <TextField
-              fullWidth
-              label="Apellido Materno"
-              name="apellidoma"
-              value={formData.apellidoma}
-              onChange={handleChange}
-              error={!!formErrors.apellidoma}
-              helperText={formErrors.apellidoma}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
-            />
-
-            <TextField
-  fullWidth
-  label="Teléfono"
-  name="telefono"
-  value={formData.telefono}
-  onChange={(e) => {
-    const value = e.target.value;
-    // Solo permitir dígitos (0-9)
-    if (/^\d*$/.test(value)) {
-      handleChange(e);
-    }
-  }}
-  error={!!formErrors.telefono}
-  helperText={formErrors.telefono || "Ingresa 10 dígitos"}
-  inputProps={{
-    maxLength: 10,
-    inputMode: "numeric",
-    pattern: "[0-9]*",
-  }}
-  InputProps={{
-    startAdornment: (
-      <InputAdornment position="start">
-        <Phone color="action" />
-      </InputAdornment>
-    ),
-  }}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      borderRadius: 2,
-    }
-  }}
-/>
           </Box>
         );
 
       case 1:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField
               fullWidth
               label="Correo Electrónico"
@@ -490,17 +433,9 @@ if (name === "telefono") {
               error={!!formErrors.correo}
               helperText={formErrors.correo}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email color="action" />
-                  </InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start"><MailOutline fontSize="small" /></InputAdornment>,
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
+              sx={inputStyles}
             />
 
             <TextField
@@ -513,57 +448,40 @@ if (name === "telefono") {
               error={!!formErrors.password || !!passwordError}
               helperText={formErrors.password || passwordError}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock color="action" />
-                  </InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start"><LockOutlined fontSize="small" /></InputAdornment>,
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={handlePasswordVisibility} edge="end">
-                      {passwordVisible ? <VisibilityOff /> : <Visibility />}
+                    <IconButton onClick={handlePasswordVisibility} edge="end" size="small">
+                      {passwordVisible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
+              sx={inputStyles}
             />
 
             {formData.password && (
-              <Box sx={{ mt: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Fortaleza de la contraseña:
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    fontWeight="bold"
-                    sx={{ color: getStrengthColor(passwordStrength) }}
-                  >
+              <Box sx={{ mt: 0.5, px: 0.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary">Nivel de seguridad</Typography>
+                  <Typography variant="caption" fontWeight="600" sx={{ color: getStrengthColor(passwordStrength) }}>
                     {getPasswordStrengthText(passwordStrength)}
                   </Typography>
                 </Box>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(passwordStrength + 1) * 20} 
+                <LinearProgress
+                  variant="determinate"
+                  value={(passwordStrength + 1) * 20}
                   sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: theme.palette.grey[200],
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: getStrengthColor(passwordStrength),
-                      borderRadius: 4,
-                    }
+                    height: 6,
+                    borderRadius: 3,
+                    bgcolor: '#f3f4f6',
+                    '& .MuiLinearProgress-bar': { bgcolor: getStrengthColor(passwordStrength) }
                   }}
                 />
               </Box>
             )}
 
-            <FormControl fullWidth error={!!formErrors.tipousuario}>
+            <FormControl fullWidth error={!!formErrors.tipousuario} sx={inputStyles}>
               <InputLabel>Tipo de Usuario</InputLabel>
               <Select
                 name="tipousuario"
@@ -571,29 +489,20 @@ if (name === "telefono") {
                 onChange={handleChange}
                 label="Tipo de Usuario"
                 startAdornment={
-                  <InputAdornment position="start">
-                    <AssignmentInd color="action" />
-                  </InputAdornment>
+                  <InputAdornment position="start"><BadgeOutlined fontSize="small" /></InputAdornment>
                 }
-                sx={{
-                  borderRadius: 2,
-                }}
               >
                 <MenuItem value="Cliente">Cliente</MenuItem>
               </Select>
-              {formErrors.tipousuario && (
-                <Typography variant="caption" color="error">
-                  {formErrors.tipousuario}
-                </Typography>
-              )}
+              {formErrors.tipousuario && <Typography variant="caption" color="error">{formErrors.tipousuario}</Typography>}
             </FormControl>
           </Box>
         );
 
       case 2:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <FormControl fullWidth error={!!formErrors.preguntaSecreta}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <FormControl fullWidth error={!!formErrors.preguntaSecreta} sx={inputStyles}>
               <InputLabel>Pregunta de Seguridad</InputLabel>
               <Select
                 name="preguntaSecreta"
@@ -601,56 +510,43 @@ if (name === "telefono") {
                 onChange={handleChange}
                 label="Pregunta de Seguridad"
                 startAdornment={
-                  <InputAdornment position="start">
-                    <Security color="action" />
-                  </InputAdornment>
+                  <InputAdornment position="start"><SecurityOutlined fontSize="small" /></InputAdornment>
                 }
-                sx={{
-                  borderRadius: 2,
-                }}
               >
-                <MenuItem value="">Selecciona una pregunta</MenuItem>
-                <MenuItem value="¿Cuál es el nombre de tu primera mascota?">
-                  ¿Cuál es el nombre de tu primera mascota?
-                </MenuItem>
-                <MenuItem value="¿En qué ciudad naciste?">
-                  ¿En qué ciudad naciste?
-                </MenuItem>
-                <MenuItem value="¿Cuál es tu comida favorita?">
-                  ¿Cuál es tu comida favorita?
-                </MenuItem>
+                <MenuItem value=""><em>Seleccionar</em></MenuItem>
+                <MenuItem value="¿Cuál es el nombre de tu primera mascota?">¿Cuál es el nombre de tu primera mascota?</MenuItem>
+                <MenuItem value="¿En qué ciudad naciste?">¿En qué ciudad naciste?</MenuItem>
+                <MenuItem value="¿Cuál es tu comida favorita?">¿Cuál es tu comida favorita?</MenuItem>
               </Select>
-              {formErrors.preguntaSecreta && (
-                <Typography variant="caption" color="error">
-                  {formErrors.preguntaSecreta}
-                </Typography>
-              )}
+              {formErrors.preguntaSecreta && <Typography variant="caption" color="error">{formErrors.preguntaSecreta}</Typography>}
             </FormControl>
 
             <TextField
               fullWidth
-              label="Respuesta de Seguridad"
+              label="Respuesta Secreta"
               name="respuestaSecreta"
               value={formData.respuestaSecreta}
               onChange={handleChange}
               error={!!formErrors.respuestaSecreta}
               helperText={formErrors.respuestaSecreta}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <QuestionAnswer color="action" />
-                  </InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start"><ChatBubbleOutline fontSize="small" /></InputAdornment>,
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                }
-              }}
+              sx={inputStyles}
             />
 
-            <Alert severity="info" sx={{ borderRadius: 2 }}>
-              Esta información te ayudará a recuperar tu cuenta en caso de olvidar tus credenciales.
+            <Alert
+              severity="info"
+              icon={false}
+              sx={{
+                bgcolor: '#f8fafc',
+                color: '#475569',
+                border: '1px solid #e2e8f0',
+                borderRadius: 2,
+                fontSize: '0.85rem'
+              }}
+            >
+              Guarda bien esta información, te servirá para recuperar tu cuenta en el futuro.
             </Alert>
           </Box>
         );
@@ -664,69 +560,80 @@ if (name === "telefono") {
     <Box
       sx={{
         minHeight: '100vh',
-        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.secondary.light, 0.1)} 100%)`,
+        backgroundColor: '#f3f4f6',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        py: 4,
+        py: { xs: 4, md: 8 },
         px: 2
       }}
     >
-      <Container component="main" maxWidth="md">
+      <Container maxWidth="sm">
         <MotionPaper
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          elevation={8}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          elevation={0}
           sx={{
             borderRadius: 4,
             overflow: 'hidden',
-            background: 'white',
+            border: '1px solid #e5e7eb',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
           }}
         >
-          {/* Header */}
-          <Box
-            sx={{
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              py: 4,
-              textAlign: 'center',
-              color: 'white',
-            }}
-          >
-            <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+          {/* Header Minimalista */}
+          <Box sx={{ pt: 6, pb: 2, px: { xs: 4, md: 6 }, textAlign: 'center' }}>
+            <Typography variant="h4" component="h1" fontWeight="800" sx={{ color: '#111827', letterSpacing: '-0.02em' }} gutterBottom>
               Crear Cuenta
             </Typography>
-            <Typography variant="h6" sx={{ opacity: 0.9 }}>
-              Únete a nuestra dulce comunidad
+            <Typography variant="body2" sx={{ color: '#6b7280' }}>
+              Completa los pasos para unirte a Dulcería Angelitos
             </Typography>
           </Box>
 
-          {/* Content */}
-          <Box sx={{ p: 6 }}>
-            <Stepper activeStep={activeStep} sx={{ mb: 6 }}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
+          {/* Stepper Simple */}
+          <Box sx={{ px: { xs: 2, md: 4 }, py: 2 }}>
+            <Stepper activeStep={activeStep} alternativeLabel
+              sx={{
+                '& .MuiStepIcon-root': {
+                  color: '#e5e7eb',
+                  '&.Mui-active': { color: '#111827' },
+                  '&.Mui-completed': { color: '#111827' }
+                },
+                '& .MuiStepLabel-label': {
+                  fontSize: '0.8rem',
+                  color: '#9ca3af',
+                  '&.Mui-active': { color: '#111827', fontWeight: '600' },
+                  '&.Mui-completed': { color: '#111827', fontWeight: '500' }
+                }
+              }}
+            >
+              {steps.map((label) => <Step key={label}><StepLabel>{label}</StepLabel></Step>)}
             </Stepper>
+          </Box>
 
+          {/* Form Content */}
+          <Box sx={{ px: { xs: 4, md: 6 }, pb: 6, pt: 2 }}>
             <form onSubmit={handleSubmit}>
+
               {renderStepContent(activeStep)}
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 6 }}>
+              {/* Botones de Navegacion Minimalistas */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
                 <Button
                   disabled={activeStep === 0}
                   onClick={handleBack}
-                  variant="outlined"
+                  variant="text"
                   sx={{
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 'bold'
+                    color: '#4b5563',
+                    fontWeight: '600',
+                    px: 3,
+                    borderRadius: '8px',
+                    '&:hover': { bgcolor: '#f3f4f6' }
                   }}
                 >
-                  Anterior
+                  Volver
                 </Button>
 
                 {activeStep === steps.length - 1 ? (
@@ -735,36 +642,60 @@ if (name === "telefono") {
                     variant="contained"
                     disabled={isLoading || Object.keys(formErrors).length > 0}
                     sx={{
-                      borderRadius: 2,
+                      bgcolor: '#111827',
+                      color: '#ffffff',
+                      fontWeight: '600',
+                      borderRadius: '8px',
+                      textTransform: 'none',
                       px: 4,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                      py: 1.2,
+                      boxShadow: 'none',
                       '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: 4
+                        bgcolor: '#1f2937',
+                        boxShadow: 'none'
                       },
-                      transition: 'all 0.3s ease'
+                      '&:disabled': {
+                        bgcolor: '#e5e7eb',
+                        color: '#9ca3af'
+                      }
                     }}
                   >
-                    {isLoading ? "Registrando..." : "Completar Registro"}
+                    {isLoading ? "Procesando..." : "Crear Cuenta"}
                   </Button>
                 ) : (
                   <Button
                     variant="contained"
                     onClick={handleNext}
                     sx={{
-                      borderRadius: 2,
+                      bgcolor: '#111827',
+                      color: '#ffffff',
+                      fontWeight: '600',
+                      borderRadius: '8px',
+                      textTransform: 'none',
                       px: 4,
-                      py: 1.5,
-                      fontWeight: 'bold'
+                      py: 1.2,
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: '#1f2937',
+                        boxShadow: 'none'
+                      }
                     }}
                   >
-                    Siguiente
+                    Continuar
                   </Button>
                 )}
               </Box>
             </form>
+          </Box>
+
+          {/* Enlace estético inferior */}
+          <Box sx={{ p: 3, textAlign: 'center', borderTop: '1px solid #f3f4f6', bgcolor: '#fafafa' }}>
+            <Typography variant="body2" sx={{ color: '#6b7280' }}>
+              ¿Ya tienes cuenta?{' '}
+              <Typography component="span" sx={{ color: '#111827', fontWeight: 600, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }} onClick={() => navigate('/login')}>
+                Inicia sesión aquí
+              </Typography>
+            </Typography>
           </Box>
         </MotionPaper>
       </Container>

@@ -112,7 +112,7 @@ const GestionUsuarios = () => {
   const obtenerUsuarios = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3000/api/gestion_usuarios", config());
+      const res = await axios.get("https://backenddulceria.onrender.com/api/gestion_usuarios", config());
       setUsuarios(res.data);
 
       const total = res.data.length;
@@ -193,13 +193,13 @@ const GestionUsuarios = () => {
     try {
       if (modoEdicion) {
         await axios.put(
-          `http://localhost:3000/api/gestion_usuarios/${formData.id}`,
+          `https://backenddulceria.onrender.com/api/gestion_usuarios/${formData.id}`,
           formData,
           config()
         );
       } else {
         await axios.post(
-          "http://localhost:3000/api/gestion_usuarios",
+          "https://backenddulceria.onrender.com/api/gestion_usuarios",
           formData,
           config()
         );
@@ -231,7 +231,7 @@ const GestionUsuarios = () => {
   const desactivarUsuario = async (id) => {
     try {
       await axios.put(
-        `http://localhost:3000/api/gestion_usuarios/desactivar/${id}`,
+        `https://backenddulceria.onrender.com/api/gestion_usuarios/desactivar/${id}`,
         {},
         config()
       );
@@ -264,40 +264,40 @@ const GestionUsuarios = () => {
   };
 
   const statsCards = [
-    { 
-      label: 'Total Usuarios', 
-      value: stats.total, 
-      icon: <PersonIcon />, 
+    {
+      label: 'Total Usuarios',
+      value: stats.total,
+      icon: <PersonIcon />,
       color: theme.palette.primary.main,
     },
-    { 
-      label: 'Clientes', 
-      value: stats.clientes, 
-      icon: <ClienteIcon />, 
+    {
+      label: 'Clientes',
+      value: stats.clientes,
+      icon: <ClienteIcon />,
       color: theme.palette.info.main,
     },
-    { 
-      label: 'Repartidores', 
-      value: stats.repartidores, 
-      icon: <RepartidorIcon />, 
+    {
+      label: 'Repartidores',
+      value: stats.repartidores,
+      icon: <RepartidorIcon />,
       color: theme.palette.warning.main,
     },
-    { 
-      label: 'Administradores', 
-      value: stats.admins, 
-      icon: <AdminIcon />, 
+    {
+      label: 'Administradores',
+      value: stats.admins,
+      icon: <AdminIcon />,
       color: theme.palette.error.main,
     },
-    { 
-      label: 'Activos', 
-      value: stats.activos, 
-      icon: <CheckCircleIcon />, 
+    {
+      label: 'Activos',
+      value: stats.activos,
+      icon: <CheckCircleIcon />,
       color: theme.palette.success.main,
     },
-    { 
-      label: 'Inactivos', 
-      value: stats.inactivos, 
-      icon: <CancelIcon />, 
+    {
+      label: 'Inactivos',
+      value: stats.inactivos,
+      icon: <CancelIcon />,
       color: theme.palette.grey[500],
     },
   ];
@@ -335,30 +335,7 @@ const GestionUsuarios = () => {
     }}>
       <Container maxWidth="xl">
         {/* Header */}
-        <MotionBox
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          sx={{ mb: 6, textAlign: 'center' }}
-        >
-          <Avatar
-            sx={{
-              width: 100,
-              height: 100,
-              bgcolor: theme.palette.primary.main,
-              mb: 2,
-              mx: 'auto',
-            }}
-          >
-            <PersonIcon sx={{ fontSize: 50 }} />
-          </Avatar>
-          <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
-            Gestión de Usuarios
-          </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            Administra todos los usuarios del sistema de manera eficiente
-          </Typography>
-        </MotionBox>
+
 
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -540,8 +517,8 @@ const GestionUsuarios = () => {
           <Typography variant="body2" color="text.secondary">
             Mostrando {indexPrimero + 1} - {Math.min(indexUltimo, usuariosFiltrados.length)} de {usuariosFiltrados.length} usuarios
           </Typography>
-          <Chip 
-            icon={<InfoIcon />} 
+          <Chip
+            icon={<InfoIcon />}
             label={`Página ${paginaActual} de ${totalPaginas}`}
             variant="outlined"
           />
@@ -597,7 +574,7 @@ const GestionUsuarios = () => {
                       onHoverStart={() => setHoveredRow(u.id_usuarios)}
                       onHoverEnd={() => setHoveredRow(null)}
                       sx={{
-                        bgcolor: hoveredRow === u.id_usuarios 
+                        bgcolor: hoveredRow === u.id_usuarios
                           ? alpha(theme.palette.primary.light, 0.05)
                           : 'transparent',
                         transition: 'background-color 0.2s',
@@ -719,7 +696,7 @@ const GestionUsuarios = () => {
             }
           }}
         >
-          <DialogTitle sx={{ 
+          <DialogTitle sx={{
             pb: 1,
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           }}>

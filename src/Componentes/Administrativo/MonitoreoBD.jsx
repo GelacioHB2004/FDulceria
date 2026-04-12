@@ -19,7 +19,7 @@ import {
   Gavel, Description, ShoppingCart, MoveToInbox,
 } from "@mui/icons-material";
 
-const API = "http://localhost:3000/api/monitoreo";
+const API = "https://backenddulceria.onrender.com/api/monitoreo";
 
 // Paleta Rosa + Blanco + Dorado
 const COLORS = {
@@ -121,16 +121,16 @@ const MonitoreoBD = () => {
           </Typography>
           <Stack direction="row" justifyContent="center" alignItems="center" spacing={2}>
             {ultimaAct && (
-              <Chip 
-                icon={<Timer sx={{ fontSize: 16 }} />} 
-                label={`Actualizado: ${ultimaAct.toLocaleTimeString()}`} 
+              <Chip
+                icon={<Timer sx={{ fontSize: 16 }} />}
+                label={`Actualizado: ${ultimaAct.toLocaleTimeString()}`}
                 size="small"
                 sx={{ bgcolor: COLORS.rosaClaro, color: COLORS.rosa, border: "none" }}
               />
             )}
             <Tooltip title="Actualizar ahora">
-              <IconButton 
-                onClick={obtenerDatos} 
+              <IconButton
+                onClick={obtenerDatos}
                 sx={{ bgcolor: COLORS.doradoClaro, color: COLORS.dorado, borderRadius: 1 }}>
                 <Refresh sx={{ fontSize: 20 }} />
               </IconButton>
@@ -244,9 +244,9 @@ const MonitoreoBD = () => {
                         {data.usuarios.sesiones_activas}
                       </Typography>
                       {data.usuarios.bloqueados > 0 && (
-                        <Chip 
-                          label={`${data.usuarios.bloqueados} bloqueado(s)`} 
-                          size="small" 
+                        <Chip
+                          label={`${data.usuarios.bloqueados} bloqueado(s)`}
+                          size="small"
                           sx={{ mt: 0.5, height: 20, bgcolor: "#FFEBEE", color: "#D32F2F", fontSize: 11 }}
                         />
                       )}
@@ -286,11 +286,11 @@ const MonitoreoBD = () => {
                         }}
                       >
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={`${COLORS.grisOscuro}20`} />
-                        <XAxis 
-                          dataKey="name" 
-                          angle={-45} 
-                          textAnchor="end" 
-                          interval={0} 
+                        <XAxis
+                          dataKey="name"
+                          angle={-45}
+                          textAnchor="end"
+                          interval={0}
                           tick={{ fontSize: 12, fill: COLORS.textoOscuro, fontWeight: 500 }}
                           height={80}
                         />
@@ -300,15 +300,15 @@ const MonitoreoBD = () => {
                           contentStyle={{ borderRadius: 8, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}
                           formatter={(value) => [fmt(value), "Registros"]}
                         />
-                        <Bar 
-                          dataKey="total" 
-                          radius={[6, 6, 0, 0]} 
+                        <Bar
+                          dataKey="total"
+                          radius={[6, 6, 0, 0]}
                           barSize={40}
                         >
                           {registros.map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length]} 
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORES_TABLAS_MINIMALISTAS[index % COLORES_TABLAS_MINIMALISTAS.length]}
                               style={{ cursor: 'pointer', filter: 'drop-shadow(0px 4px 4px rgba(0,0,0,0.05))' }}
                             />
                           ))}
@@ -316,13 +316,13 @@ const MonitoreoBD = () => {
                       </BarChart>
                     </ResponsiveContainer>
                   </Box>
-                  
+
                   {/* Leyenda rápida interactiva debajo */}
-                  <Stack 
-                    direction="row" 
-                    flexWrap="wrap" 
-                    justifyContent="center" 
-                    gap={1.5} 
+                  <Stack
+                    direction="row"
+                    flexWrap="wrap"
+                    justifyContent="center"
+                    gap={1.5}
                     sx={{ mt: 2, px: 2 }}
                   >
                     {registros.map(([key, val], index) => (
@@ -602,9 +602,9 @@ const MonitoreoBD = () => {
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button 
-            onClick={() => setDialogOpen(false)} 
-            variant="contained" 
+          <Button
+            onClick={() => setDialogOpen(false)}
+            variant="contained"
             sx={{ borderRadius: 1.5, bgcolor: COLORS.rosa, textTransform: "none" }}>
             Cerrar
           </Button>

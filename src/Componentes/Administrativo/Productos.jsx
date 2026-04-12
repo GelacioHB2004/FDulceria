@@ -38,6 +38,7 @@ import {
   Badge,
   Fab,
   Zoom,
+  TablePagination,
 } from "@mui/material";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,7 +50,6 @@ import {
   Search as SearchIcon,
   Inventory as InventoryIcon,
   Category as CategoryIcon,
-  AttachMoney as MoneyIcon,
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
@@ -60,7 +60,7 @@ import {
   Store as StoreIcon,
 } from "@mui/icons-material";
 
-const API = "http://localhost:3000/api";
+const API = "https://backenddulceria.onrender.com/api";
 const MotionCard = motion(Card);
 const MotionBox = motion(Box);
 const MotionPaper = motion(Paper);
@@ -70,7 +70,6 @@ export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [stats, setStats] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const [open, setOpen] = useState(false);
   const [editando, setEditando] = useState(null);
@@ -83,6 +82,10 @@ export default function Productos() {
   const [stockBajo] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
 
+  // Estados para paginación
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const token = localStorage.getItem("token");
   const id_empresa = localStorage.getItem("id_empresa") || 1;
 
@@ -92,7 +95,6 @@ export default function Productos() {
 
   // Función memoizada para cargar datos
   const cargarDatos = useCallback(async () => {
-    setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filtroEstado) params.append("estado", filtroEstado);
@@ -120,8 +122,6 @@ export default function Productos() {
         text: 'No se pudieron cargar los datos',
         background: theme.palette.background.paper,
       });
-    } finally {
-      setLoading(false);
     }
   }, [filtroEstado, filtroCategoria, busqueda, stockBajo, token, theme.palette.background.paper]);
 
@@ -208,7 +208,7 @@ export default function Productos() {
         : {};
 
       await axios.delete(`${API}/productos/${id}`, authConfig);
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Eliminado',
@@ -217,7 +217,7 @@ export default function Productos() {
         timer: 1500,
         showConfirmButton: false,
       });
-      
+
       cargarDatos();
     } catch (error) {
       Swal.fire({
@@ -233,9 +233,9 @@ export default function Productos() {
     try {
       const authConfig = token
         ? {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "blob"
-          }
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob"
+        }
         : {};
 
       const response = await axios.get(
@@ -273,63 +273,43 @@ export default function Productos() {
   };
 
   const handleSearch = () => {
+    setPage(0); // Reiniciar a la primera página al buscar
     cargarDatos();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const statsCards = [
-    { 
-      label: 'Total Productos', 
-      value: stats.total || 0, 
-      icon: <InventoryIcon />, 
+    {
+      label: 'Total Productos',
+      value: stats.total || 0,
+      icon: <InventoryIcon />,
       color: theme.palette.primary.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Activos', 
-      value: stats.activos || 0, 
-      icon: <CheckCircleIcon />, 
+    {
+      label: 'Activos',
+      value: stats.activos || 0,
+      icon: <CheckCircleIcon />,
       color: theme.palette.success.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Stock Bajo', 
-      value: stats.stock_bajo || 0, 
-      icon: <WarningIcon />, 
+    {
+      label: 'Stock Bajo',
+      value: stats.stock_bajo || 0,
+      icon: <WarningIcon />,
       color: theme.palette.warning.main,
       gradient: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.dark, 0.1)} 100%)`,
     },
-    { 
-      label: 'Valor Inventario', 
-      value: `$${stats.valor_inventario?.toLocaleString() || 0}`, 
-      icon: <MoneyIcon />, 
-      color: theme.palette.info.main,
-      gradient: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.1)} 0%, ${alpha(theme.palette.info.dark, 0.1)} 100%)`,
-    },
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: `radial-gradient(circle, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.background.default, 1)} 100%)`,
-      }}>
-        <Stack spacing={3} alignItems="center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            <StoreIcon sx={{ fontSize: 80, color: theme.palette.primary.main }} />
-          </motion.div>
-          <Typography variant="h5" color="text.secondary">
-            Cargando productos...
-          </Typography>
-        </Stack>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{
@@ -368,7 +348,7 @@ export default function Productos() {
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {statsCards.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <MotionCard
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -432,7 +412,7 @@ export default function Productos() {
                 sx: { borderRadius: 2 }
               }}
             />
-            
+
             <Button
               variant="contained"
               onClick={handleSearch}
@@ -583,112 +563,129 @@ export default function Productos() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    productos.map((p, index) => (
-                      <MotionBox
-                        key={p.id_producto}
-                        component="tr"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ delay: index * 0.02 }}
-                        onHoverStart={() => setHoveredRow(p.id_producto)}
-                        onHoverEnd={() => setHoveredRow(null)}
-                        sx={{
-                          bgcolor: hoveredRow === p.id_producto 
-                            ? alpha(theme.palette.primary.light, 0.05)
-                            : 'transparent',
-                          transition: 'background-color 0.2s',
-                        }}
-                      >
-                        <TableCell>
-                          <Avatar
-                            src={p.imagen}
-                            variant="rounded"
-                            sx={{ width: 60, height: 60, borderRadius: 2 }}
-                          >
-                            {p.nombre?.charAt(0)}
-                          </Avatar>
-                        </TableCell>
-                        <TableCell>
-                          <Typography fontWeight="medium">{p.nombre}</Typography>
-                          <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
-                            {p.descripcion || 'Sin descripción'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            icon={<CategoryIcon />}
-                            label={p.categoria}
-                            size="small"
-                            variant="outlined"
-                            sx={{ borderRadius: 1 }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography fontWeight="bold" color="primary.main">
-                            ${p.precio?.toLocaleString()}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            badgeContent={p.stock <= p.stock_minimo ? '!' : 0}
-                            color="error"
-                            invisible={p.stock > p.stock_minimo}
-                          >
-                            <Typography
-                              sx={{
-                                color: p.stock <= p.stock_minimo ? theme.palette.error.main : 'text.primary',
-                                fontWeight: p.stock <= p.stock_minimo ? 'bold' : 'normal',
-                              }}
+                    productos
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((p, index) => (
+                        <MotionBox
+                          key={p.id_producto}
+                          component="tr"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ delay: index * 0.02 }}
+                          onHoverStart={() => setHoveredRow(p.id_producto)}
+                          onHoverEnd={() => setHoveredRow(null)}
+                          sx={{
+                            bgcolor: hoveredRow === p.id_producto
+                              ? alpha(theme.palette.primary.light, 0.05)
+                              : 'transparent',
+                            transition: 'background-color 0.2s',
+                          }}
+                        >
+                          <TableCell>
+                            <Avatar
+                              src={p.imagen}
+                              variant="rounded"
+                              sx={{ width: 60, height: 60, borderRadius: 2 }}
                             >
-                              {p.stock} / {p.stock_minimo}
+                              {p.nombre?.charAt(0)}
+                            </Avatar>
+                          </TableCell>
+                          <TableCell>
+                            <Typography fontWeight="medium">{p.nombre}</Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
+                              {p.descripcion || 'Sin descripción'}
                             </Typography>
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            icon={p.estado === 'Activo' ? <CheckCircleIcon /> : <CancelIcon />}
-                            label={p.estado}
-                            size="small"
-                            color={p.estado === 'Activo' ? 'success' : 'error'}
-                            variant="filled"
-                          />
-                        </TableCell>
-                        <TableCell align="right">
-                          <Stack direction="row" spacing={1} justifyContent="flex-end">
-                            <Tooltip title="Editar">
-                              <IconButton
-                                onClick={() => abrirForm(p)}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={<CategoryIcon />}
+                              label={p.categoria}
+                              size="small"
+                              variant="outlined"
+                              sx={{ borderRadius: 1 }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography fontWeight="bold" color="primary.main">
+                              ${p.precio?.toLocaleString()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              badgeContent={p.stock <= p.stock_minimo ? '!' : 0}
+                              color="error"
+                              invisible={p.stock > p.stock_minimo}
+                            >
+                              <Typography
                                 sx={{
-                                  bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                  color: theme.palette.warning.main,
-                                  '&:hover': { bgcolor: theme.palette.warning.main, color: 'white' },
+                                  color: p.stock <= p.stock_minimo ? theme.palette.error.main : 'text.primary',
+                                  fontWeight: p.stock <= p.stock_minimo ? 'bold' : 'normal',
                                 }}
                               >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Eliminar">
-                              <IconButton
-                                onClick={() => eliminar(p.id_producto)}
-                                sx={{
-                                  bgcolor: alpha(theme.palette.error.main, 0.1),
-                                  color: theme.palette.error.main,
-                                  '&:hover': { bgcolor: theme.palette.error.main, color: 'white' },
-                                }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Stack>
-                        </TableCell>
-                      </MotionBox>
-                    ))
+                                {p.stock} / {p.stock_minimo}
+                              </Typography>
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={p.estado === 'Activo' ? <CheckCircleIcon /> : <CancelIcon />}
+                              label={p.estado}
+                              size="small"
+                              color={p.estado === 'Activo' ? 'success' : 'error'}
+                              variant="filled"
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <Tooltip title="Editar">
+                                <IconButton
+                                  onClick={() => abrirForm(p)}
+                                  sx={{
+                                    bgcolor: alpha(theme.palette.warning.main, 0.1),
+                                    color: theme.palette.warning.main,
+                                    '&:hover': { bgcolor: theme.palette.warning.main, color: 'white' },
+                                  }}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Eliminar">
+                                <IconButton
+                                  onClick={() => eliminar(p.id_producto)}
+                                  sx={{
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    color: theme.palette.error.main,
+                                    '&:hover': { bgcolor: theme.palette.error.main, color: 'white' },
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
+                          </TableCell>
+                        </MotionBox>
+                      ))
                   )}
                 </AnimatePresence>
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={productos.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Productos por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            sx={{
+              borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              bgcolor: alpha(theme.palette.background.paper, 0.5),
+            }}
+          />
         </MotionPaper>
 
         {/* Product Form Dialog */}
@@ -705,7 +702,7 @@ export default function Productos() {
             }
           }}
         >
-          <DialogTitle sx={{ 
+          <DialogTitle sx={{
             pb: 1,
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
           }}>

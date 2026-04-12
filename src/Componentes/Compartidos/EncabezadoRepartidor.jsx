@@ -32,7 +32,7 @@ import {
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 /* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {
@@ -245,7 +245,7 @@ const EncabezadoRepartidor = () => {
                 const isActive = active === item.key;
                 const hasSubmenu = !!item.submenu;
                 const isParentActive = hasSubmenu && item.submenu.some(s => active === s.key);
-                
+
                 if (item.key === "cerrarSesion") {
                   return (
                     <motion.div
@@ -346,7 +346,7 @@ const EncabezadoRepartidor = () => {
                         </Box>
                       )}
                     </Box>
-                    
+
                     {/* Submenú desplegable para desktop */}
                     {hasSubmenu && openMenus[item.key] && (
                       <Box

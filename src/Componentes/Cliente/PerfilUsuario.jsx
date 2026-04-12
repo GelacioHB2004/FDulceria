@@ -15,7 +15,7 @@ const PerfilUsuario = () => {
 
   const obtenerPerfil = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/perfil_usuario", {
+      const res = await axios.get("https://backenddulceria.onrender.com/api/perfil_usuario", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -39,7 +39,7 @@ const PerfilUsuario = () => {
   const guardarCambios = async () => {
     try {
       await axios.put(
-        "http://localhost:3000/api/perfil_usuario",
+        "https://backenddulceria.onrender.com/api/perfil_usuario",
         {
           nombre: perfil.nombre,
           apellidoP: perfil.apellidoP,

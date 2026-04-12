@@ -2,7 +2,7 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://backenddulceria.onrender.com';
 
 const instance = axios.create({
   baseURL: API_BASE_URL,
@@ -49,15 +49,15 @@ instance.interceptors.response.use(
           console.log('Errores por campo:', apiErrors);
           // Aquí podrías emitir un evento o guardar en un contexto global
         }
-      } 
+      }
       else if (status === 404) {
         title = 'No encontrado';
         message = apiMessage || 'El recurso solicitado no existe';
-      } 
+      }
       else if (status === 500) {
         title = 'Error del servidor';
         message = 'Estamos trabajando en solucionarlo. Intenta más tarde.';
-      } 
+      }
       else {
         message = apiMessage || 'Error inesperado del servidor';
       }

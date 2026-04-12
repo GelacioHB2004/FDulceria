@@ -5,7 +5,7 @@ import {
   Container, Chip, Divider, alpha, ThemeProvider, createTheme,
 } from "@mui/material";
 import {
-    Edit as EditIcon, Save as SaveIcon, Close as CloseIcon,
+  Edit as EditIcon, Save as SaveIcon, Close as CloseIcon,
   Email as EmailIcon, Phone as PhoneIcon, Badge as BadgeIcon,
   AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
@@ -34,7 +34,7 @@ const PerfilUsuario = () => {
 
   const obtenerPerfil = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/perfil_usuario", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get("https://backenddulceria.onrender.com/api/perfil_usuario", { headers: { Authorization: `Bearer ${token}` } });
       setPerfil(res.data.perfil);
       setLoading(false);
     } catch (error) { console.error(error); setLoading(false); }
@@ -44,7 +44,7 @@ const PerfilUsuario = () => {
 
   const guardarCambios = async () => {
     try {
-      await axios.put("http://localhost:3000/api/perfil_usuario", {
+      await axios.put("https://backenddulceria.onrender.com/api/perfil_usuario", {
         nombre: perfil.nombre, apellidoP: perfil.apellidoP, apellidoM: perfil.apellidoM, telefono: perfil.telefono,
       }, { headers: { Authorization: `Bearer ${token}` } });
       setMensaje("Perfil actualizado correctamente");

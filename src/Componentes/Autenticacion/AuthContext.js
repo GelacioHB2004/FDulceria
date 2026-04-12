@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUser);
           setToken(storedToken);
 
-          await axios.get('http://localhost:3000/api/login1/ping', {
+          await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
             headers: { Authorization: `Bearer ${storedToken}` },
             timeout: 8000
           });
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
 
     const pingInterval = setInterval(async () => {
       try {
-        await axios.get('http://localhost:3000/api/login1/ping', {
+        await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 6000
         });
@@ -222,7 +222,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('intentional_logout', 'true');
 
     try {
-      await axios.post('http://localhost:3000/api/login1/logout', {}, {
+      await axios.post('https://backenddulceria.onrender.com/api/login1/logout', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
     } catch (err) {

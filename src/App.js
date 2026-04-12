@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LayoutConEncabezado from './Componentes/Layout/LayoutEncabezado.jsx';
 import PaginaPrincipal from './Paginas/PaginaPrincipal';
 import PaginaPrincipalAdministrativa from './Paginas/PaginaPrincipalAdministrativo';
@@ -40,7 +40,7 @@ import Categorias from './Componentes/Administrativo/Categorias.jsx';
 import ProductosAdmin from './Componentes/Administrativo/Productos.jsx';
 import Reportes from './Componentes/Administrativo/Reportes.jsx';
 import GestionPedidos from './Componentes/Administrativo/GestionPedidos.jsx';
-import InventarioMovimientos from './Componentes/Administrativo/InventarioMovimiento.jsx'; 
+import InventarioMovimientos from './Componentes/Administrativo/InventarioMovimiento.jsx';
 import GestionUsuarios from './Componentes/Administrativo/GestionUsuarios.jsx';
 import RespaldoBD from './Componentes/Administrativo/RespaldoBD.jsx';
 import PoliticasEmpresa from './Componentes/Administrativo/PoliticasEmpresa.jsx';
@@ -79,7 +79,11 @@ const App = () => {
               <Route path="/detalleproducto/:id" element={<ProductosDetallePublico />} />
               <Route path="/politicas" element={<PoliticasDePrivacidad />} />
               <Route path="/carrito" element={<CarritoComprasPublico />} />
-              
+              <Route path="/mision" element={<Mision />} />
+              <Route path="/vision" element={<Vision />} />
+              <Route path="/terminos" element={<TerminosCondicionesAdmin />} />
+              <Route path="/politicas" element={<PoliticasDePrivacidadAdmin />} />
+
 
               {/* Rutas administrador */}
               <Route path="/admin" element={<PaginaPrincipalAdministrativa />} />

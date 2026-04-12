@@ -33,7 +33,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
 import BusquedaSimple from "./BusquedaSimple.jsx"
 
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = "https://backenddulceria.onrender.com"
 
 /* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {
@@ -229,7 +229,7 @@ const EncabezadoCliente = () => {
   const menuItems = [
     { key: "home", label: "Inicio", icon: <HomeOutlined /> },
     { key: "productos", label: "Productos", icon: <ShopOutlined /> },
-    { key: "carrito", label: "Carrito", icon: <Badge badgeContent={cartCount} color="error"><ShoppingCartOutlined style={{fontSize: 'inherit'}} /></Badge> },
+    { key: "carrito", label: "Carrito", icon: <Badge badgeContent={cartCount} color="error"><ShoppingCartOutlined style={{ fontSize: 'inherit' }} /></Badge> },
     { key: "mispedidos", label: "Mis Pedidos", icon: <CalendarOutlined /> },
     { key: "Perfilusuario", label: "Perfil", icon: <UserOutlined /> },
     {
@@ -374,9 +374,9 @@ const EncabezadoCliente = () => {
                         }),
                       }}
                     >
-                      <Box sx={{ 
-                        fontSize: "1.1rem", 
-                        color: item.customColor || (isActive ? COLORS.accent : "inherit") 
+                      <Box sx={{
+                        fontSize: "1.1rem",
+                        color: item.customColor || (isActive ? COLORS.accent : "inherit")
                       }}>
                         {item.icon}
                       </Box>

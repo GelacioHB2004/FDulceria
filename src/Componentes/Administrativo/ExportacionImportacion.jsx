@@ -23,7 +23,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 const COLORS = {
   accent: "#E91E6C",
@@ -169,7 +169,7 @@ const ExportacionImportacion = () => {
             <Box display="flex" alignItems="center" gap={2} mb={4}>
               <Avatar sx={{ bgcolor: COLORS.accentBg, color: COLORS.accent, width: 60, height: 60 }}><DatabaseOutlined style={{ fontSize: 32 }} /></Avatar>
               <Box>
-                <Typography variant="h4" fontWeight={800} color={COLORS.textPrimary}>Gestión de Datos (No Relacional/Relacional)</Typography>
+                <Typography variant="h4" fontWeight={800} color={COLORS.textPrimary}>Gestión de Datos</Typography>
                 <Typography variant="body1" color={COLORS.textSecondary}>Exporta e Importa información en formatos JSON y CSV</Typography>
               </Box>
             </Box>
@@ -256,7 +256,7 @@ const ExportacionImportacion = () => {
             <Grid item xs={12} lg={5}>
               <Paper sx={{ p: 3, borderRadius: 4, height: 'fit-content' }}>
                 <Typography variant="h6" fontWeight={700} mb={3}><ImportOutlined /> Importar Datos (JSON/CSV)</Typography>
-                <Box 
+                <Box
                   sx={{ border: `2px dashed ${COLORS.divider}`, borderRadius: 3, p: 4, textAlign: 'center', bgcolor: archivo ? COLORS.accentBg : 'transparent', mb: 3 }}
                   onClick={() => document.getElementById('imp-file').click()}
                 >

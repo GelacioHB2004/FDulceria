@@ -24,7 +24,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import BusquedaSimple from "./BusquedaSimple.jsx"
 
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = "https://backenddulceria.onrender.com"
 
 /* ───────── Paleta: Rosa + Blanco + Dorado (Dulceria) ───────── */
 const COLORS = {

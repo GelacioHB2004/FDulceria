@@ -70,7 +70,7 @@ const PaginaPrincipal = () => {
   const fetchFeaturedProducts = async () => {
     try {
       // Intentamos obtener productos de la empresa 1 (default)
-      const resp = await axios.get("http://localhost:3000/api/productos/catalogo/publico/1");
+      const resp = await axios.get("https://backenddulceria.onrender.com/api/productos/catalogo/publico/1");
       setProductosDestacados(resp.data.slice(0, 4));
     } catch (error) {
       console.error("Error fetching products", error);
@@ -106,7 +106,7 @@ const PaginaPrincipal = () => {
 
   return (
     <Box sx={{ bgcolor: COLORS.background, minHeight: "100vh", overflow: "hidden" }}>
-      
+
       {/* SECTION: HERO PARALLAX */}
       <Box
         ref={heroRef}
@@ -149,15 +149,15 @@ const PaginaPrincipal = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                <Chip 
-                  label="DULCERÍA ARTESANAL" 
-                  sx={{ 
-                    bgcolor: COLORS.accent, 
-                    color: COLORS.textPrimary, 
-                    fontWeight: 800, 
+                <Chip
+                  label="DULCERÍA ARTESANAL"
+                  sx={{
+                    bgcolor: COLORS.accent,
+                    color: COLORS.textPrimary,
+                    fontWeight: 800,
                     mb: 3,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)" 
-                  }} 
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  }}
                 />
                 <Typography
                   variant="h1"
@@ -182,7 +182,7 @@ const PaginaPrincipal = () => {
                     lineHeight: 1.6
                   }}
                 >
-                  Descubre la magia de la confitería tradicional con un toque moderno. 
+                  Descubre la magia de la confitería tradicional con un toque moderno.
                   Explora nuestra selección exclusiva de dulces caseros diseñados para deleitar tu paladar.
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
@@ -263,8 +263,8 @@ const PaginaPrincipal = () => {
               Los Favoritos de la Casa 🍬
             </Typography>
           </Box>
-          <Button 
-            endIcon={<ArrowRightOutlined />} 
+          <Button
+            endIcon={<ArrowRightOutlined />}
             onClick={() => navigate("/productos")}
             sx={{ color: COLORS.textPrimary, fontWeight: 700 }}
           >
@@ -342,8 +342,8 @@ const PaginaPrincipal = () => {
         <Container maxWidth="lg">
           <Grid container spacing={8} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Box 
-                component="img" 
+              <Box
+                component="img"
                 src="https://images.unsplash.com/photo-1599599810769-bcde5a160d32?q=80&w=1000&auto=format&fit=crop"
                 sx={{ width: "100%", borderRadius: 8, boxShadow: "0 30px 60px rgba(0,0,0,0.15)" }}
               />
@@ -356,10 +356,10 @@ const PaginaPrincipal = () => {
                 Endulzando vidas desde hace más de una década.
               </Typography>
               <Typography variant="body1" sx={{ color: COLORS.textSecondary, mb: 6, fontSize: "1.1rem" }}>
-                Comenzamos en una pequeña cocina familiar con un solo sueño: compartir la alegría de los dulces artesanales. 
+                Comenzamos en una pequeña cocina familiar con un solo sueño: compartir la alegría de los dulces artesanales.
                 Hoy, Dulcería Angelitos es sinónimo de calidad y amor en cada bocado, preservando recetas que han pasado de generación en generación.
               </Typography>
-              
+
               <Grid container spacing={4}>
                 {stats.map((s, i) => (
                   <Grid item xs={4} key={i}>
@@ -424,32 +424,32 @@ const PaginaPrincipal = () => {
           <Typography variant="body1" sx={{ opacity: 0.8, mb: 6 }}>
             Suscríbete para recibir ofertas exclusivas y ser el primero en probar nuestros nuevos lanzamientos.
           </Typography>
-          <Box 
-            component="form" 
-            sx={{ 
-              display: "flex", 
-              gap: 2, 
+          <Box
+            component="form"
+            sx={{
+              display: "flex",
+              gap: 2,
               flexDirection: { xs: "column", sm: "row" },
               justifyContent: "center"
             }}
           >
-            <Paper 
+            <Paper
               component="input"
               placeholder="Tu correo electronico"
-              sx={{ 
-                px: 3, py: 2, 
-                width: { xs: "100%", sm: 300 }, 
-                borderRadius: "50px", 
+              sx={{
+                px: 3, py: 2,
+                width: { xs: "100%", sm: 300 },
+                borderRadius: "50px",
                 border: "none",
                 outline: "none"
               }}
             />
             <Button
               variant="contained"
-              sx={{ 
-                bgcolor: COLORS.primary, 
-                px: 4, py: 1.5, 
-                borderRadius: "50px", 
+              sx={{
+                bgcolor: COLORS.primary,
+                px: 4, py: 1.5,
+                borderRadius: "50px",
                 fontWeight: 700,
                 "&:hover": { bgcolor: COLORS.primaryDark }
               }}
@@ -457,7 +457,7 @@ const PaginaPrincipal = () => {
               Suscribirme
             </Button>
           </Box>
-          
+
           <Box sx={{ mt: 8, pt: 8, borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 3 }}>
             <Typography variant="body2" sx={{ opacity: 0.6 }}>
               © 2024 Dulcería Angelitos. Todos los derechos reservados.

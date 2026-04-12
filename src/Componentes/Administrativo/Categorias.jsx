@@ -7,76 +7,83 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Stack,
-  useTheme,
-  alpha,
-  Avatar,
-  Fab,
-  Zoom,
-  Badge,
+  Box, Button, TextField, Typography, Paper, FormControl,
+  InputLabel, Select, MenuItem, CircularProgress,
+  IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
+  DialogActions, Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Avatar, Stack, InputAdornment, Grid, alpha
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-
 import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  DeleteOutline as DeleteIcon,
-  Refresh as RefreshIcon,
-  Category as CategoryIcon,
-  Inventory as InventoryIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  Description as DescriptionIcon,
-  LocalOffer as TagIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
+  EditOutlined, DeleteOutlined, PlusOutlined, ReloadOutlined,
+  SearchOutlined, TagOutlined, FileTextOutlined
+} from '@ant-design/icons';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const MySwal = withReactContent(Swal);
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
-const schema = yup.object().shape({
-  nombre: yup.string()
-    .required('El nombre es obligatorio')
-    .min(2, 'Mínimo 2 caracteres')
-    .max(100, 'Máximo 100 caracteres'),
-  descripcion: yup.string()
-    .max(500, 'Máximo 500 caracteres')
-    .optional(),
-  estado: yup.string()
-    .oneOf(['Activo', 'Inactivo'])
-    .required('El estado es obligatorio'),
+/* ───────── Paleta Dulcería Premium ───────── */
+const COLORS = {
+  accent: "#E91E6C",
+  accentLight: "#F06292",
+  accentSoft: "#FCE4EC",
+  accentBg: "rgba(233,30,108,0.08)",
+  gold: "#D4A017",
+  goldLight: "#F5D060",
+  goldBg: "rgba(212,160,23,0.10)",
+  textPrimary: "#2D2D2D",
+  textSecondary: "#6B6B6B",
+  textMuted: "#A0A0A0",
+  divider: "rgba(0,0,0,0.06)",
+  danger: "#D32F2F",
+  dangerBg: "rgba(211,47,47,0.08)",
+  success: "#2E7D32",
+  successBg: "rgba(46,125,50,0.08)",
+};
+
+const sweetTheme = createTheme({
+  palette: { primary: { main: COLORS.accent }, secondary: { main: COLORS.gold } },
+  typography: { fontFamily: "'Inter', sans-serif" },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: { borderRadius: "10px", textTransform: "none", fontWeight: 600 }
+      }
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "10px",
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: COLORS.accentLight },
+          }
+        }
+      }
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          backgroundColor: COLORS.accentSoft,
+          color: COLORS.accent,
+          fontWeight: 700,
+          fontSize: "0.75rem",
+          textTransform: "uppercase",
+          letterSpacing: "1px"
+        }
+      }
+    }
+  }
 });
 
-const MotionCard = motion(Card);
-const MotionPaper = motion(Paper);
-const MotionBox = motion(Box);
+const schema = yup.object().shape({
+  nombre: yup.string().required('El nombre es obligatorio').min(2, 'Mínimo 2 caracteres'),
+  descripcion: yup.string().max(500, 'Máximo 500 caracteres').optional(),
+  estado: yup.string().oneOf(['Activo', 'Inactivo']).required('El estado es obligatorio'),
+});
 
 const Categorias = () => {
-  const theme = useTheme();
   const [categorias, setCategorias] = useState([]);
+  const [filtro, setFiltro] = useState("");
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -84,59 +91,30 @@ const Categorias = () => {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      nombre: '',
-      descripcion: '',
-      estado: 'Activo',
-    }
+    defaultValues: { nombre: '', descripcion: '', estado: 'Activo' }
   });
 
-  // Función memoizada para cargar categorías
   const cargarCategorias = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(`${API_BASE_URL}/api/categorias`);
       setCategorias(data || []);
     } catch (error) {
-      MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudieron cargar las categorías',
-        background: theme.palette.background.paper,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [theme.palette.background.paper]); // Dependencia necesaria para useCallback
+      MySwal.fire({ icon: 'error', title: 'Error', text: 'No se pudieron cargar las categorías' });
+    } finally { setLoading(false); }
+  }, []);
 
-  // useEffect corregido con la dependencia
-  useEffect(() => {
-    cargarCategorias();
-  }, [cargarCategorias]); // 👈 AHORA CON LA DEPENDENCIA CORRECTA
+  useEffect(() => { cargarCategorias(); }, [cargarCategorias]);
 
   const handleOpenModal = (categoria = null) => {
     if (categoria) {
       setEditingId(categoria.id_categoria);
-      reset({
-        nombre: categoria.nombre,
-        descripcion: categoria.descripcion || '',
-        estado: categoria.estado,
-      });
+      reset({ nombre: categoria.nombre, descripcion: categoria.descripcion || '', estado: categoria.estado });
     } else {
       setEditingId(null);
-      reset({
-        nombre: '',
-        descripcion: '',
-        estado: 'Activo',
-      });
+      reset({ nombre: '', descripcion: '', estado: 'Activo' });
     }
     setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setEditingId(null);
-    reset();
   };
 
   const onSubmit = async (data) => {
@@ -144,589 +122,216 @@ const Categorias = () => {
     try {
       if (editingId) {
         await axios.put(`${API_BASE_URL}/api/categorias/${editingId}`, data);
-        MySwal.fire({
-          icon: 'success',
-          title: '¡Actualizado!',
-          text: 'La categoría se actualizó correctamente',
-          background: theme.palette.background.paper,
-          timer: 1500,
-          showConfirmButton: false,
-        });
       } else {
         await axios.post(`${API_BASE_URL}/api/categorias`, data);
-        MySwal.fire({
-          icon: 'success',
-          title: '¡Creada!',
-          text: 'La categoría se creó correctamente',
-          background: theme.palette.background.paper,
-          timer: 1500,
-          showConfirmButton: false,
-        });
       }
-      handleCloseModal();
+      setOpenModal(false);
       cargarCategorias();
+      MySwal.fire({ icon: 'success', title: 'Éxito', text: 'Categoría guardada correctamente', timer: 1500, showConfirmButton: false });
     } catch (error) {
-      MySwal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.error || 'No se pudo guardar la categoría',
-        background: theme.palette.background.paper,
-      });
-    } finally {
-      setSubmitting(false);
-    }
+      MySwal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.error || 'Error al guardar' });
+    } finally { setSubmitting(false); }
   };
 
   const handleDelete = async (id) => {
     const result = await MySwal.fire({
-      title: '¿Desactivar categoría?',
+      title: '¿Desactivar?',
       text: 'La categoría pasará a estado inactivo',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: theme.palette.error.main,
-      cancelButtonColor: theme.palette.grey[500],
-      confirmButtonText: 'Sí, desactivar',
-      cancelButtonText: 'Cancelar',
-      background: theme.palette.background.paper,
+      confirmButtonColor: COLORS.danger,
+      confirmButtonText: 'Sí, desactivar'
     });
-
     if (result.isConfirmed) {
       try {
         await axios.delete(`${API_BASE_URL}/api/categorias/${id}`);
-        MySwal.fire({
-          icon: 'success',
-          title: '¡Desactivada!',
-          text: 'La categoría se desactivó correctamente',
-          background: theme.palette.background.paper,
-          timer: 1500,
-          showConfirmButton: false,
-        });
         cargarCategorias();
-      } catch (error) {
-        MySwal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error.response?.data?.error || 'No se pudo desactivar',
-          background: theme.palette.background.paper,
-        });
-      }
+      } catch (err) { MySwal.fire({ icon: 'error', title: 'Error' }); }
     }
   };
 
-  const stats = {
-    total: categorias.length,
-    activas: categorias.filter(c => c.estado === 'Activo').length,
-    inactivas: categorias.filter(c => c.estado === 'Inactivo').length,
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: `radial-gradient(circle, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.background.default, 1)} 100%)`,
-      }}>
-        <Stack spacing={3} alignItems="center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            <CategoryIcon sx={{ fontSize: 80, color: theme.palette.primary.main }} />
-          </motion.div>
-          <Typography variant="h5" color="text.secondary">
-            Cargando categorías...
-          </Typography>
-        </Stack>
-      </Box>
-    );
-  }
+  const categoriasFiltradas = categorias.filter(c =>
+    c.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
+    c.descripcion?.toLowerCase().includes(filtro.toLowerCase())
+  );
 
   return (
-    <Box sx={{
-      minHeight: '100vh',
-      background: `radial-gradient(circle at 0% 0%, ${alpha(theme.palette.primary.light, 0.1)} 0%, transparent 50%),
-                   radial-gradient(circle at 100% 100%, ${alpha(theme.palette.secondary.light, 0.1)} 0%, transparent 50%)`,
-      py: 6,
-    }}>
-      <Container maxWidth="xl">
-        {/* Header */}
-        <MotionBox
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          sx={{ mb: 6, textAlign: 'center' }}
-        >
-          <Badge
-            badgeContent={stats.total}
-            color="primary"
-            sx={{
-              '& .MuiBadge-badge': {
-                fontSize: '1rem',
-                minWidth: 30,
-                height: 30,
-                borderRadius: 2,
-              }
-            }}
-          >
-            <Avatar
-              sx={{
-                width: 100,
-                height: 100,
-                bgcolor: theme.palette.primary.main,
-                mb: 2,
-                mx: 'auto',
-              }}
-            >
-              <CategoryIcon sx={{ fontSize: 50 }} />
+    <ThemeProvider theme={sweetTheme}>
+      <Box sx={{ p: { xs: 2, md: 4 }, background: "#F9F9F9", minHeight: "100vh" }}>
+
+        {/* ENCABEZADO */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4, flexWrap: "wrap", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: COLORS.accentSoft, color: COLORS.accent, width: 50, height: 50, borderRadius: "14px" }}>
+              <TagOutlined style={{ fontSize: 24 }} />
             </Avatar>
-          </Badge>
-          <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
-            Categorías
-          </Typography>
-          <Typography variant="h5" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
-            Organiza tus productos en categorías para una mejor experiencia de compra
-          </Typography>
-        </MotionBox>
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: "1.5rem", color: COLORS.textPrimary }}>Gestión de Categorías</Typography>
+              <Typography sx={{ fontSize: "0.85rem", color: COLORS.textMuted }}>Organiza y clasifica tus productos</Typography>
+            </Box>
+          </Box>
 
-        {/* Stats Grid */}
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          <Grid item xs={12} md={4}>
-            <MotionCard
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              sx={{
-                borderRadius: 4,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.dark, 0.1)} 100%)`,
-                backdropFilter: 'blur(10px)',
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-              }}
-            >
-              <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <CategoryIcon sx={{ fontSize: 60, color: theme.palette.primary.main, mb: 2 }} />
-                </motion.div>
-                <Typography variant="h2" fontWeight="bold" color="primary.main">
-                  {stats.total}
-                </Typography>
-                <Typography variant="h6" color="text.secondary">
-                  Total Categorías
-                </Typography>
-              </CardContent>
-            </MotionCard>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <MotionCard
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              sx={{
-                borderRadius: 4,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.dark, 0.1)} 100%)`,
-                backdropFilter: 'blur(10px)',
-                border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
-              }}
-            >
-              <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                >
-                  <CheckCircleIcon sx={{ fontSize: 60, color: theme.palette.success.main, mb: 2 }} />
-                </motion.div>
-                <Typography variant="h2" fontWeight="bold" color="success.main">
-                  {stats.activas}
-                </Typography>
-                <Typography variant="h6" color="text.secondary">
-                  Categorías Activas
-                </Typography>
-              </CardContent>
-            </MotionCard>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <MotionCard
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              sx={{
-                borderRadius: 4,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.1)} 0%, ${alpha(theme.palette.error.dark, 0.1)} 100%)`,
-                backdropFilter: 'blur(10px)',
-                border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-              }}
-            >
-              <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                >
-                  <CancelIcon sx={{ fontSize: 60, color: theme.palette.error.main, mb: 2 }} />
-                </motion.div>
-                <Typography variant="h2" fontWeight="bold" color="error.main">
-                  {stats.inactivas}
-                </Typography>
-                <Typography variant="h6" color="text.secondary">
-                  Categorías Inactivas
-                </Typography>
-              </CardContent>
-            </MotionCard>
-          </Grid>
-        </Grid>
-
-        {/* Action Bar */}
-        <MotionPaper
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          elevation={0}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 2,
-          }}
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <InventoryIcon sx={{ color: theme.palette.primary.main }} />
-            <Typography variant="h6" fontWeight="medium">
-              Listado de Categorías
-            </Typography>
-          </Stack>
-          
           <Stack direction="row" spacing={2}>
-            <Tooltip title="Actualizar">
-              <IconButton
-                onClick={cargarCategorias}
-                sx={{
-                  bgcolor: alpha(theme.palette.info.main, 0.1),
-                  color: theme.palette.info.main,
-                  '&:hover': { bgcolor: theme.palette.info.main, color: 'white' },
-                }}
-              >
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-            
+            <Button
+              variant="outlined"
+              startIcon={<ReloadOutlined />}
+              onClick={cargarCategorias}
+              sx={{ color: COLORS.textSecondary, borderColor: COLORS.divider }}
+            >
+              Actualizar
+            </Button>
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              startIcon={<PlusOutlined />}
               onClick={() => handleOpenModal()}
-              sx={{
-                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-                boxShadow: `0 3px 15px ${alpha(theme.palette.primary.main, 0.3)}`,
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
-                },
-              }}
+              sx={{ boxShadow: `0 8px 16px ${alpha(COLORS.accent, 0.25)}` }}
             >
               Nueva Categoría
             </Button>
           </Stack>
-        </MotionPaper>
+        </Box>
 
-        {/* Categories Grid */}
-        <AnimatePresence>
-          {categorias.length === 0 ? (
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              sx={{
-                textAlign: 'center',
-                py: 12,
-                px: 4,
-                bgcolor: alpha(theme.palette.background.paper, 0.6),
-                borderRadius: 4,
-                backdropFilter: 'blur(10px)',
+        {/* ESTADÍSTICAS RÁPIDAS */}
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {[
+            { label: "Total", value: categorias.length, color: COLORS.accent },
+            { label: "Activas", value: categorias.filter(c => c.estado === 'Activo').length, color: COLORS.success },
+            { label: "Inactivas", value: categorias.filter(c => c.estado === 'Inactivo').length, color: COLORS.danger }
+          ].map((stat, i) => (
+            <Grid item xs={12} sm={4} key={i}>
+              <Paper sx={{ p: 2, borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", border: `1px solid ${COLORS.divider}` }}>
+                <Typography sx={{ fontWeight: 600, color: COLORS.textSecondary }}>{stat.label}</Typography>
+                <Typography sx={{ fontWeight: 800, fontSize: "1.5rem", color: stat.color }}>{stat.value}</Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* TABLA Y BUSCADOR */}
+        <Paper sx={{ borderRadius: "20px", overflow: "hidden", border: `1px solid ${COLORS.divider}`, boxShadow: "0 4px 20px rgba(0,0,0,0.03)" }}>
+          <Box sx={{ p: 3, borderBottom: `1px solid ${COLORS.divider}`, display: "flex", alignItems: "center" }}>
+            <TextField
+              placeholder="Buscar por nombre o descripción..."
+              size="small"
+              fullWidth
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><SearchOutlined style={{ color: COLORS.textMuted }} /></InputAdornment>,
+                sx: { background: "#fcfcfc" }
               }}
-            >
-              <TagIcon sx={{ fontSize: 80, color: theme.palette.text.disabled, mb: 3 }} />
-              <Typography variant="h4" color="text.secondary" gutterBottom>
-                No hay categorías
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                Comienza creando tu primera categoría para organizar tus productos
-              </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddIcon />}
-                onClick={() => handleOpenModal()}
-              >
-                Crear Categoría
-              </Button>
-            </MotionBox>
-          ) : (
-            <Grid container spacing={3}>
-              {categorias.map((categoria, index) => (
-                <Grid item xs={12} sm={6} md={4} key={categoria.id_categoria}>
-                  <MotionCard
-                    layout
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -50 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    sx={{
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                      position: 'relative',
-                      background: `linear-gradient(135deg, 
-                        ${alpha(theme.palette.background.paper, 0.9)} 0%, 
-                        ${alpha(theme.palette.background.paper, 0.8)} 100%)`,
-                      backdropFilter: 'blur(10px)',
-                      border: `1px solid ${alpha(
-                        categoria.estado === 'Activo' 
-                          ? theme.palette.success.main 
-                          : theme.palette.error.main,
-                        0.2
-                      )}`,
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    {/* Estado Badge */}
-                    <Box sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      zIndex: 1,
-                    }}>
-                      <Chip
-                        icon={categoria.estado === 'Activo' ? <CheckCircleIcon /> : <CancelIcon />}
-                        label={categoria.estado}
-                        size="small"
-                        color={categoria.estado === 'Activo' ? 'success' : 'error'}
-                        variant="filled"
-                        sx={{
-                          fontWeight: 'bold',
-                          boxShadow: `0 2px 8px ${alpha(
-                            categoria.estado === 'Activo' 
-                              ? theme.palette.success.main 
-                              : theme.palette.error.main,
-                            0.3
-                          )}`,
-                        }}
-                      />
-                    </Box>
+            />
+          </Box>
 
-                    <CardContent sx={{ p: 4 }}>
-                      {/* Icono */}
-                      <Box sx={{
-                        width: 70,
-                        height: 70,
-                        borderRadius: 3,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mb: 3,
-                      }}>
-                        <TagIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />
-                      </Box>
-
-                      {/* Nombre */}
-                      <Typography variant="h5" fontWeight="bold" gutterBottom>
-                        {categoria.nombre}
-                      </Typography>
-
-                      {/* Descripción */}
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary"
-                        sx={{
-                          mb: 3,
-                          minHeight: 60,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {categoria.descripcion || 'Sin descripción'}
-                      </Typography>
-
-                      {/* Acciones */}
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        <Tooltip title="Editar">
-                          <IconButton
-                            onClick={() => handleOpenModal(categoria)}
-                            sx={{
-                              bgcolor: alpha(theme.palette.warning.main, 0.1),
-                              color: theme.palette.warning.main,
-                              '&:hover': { bgcolor: theme.palette.warning.main, color: 'white' },
-                            }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        
-                        {categoria.estado === 'Activo' && (
-                          <Tooltip title="Desactivar">
-                            <IconButton
-                              onClick={() => handleDelete(categoria.id_categoria)}
-                              sx={{
-                                bgcolor: alpha(theme.palette.error.main, 0.1),
-                                color: theme.palette.error.main,
-                                '&:hover': { bgcolor: theme.palette.error.main, color: 'white' },
-                              }}
-                            >
-                              <DeleteIcon />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Categoría</TableCell>
+                  <TableCell>Descripción</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell align="center">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={4} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell></TableRow>
+                ) : categoriasFiltradas.length === 0 ? (
+                  <TableRow><TableCell colSpan={4} align="center" sx={{ py: 10 }}><Typography color="textMuted">No se encontraron resultados</Typography></TableCell></TableRow>
+                ) : (
+                  categoriasFiltradas.map((cat) => (
+                    <TableRow key={cat.id_categoria} sx={{ "&:hover": { bgcolor: "#fdfdfd" } }}>
+                      <TableCell>
+                        <Typography sx={{ fontWeight: 700, color: COLORS.textPrimary }}>{cat.nombre}</Typography>
+                        <Typography sx={{ fontSize: "0.7rem", color: COLORS.textMuted }}>ID: #{cat.id_categoria}</Typography>
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 300 }}>
+                        <Typography sx={{ fontSize: "0.85rem", color: COLORS.textSecondary, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {cat.descripcion || "Sin descripción"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={cat.estado}
+                          size="small"
+                          sx={{
+                            fontWeight: 700, fontSize: "0.65rem",
+                            bgcolor: cat.estado === 'Activo' ? COLORS.successBg : COLORS.dangerBg,
+                            color: cat.estado === 'Activo' ? COLORS.success : COLORS.danger,
+                            border: `1px solid ${cat.estado === 'Activo' ? 'rgba(46,125,50,0.2)' : 'rgba(211,47,47,0.2)'}`
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={1} justifyContent="center">
+                          <Tooltip title="Editar">
+                            <IconButton onClick={() => handleOpenModal(cat)} sx={{ color: COLORS.gold, bgcolor: COLORS.goldBg, "&:hover": { bgcolor: COLORS.goldLight, color: "white" } }}>
+                              <EditOutlined fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                        )}
-                      </Stack>
-                    </CardContent>
-                  </MotionCard>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </AnimatePresence>
+                          <Tooltip title="Desactivar">
+                            <IconButton onClick={() => handleDelete(cat.id_categoria)} sx={{ color: COLORS.danger, bgcolor: COLORS.dangerBg, "&:hover": { bgcolor: COLORS.danger, color: "white" } }}>
+                              <DeleteOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
 
-        {/* Modal de creación/edición */}
-        <Dialog
-          open={openModal}
-          onClose={handleCloseModal}
-          maxWidth="sm"
-          fullWidth
-          TransitionComponent={Zoom}
-          PaperProps={{
-            sx: {
-              borderRadius: 4,
-              bgcolor: 'background.paper',
-              backgroundImage: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.05)} 0%, ${alpha(theme.palette.secondary.light, 0.05)} 100%)`,
-            }
-          }}
-        >
-          <DialogTitle sx={{ pb: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                {editingId ? <EditIcon /> : <AddIcon />}
-              </Avatar>
-              <Box>
-                <Typography variant="h5" fontWeight="bold">
-                  {editingId ? 'Editar Categoría' : 'Nueva Categoría'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {editingId ? 'Modifica los datos de la categoría' : 'Agrega una nueva categoría'}
-                </Typography>
-              </Box>
-            </Stack>
+        {/* DIALOGO DE FORMULARIO */}
+        <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: "20px" } }}>
+          <DialogTitle sx={{ px: 3, pt: 3, display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: COLORS.accentSoft, display: "flex", alignItems: "center", justifyContent: "center", color: COLORS.accent }}>
+              {editingId ? <EditOutlined /> : <PlusOutlined />}
+            </Box>
+            <Typography sx={{ fontWeight: 800, fontSize: "1.2rem" }}>{editingId ? "Editar Categoría" : "Nueva Categoría"}</Typography>
           </DialogTitle>
-
           <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogContent>
-              <Stack spacing={3}>
+            <DialogContent sx={{ px: 3, pb: 4 }}>
+              <Stack spacing={2.5} sx={{ mt: 1 }}>
                 <TextField
+                  label="Nombre de Categoría"
                   fullWidth
-                  label="Nombre de la categoría"
                   {...register('nombre')}
                   error={!!errors.nombre}
                   helperText={errors.nombre?.message}
-                  InputProps={{
-                    startAdornment: <TagIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                    sx: { borderRadius: 2 }
-                  }}
+                  InputProps={{ startAdornment: <TagOutlined style={{ color: COLORS.textMuted, marginRight: 8 }} /> }}
                 />
-
                 <TextField
+                  label="Descripción (Opcional)"
                   fullWidth
-                  label="Descripción"
+                  multiline
+                  rows={3}
                   {...register('descripcion')}
                   error={!!errors.descripcion}
                   helperText={errors.descripcion?.message}
-                  multiline
-                  rows={3}
-                  InputProps={{
-                    startAdornment: <DescriptionIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                    sx: { borderRadius: 2 }
-                  }}
+                  InputProps={{ startAdornment: <FileTextOutlined style={{ color: COLORS.textMuted, marginRight: 8, marginTop: 4 }} /> }}
                 />
-
-                <FormControl fullWidth error={!!errors.estado}>
+                <FormControl fullWidth>
                   <InputLabel>Estado</InputLabel>
-                  <Select
-                    {...register('estado')}
-                    label="Estado"
-                    sx={{ borderRadius: 2 }}
-                  >
-                    <MenuItem value="Activo">
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <CheckCircleIcon fontSize="small" color="success" />
-                        <span>Activo</span>
-                      </Stack>
-                    </MenuItem>
-                    <MenuItem value="Inactivo">
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <CancelIcon fontSize="small" color="error" />
-                        <span>Inactivo</span>
-                      </Stack>
-                    </MenuItem>
+                  <Select {...register('estado')} label="Estado" defaultValue="Activo">
+                    <MenuItem value="Activo">Activo</MenuItem>
+                    <MenuItem value="Inactivo">Inactivo</MenuItem>
                   </Select>
-                  {errors.estado && <FormHelperText>{errors.estado.message}</FormHelperText>}
                 </FormControl>
               </Stack>
             </DialogContent>
-
-            <DialogActions sx={{ p: 3 }}>
-              <Button
-                onClick={handleCloseModal}
-                variant="outlined"
-                startIcon={<CloseIcon />}
-                sx={{ borderRadius: 2 }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={submitting}
-                startIcon={submitting ? <CircularProgress size={20} /> : <SaveIcon />}
-                sx={{
-                  borderRadius: 2,
-                  background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-                  '&:hover': { transform: 'translateY(-2px)' },
-                }}
-              >
-                {submitting ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
+            <DialogActions sx={{ p: 3, pt: 0 }}>
+              <Button onClick={() => setOpenModal(false)} sx={{ color: COLORS.textSecondary }}>Cancelar</Button>
+              <Button type="submit" variant="contained" disabled={submitting} sx={{ px: 4, borderRadius: "12px" }}>
+                {submitting ? <CircularProgress size={20} color="inherit" /> : editingId ? "Actualizar" : "Crear"}
               </Button>
             </DialogActions>
           </form>
         </Dialog>
-
-        {/* FAB para móviles */}
-        <Zoom in={categorias.length > 0}>
-          <Fab
-            color="primary"
-            aria-label="add"
-            onClick={() => handleOpenModal()}
-            sx={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              display: { xs: 'flex', md: 'none' },
-              background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-            }}
-          >
-            <AddIcon />
-          </Fab>
-        </Zoom>
-      </Container>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
 };
 

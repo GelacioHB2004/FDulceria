@@ -1,689 +1,745 @@
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
+import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Grid,
+  Box,
   Card,
   CardContent,
   Typography,
-  Button,
-  Box,
+  Grid,
   Chip,
-  LinearProgress,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  CircularProgress,
   Divider,
-  Badge,
-  useTheme,
-  alpha,
-} from "@mui/material"
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import {
-  TwoWheeler,
-  Schedule,
-  MonetizationOn,
-  Star,
-  CheckCircle,
-  DirectionsBike,
-  Assignment,
-  LocationOn,
-  Phone,
-  Email,
-} from "@mui/icons-material"
+  TrendingUp,
+  TrendingDown,
+  ShoppingBag,
+  People,
+  Inventory,
+  AttachMoney,
+  Warning,
+  Refresh,
+  ArrowUpward,
+  ArrowDownward,
+} from "@mui/icons-material";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
+import axios from "axios";
 
-// Componente para animaciones con scroll
-const ScrollReveal = ({ children, delay = 0 }) => {
-  const ref = useRef(null)
-  const isInView = useInView(ref, {
-    once: false,
-    margin: "-100px",
-    amount: 0.3,
-  })
+// ─── Paleta ────────────────────────────────────────────────────────────────
+const C = {
+  rosa: "#E91E63",
+  rosaClaro: "#FCE4EC",
+  rosaMedio: "#F48FB1",
+  dorado: "#D4A017",
+  doradoClaro: "#FFF8E1",
+  blanco: "#FFFFFF",
+  gris50: "#FAFAFA",
+  gris100: "#F5F5F5",
+  gris200: "#EEEEEE",
+  gris400: "#BDBDBD",
+  gris600: "#757575",
+  gris800: "#424242",
+  chocolate: "#4E342E",
+  verde: "#2E7D32",
+  verdeClaro: "#E8F5E9",
+  rojo: "#C62828",
+  rojoClaro: "#FFEBEE",
+  ambar: "#F59E0B",
+  ambarClaro: "#FFFBEB",
+};
 
+// ─── Datos de ejemplo para gráfica de ventas ───────────────────────────────
+const ventasData = [
+  { mes: "Ene", ventas: 4200, pedidos: 38 },
+  { mes: "Feb", ventas: 5800, pedidos: 52 },
+  { mes: "Mar", ventas: 4900, pedidos: 44 },
+  { mes: "Abr", ventas: 7100, pedidos: 63 },
+  { mes: "May", ventas: 6300, pedidos: 57 },
+  { mes: "Jun", ventas: 8900, pedidos: 81 },
+  { mes: "Jul", ventas: 7600, pedidos: 69 },
+  { mes: "Ago", ventas: 9400, pedidos: 86 },
+  { mes: "Sep", ventas: 8100, pedidos: 74 },
+  { mes: "Oct", ventas: 10200, pedidos: 93 },
+  { mes: "Nov", ventas: 11500, pedidos: 105 },
+  { mes: "Dic", ventas: 13800, pedidos: 126 },
+];
+
+// ─── Subcomponentes ─────────────────────────────────────────────────────────
+
+function StatCard({ titulo, valor, subtexto, icono, color, colorFondo, tendencia, porcentaje }) {
+  const subiendo = tendencia === "up";
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.6, delay }}
+    <Card
+      elevation={0}
+      sx={{
+        border: `1px solid ${C.gris200}`,
+        borderRadius: 3,
+        height: "100%",
+        transition: "box-shadow 0.2s",
+        "&:hover": { boxShadow: "0 4px 20px rgba(233,30,99,0.10)" },
+      }}
     >
-      {children}
-    </motion.div>
-  )
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+          <Box
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2.5,
+              backgroundColor: colorFondo,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {React.cloneElement(icono, { sx: { color, fontSize: 22 } })}
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            {subiendo ? (
+              <ArrowUpward sx={{ fontSize: 14, color: C.verde }} />
+            ) : (
+              <ArrowDownward sx={{ fontSize: 14, color: C.rojo }} />
+            )}
+            <Typography
+              variant="caption"
+              sx={{ fontWeight: 700, color: subiendo ? C.verde : C.rojo }}
+            >
+              {porcentaje}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: 800, color: C.chocolate, lineHeight: 1, mb: 0.5 }}
+        >
+          {valor}
+        </Typography>
+        <Typography variant="body2" sx={{ color: C.gris600, fontWeight: 500, mb: 0.25 }}>
+          {titulo}
+        </Typography>
+        <Typography variant="caption" sx={{ color: C.gris400 }}>
+          {subtexto}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
 }
 
-const PaginaPrincipalRepartidor = () => {
-  const theme = useTheme()
+function SeccionTitulo({ titulo, subtitulo, accion }) {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2.5 }}>
+      <Box>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: C.chocolate, lineHeight: 1.2 }}>
+          {titulo}
+        </Typography>
+        {subtitulo && (
+          <Typography variant="caption" sx={{ color: C.gris600 }}>
+            {subtitulo}
+          </Typography>
+        )}
+      </Box>
+      {accion}
+    </Box>
+  );
+}
 
-  // Datos del repartidor
-  const datosRepartidor = {
-    nombre: "Carlos Mendoza",
-    rating: 4.8,
-    entregasCompletadas: 347,
-    gananciasSemana: 12500,
-    nivel: "Elite",
-    vehiculo: "Moto Honda CB190",
-    telefono: "+52 55 1234 5678",
-    email: "carlos.mendoza@dulceria.com"
+function BadgeTendencia({ valor }) {
+  const subiendo = valor >= 0;
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.4 }}>
+      {subiendo ? (
+        <TrendingUp sx={{ fontSize: 14, color: C.verde }} />
+      ) : (
+        <TrendingDown sx={{ fontSize: 14, color: C.rojo }} />
+      )}
+      <Typography
+        variant="caption"
+        sx={{ fontWeight: 700, color: subiendo ? C.verde : C.rojo }}
+      >
+        {subiendo ? "+" : ""}{valor}%
+      </Typography>
+    </Box>
+  );
+}
+
+// ─── Componente Principal ───────────────────────────────────────────────────
+export default function DashboardAdmin() {
+  const [stats, setStats] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [alertasInventario, setAlertasInventario] = useState([]);
+  const [actividadReciente, setActividadReciente] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [, setError] = useState(null);
+  const [periodoVentas, setPeriodoVentas] = useState("mensual");
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [statsRes, prodRes, invRes, actRes] = await Promise.allSettled([
+        axios.get("https://backenddulceria.onrender.com/api/dashboard/estadisticas"),
+        axios.get("https://backenddulceria.onrender.com/api/dashboard/productos-top"),
+        axios.get("https://backenddulceria.onrender.com/api/dashboard/alertas-inventario"),
+        axios.get("https://backenddulceria.onrender.com/api/dashboard/actividad-reciente"),
+      ]);
+
+      if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
+      if (prodRes.status === "fulfilled") setProductos(prodRes.value.data);
+      if (invRes.status === "fulfilled") setAlertasInventario(invRes.value.data);
+      if (actRes.status === "fulfilled") setActividadReciente(actRes.value.data);
+    } catch (err) {
+      setError("Error al cargar los datos del panel.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // ── Valores por defecto mientras carga la API ──
+  const kpis = [
+    {
+      titulo: "Ventas Hoy",
+      valor: stats?.ventasHoy ? `$${stats.ventasHoy.toLocaleString()}` : "$0",
+      subtexto: "vs. ayer",
+      icono: <AttachMoney />,
+      color: C.rosa,
+      colorFondo: C.rosaClaro,
+      tendencia: "up",
+      porcentaje: stats?.ventasHoyPct ?? "0%",
+    },
+    {
+      titulo: "Pedidos",
+      valor: stats?.pedidosMes ?? 0,
+      subtexto: "este mes",
+      icono: <ShoppingBag />,
+      color: C.dorado,
+      colorFondo: C.doradoClaro,
+      tendencia: "up",
+      porcentaje: stats?.pedidosPct ?? "0%",
+    },
+    {
+      titulo: "Clientes",
+      valor: stats?.totalClientes ?? 0,
+      subtexto: "registrados",
+      icono: <People />,
+      color: "#1565C0",
+      colorFondo: "#E3F2FD",
+      tendencia: stats?.clientesTendencia ?? "up",
+      porcentaje: stats?.clientesPct ?? "0%",
+    },
+    {
+      titulo: "Productos",
+      valor: stats?.totalProductos ?? 0,
+      subtexto: "en catálogo",
+      icono: <Inventory />,
+      color: C.verde,
+      colorFondo: C.verdeClaro,
+      tendencia: "up",
+      porcentaje: stats?.productosPct ?? "0%",
+    },
+  ];
+
+  // ── Productos fallback ──
+  const productosTop =
+    productos.length > 0
+      ? productos
+      : [
+        { id: 1, nombre: "Gomitas de fresa", categoria: "Gomitas", ventas: 142, ingreso: 2840, tendencia: 12 },
+        { id: 2, nombre: "Paletas de tamarindo", categoria: "Paletas", ventas: 118, ingreso: 2360, tendencia: 8 },
+        { id: 3, nombre: "Chocolates surtidos", categoria: "Chocolates", ventas: 96, ingreso: 4800, tendencia: -3 },
+        { id: 4, nombre: "Mazapán", categoria: "Tradicional", ventas: 84, ingreso: 1260, tendencia: 5 },
+        { id: 5, nombre: "Alegrías", categoria: "Tradicional", ventas: 71, ingreso: 1065, tendencia: 2 },
+      ];
+
+  // ── Alertas fallback ──
+  const alertas =
+    alertasInventario.length > 0
+      ? alertasInventario
+      : [
+        { id: 1, producto: "Gomitas de fresa", stock: 8, minimo: 20, nivel: "critico" },
+        { id: 2, producto: "Paletas de mango", stock: 15, minimo: 20, nivel: "bajo" },
+        { id: 3, producto: "Chocolates con leche", stock: 5, minimo: 30, nivel: "critico" },
+        { id: 4, producto: "Caramelos de menta", stock: 18, minimo: 25, nivel: "bajo" },
+      ];
+
+  // ── Actividad fallback ──
+  const actividad =
+    actividadReciente.length > 0
+      ? actividadReciente
+      : [
+        { id: 1, tipo: "venta", descripcion: "Pedido #1042 completado", hora: "Hace 5 min", monto: "$280" },
+        { id: 2, tipo: "usuario", descripcion: "Nuevo cliente registrado", hora: "Hace 18 min", monto: null },
+        { id: 3, tipo: "inventario", descripcion: "Stock actualizado: Gomitas", hora: "Hace 1 hora", monto: null },
+        { id: 4, tipo: "venta", descripcion: "Pedido #1041 completado", hora: "Hace 2 horas", monto: "$145" },
+        { id: 5, tipo: "producto", descripcion: "Producto nuevo agregado", hora: "Hace 3 horas", monto: null },
+      ];
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 400 }}>
+        <CircularProgress sx={{ color: C.rosa }} />
+      </Box>
+    );
   }
 
-  // Pedidos activos
-  const pedidosActivos = [
-    {
-      id: "#ORD-7842",
-      cliente: "María González",
-      direccion: "Av. Reforma 123, Col. Centro",
-      total: "$450",
-      tiempoEstimado: "25 min",
-      estado: "En camino",
-      prioridad: "Alta",
-      items: ["Caja Chocolates Premium", "Mix Gomitas"]
-    },
-    {
-      id: "#ORD-7843",
-      cliente: "Roberto Sánchez",
-      direccion: "Calle Juárez 456, Col. Moderna",
-      total: "$320",
-      tiempoEstimado: "15 min",
-      estado: "Recogiendo",
-      prioridad: "Media",
-      items: ["Paletas Artesanales", "Caramelos Vintage"]
-    }
-  ]
-
-  // Estadísticas del día
-  const estadisticasDia = [
-    { 
-      titulo: "Pedidos Entregados", 
-      valor: 8, 
-      meta: 12, 
-      icono: <CheckCircle sx={{ fontSize: 30 }} />,
-      color: "#4CAF50"
-    },
-    { 
-      titulo: "Ganancias Hoy", 
-      valor: "$1,850", 
-      meta: "$2,500", 
-      icono: <MonetizationOn sx={{ fontSize: 30 }} />,
-      color: "#FF9800"
-    },
-    { 
-      titulo: "Tiempo Promedio", 
-      valor: "18 min", 
-      meta: "15 min", 
-      icono: <Schedule sx={{ fontSize: 30 }} />,
-      color: "#2196F3"
-    },
-    { 
-      titulo: "Calificación", 
-      valor: "4.9", 
-      meta: "5.0", 
-      icono: <Star sx={{ fontSize: 30 }} />,
-      color: "#FFD700"
-    }
-  ]
-
-  // Próximas entregas
-  const proximasEntregas = [
-    {
-      id: "#ORD-7844",
-      cliente: "Ana López",
-      hora: "14:30",
-      direccion: "Calle Morelos 789",
-      total: "$280",
-      preparacion: "Listo en 5 min"
-    },
-    {
-      id: "#ORD-7845",
-      cliente: "Javier Ruiz",
-      hora: "15:15",
-      direccion: "Av. Insurgentes 321",
-      total: "$520",
-      preparacion: "En preparación"
-    },
-    {
-      id: "#ORD-7846",
-      cliente: "Laura Díaz",
-      hora: "16:00",
-      direccion: "Calle Hidalgo 654",
-      total: "$390",
-      preparacion: "Listo en 10 min"
-    }
-  ]
-
-  // Logros del mes
-  const logros = [
-    { icono: "🏆", titulo: "Top Repartidor", descripcion: "Mayor número de entregas" },
-    { icono: "⚡", titulo: "Más Rápido", descripcion: "Tiempo promedio menor a 15min" },
-    { icono: "⭐", titulo: "5 Estrellas", descripcion: "Calificación perfecta semanal" },
-    { icono: "💰", titulo: "Meta Superada", descripcion: "+20% en ganancias" }
-  ]
-
   return (
-    <Box sx={{ 
-      bgcolor: theme.palette.background.default, 
-      minHeight: "100vh", 
-      overflow: "hidden",
-      background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.05)} 0%, ${alpha(theme.palette.secondary.light, 0.05)} 100%)`
-    }}>
-      {/* Hero Section - Dashboard Principal */}
+    <Box sx={{ flexGrow: 1, width: "100%", overflowX: "hidden", backgroundColor: C.gris50, minHeight: "100vh", p: { xs: 2, md: 4 } }}>
+
+      {/* ── Encabezado ── */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: C.chocolate }}>
+            Panel de Administrador
+          </Typography>
+          <Typography variant="body2" sx={{ color: C.gris600, mt: 0.25 }}>
+            Resumen general de tu dulceria
+          </Typography>
+        </Box>
+        <Tooltip title="Actualizar datos">
+          <IconButton
+            onClick={fetchData}
+            sx={{
+              border: `1px solid ${C.gris200}`,
+              borderRadius: 2,
+              backgroundColor: C.blanco,
+              "&:hover": { backgroundColor: C.rosaClaro, borderColor: C.rosa },
+            }}
+          >
+            <Refresh sx={{ color: C.rosa, fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      {/* ── Linea decorativa ── */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-          color: "white",
-          py: { xs: 6, md: 8 },
-          position: "relative",
-          overflow: "hidden",
+          height: 3,
+          borderRadius: 99,
+          background: `linear-gradient(90deg, ${C.rosa} 0%, ${C.dorado} 100%)`,
+          mb: 4,
+          width: 80,
         }}
-      >
-        <Container maxWidth="lg">
-          <ScrollReveal>
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8 }}
-            >
-              <Grid container spacing={4} alignItems="center">
-                <Grid item xs={12} md={8}>
-                  <Typography
-                    variant="h3"
-                    component="h1"
-                    gutterBottom
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: { xs: "2rem", md: "3rem" },
-                      textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    ¡Hola, {datosRepartidor.nombre}! 🚀
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 3,
-                      fontSize: { xs: "1rem", md: "1.3rem" },
-                      fontWeight: 300,
-                      opacity: 0.9,
-                    }}
-                  >
-                    Controla tus entregas y maximiza tus ganancias
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={<DirectionsBike />}
-                        sx={{
-                          bgcolor: "white",
-                          color: theme.palette.primary.main,
-                          px: 4,
-                          py: 1.5,
-                          fontSize: "1rem",
-                          fontWeight: 600,
-                          borderRadius: 3,
-                          "&:hover": { bgcolor: "#f5f5f5" },
-                        }}
-                      >
-                        Iniciar Jornada
-                      </Button>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button
-                        variant="outlined"
-                        size="large"
-                        startIcon={<Assignment />}
-                        sx={{
-                          borderColor: "white",
-                          color: "white",
-                          px: 4,
-                          py: 1.5,
-                          fontSize: "1rem",
-                          fontWeight: 600,
-                          borderRadius: 3,
-                          "&:hover": { borderColor: "white", bgcolor: "rgba(255,255,255,0.1)" },
-                        }}
-                      >
-                        Ver Estadísticas
-                      </Button>
-                    </motion.div>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <motion.div
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.8 }}
-                  >
-                    <Card sx={{ borderRadius: 3, overflow: 'hidden', bgcolor: 'rgba(255,255,255,0.95)' }}>
-                      <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                        <Avatar 
-                          sx={{ 
-                            width: 80, 
-                            height: 80, 
-                            mx: 'auto', 
-                            mb: 2,
-                            bgcolor: theme.palette.primary.main 
-                          }}
-                        >
-                          <TwoWheeler sx={{ fontSize: 40 }} />
-                        </Avatar>
-                        <Typography variant="h6" color="text.primary" gutterBottom>
-                          {datosRepartidor.nivel} Repartidor
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-                          <Star sx={{ color: '#FFD700', mr: 0.5 }} />
-                          <Typography variant="h6" color="text.primary">
-                            {datosRepartidor.rating}
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {datosRepartidor.entregasCompletadas} entregas
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </Grid>
-              </Grid>
-            </motion.div>
-          </ScrollReveal>
-        </Container>
+      />
 
-        {/* Elementos decorativos */}
-        <motion.div
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 5, 0],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            top: "20%",
-            left: "5%",
-            fontSize: "2.5rem",
-          }}
-        >
-          🛵
-        </motion.div>
-        <motion.div
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -5, 0],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-          style={{
-            position: "absolute",
-            bottom: "20%",
-            right: "5%",
-            fontSize: "2.5rem",
-          }}
-        >
-          📦
-        </motion.div>
-      </Box>
+      {/* ── Tarjetas KPI ── */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {kpis.map((kpi, i) => (
+          <Grid item xs={12} sm={6} md={3} key={i}>
+            <StatCard {...kpi} />
+          </Grid>
+        ))}
+      </Grid>
 
-      {/* Estadísticas del Día */}
-      <Container maxWidth="lg" sx={{ py: 6, mt: -4 }}>
-        <Grid container spacing={3}>
-          {estadisticasDia.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <ScrollReveal delay={index * 0.1}>
-                <motion.div whileHover={{ scale: 1.05, y: -5 }} whileTap={{ scale: 0.95 }}>
-                  <Card sx={{ 
-                    borderRadius: 3, 
-                    overflow: 'hidden',
-                    boxShadow: theme.shadows[4],
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: theme.shadows[8],
-                    }
-                  }}>
-                    <CardContent sx={{ p: 3 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Box sx={{ 
-                          color: stat.color, 
-                          mr: 2,
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}>
-                          {stat.icono}
-                        </Box>
-                        <Typography variant="h6" component="h3" fontWeight={600}>
-                          {stat.titulo}
-                        </Typography>
-                      </Box>
-                      <Typography variant="h4" component="div" fontWeight={700} sx={{ mb: 1 }}>
-                        {stat.valor}
-                      </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={(stat.valor / (typeof stat.meta === 'string' ? 100 : stat.meta)) * 100} 
-                        sx={{ 
-                          height: 8, 
-                          borderRadius: 4,
-                          bgcolor: alpha(stat.color, 0.2),
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: stat.color,
-                          }
+      {/* ── Gráfica de ventas + Actividad reciente ── */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Gráfica */}
+        <Grid item xs={12} md={8} lg={8}>
+          <Card
+            elevation={0}
+            sx={{ border: `1px solid ${C.gris200}`, borderRadius: 3, height: "100%" }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <SeccionTitulo
+                titulo="Ventas del Año"
+                subtitulo="Ingresos mensuales en pesos"
+                accion={
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    {["mensual", "semanal"].map((p) => (
+                      <Chip
+                        key={p}
+                        label={p.charAt(0).toUpperCase() + p.slice(1)}
+                        size="small"
+                        onClick={() => setPeriodoVentas(p)}
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: 11,
+                          backgroundColor: periodoVentas === p ? C.rosaClaro : C.gris100,
+                          color: periodoVentas === p ? C.rosa : C.gris600,
+                          border: periodoVentas === p ? `1px solid ${C.rosaMedio}` : "1px solid transparent",
+                          cursor: "pointer",
+                          "&:hover": { backgroundColor: C.rosaClaro },
                         }}
                       />
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Meta: {stat.meta}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </ScrollReveal>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      {/* Pedidos Activos y Próximas Entregas */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Grid container spacing={4}>
-          {/* Pedidos Activos */}
-          <Grid item xs={12} lg={8}>
-            <ScrollReveal>
-              <Typography variant="h4" component="h2" gutterBottom fontWeight={700} sx={{ mb: 3 }}>
-                🚀 Pedidos Activos
-              </Typography>
-            </ScrollReveal>
-
-            <Grid container spacing={3}>
-              {pedidosActivos.map((pedido, index) => (
-                <Grid item xs={12} key={index}>
-                  <ScrollReveal delay={index * 0.15}>
-                    <motion.div whileHover={{ y: -5 }} transition={{ duration: 0.3 }}>
-                      <Card sx={{ 
-                        borderRadius: 3,
-                        boxShadow: theme.shadows[3],
-                        transition: 'all 0.3s ease',
-                        border: pedido.prioridad === 'Alta' ? `2px solid ${theme.palette.error.main}` : '2px solid transparent',
-                        '&:hover': {
-                          boxShadow: theme.shadows[6],
-                        }
-                      }}>
-                        <CardContent sx={{ p: 3 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                            <Box>
-                              <Typography variant="h6" fontWeight={600} gutterBottom>
-                                {pedido.id} - {pedido.cliente}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <LocationOn sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                                <Typography variant="body2" color="text.secondary">
-                                  {pedido.direccion}
-                                </Typography>
-                              </Box>
-                              <Typography variant="body2" color="text.secondary">
-                                {pedido.items.join(', ')}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ textAlign: 'right' }}>
-                              <Chip 
-                                label={pedido.estado} 
-                                color={pedido.estado === 'En camino' ? 'success' : 'warning'}
-                                size="small"
-                                sx={{ mb: 1 }}
-                              />
-                              <Typography variant="h6" color="primary" fontWeight={700}>
-                                {pedido.total}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {pedido.tiempoEstimado}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                            <Button 
-                              variant="contained" 
-                              size="small"
-                              startIcon={<CheckCircle />}
-                              sx={{ borderRadius: 2 }}
-                            >
-                              Entregado
-                            </Button>
-                            <Button 
-                              variant="outlined" 
-                              size="small"
-                              startIcon={<Phone />}
-                              sx={{ borderRadius: 2 }}
-                            >
-                              Llamar
-                            </Button>
-                            <Button 
-                              variant="outlined" 
-                              size="small"
-                              startIcon={<LocationOn />}
-                              sx={{ borderRadius: 2 }}
-                            >
-                              Ruta
-                            </Button>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </ScrollReveal>
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-
-          {/* Próximas Entregas */}
-          <Grid item xs={12} lg={4}>
-            <ScrollReveal delay={0.2}>
-              <Typography variant="h4" component="h2" gutterBottom fontWeight={700} sx={{ mb: 3 }}>
-                📋 Próximas Entregas
-              </Typography>
-            </ScrollReveal>
-
-            <Card sx={{ borderRadius: 3, boxShadow: theme.shadows[3] }}>
-              <CardContent sx={{ p: 0 }}>
-                <List>
-                  {proximasEntregas.map((entrega, index) => (
-                    <motion.div key={index} whileHover={{ backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>
-                      <ListItem sx={{ py: 2 }}>
-                        <ListItemIcon>
-                          <Badge color="primary" badgeContent={index + 1}>
-                            <Schedule color="primary" />
-                          </Badge>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              {entrega.id}
-                            </Typography>
-                          }
-                          secondary={
-                            <Box>
-                              <Typography variant="body2" color="text.primary">
-                                {entrega.cliente}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {entrega.direccion}
-                              </Typography>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                <Typography variant="body2" fontWeight={600} color="primary">
-                                  {entrega.total}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  {entrega.hora}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                      {index < proximasEntregas.length - 1 && <Divider />}
-                    </motion.div>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* Logros y Reconocimientos */}
-      <Box sx={{ bgcolor: 'white', py: 8 }}>
-        <Container maxWidth="lg">
-          <ScrollReveal>
-            <Typography variant="h3" component="h2" gutterBottom fontWeight={700} sx={{ textAlign: 'center', mb: 6 }}>
-              🏆 Tus Logros
-            </Typography>
-          </ScrollReveal>
-
-          <Grid container spacing={4}>
-            {logros.map((logro, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <ScrollReveal delay={index * 0.1}>
-                  <motion.div whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0] }} transition={{ duration: 0.3 }}>
-                    <Card sx={{ 
-                      textAlign: 'center', 
-                      p: 3, 
-                      borderRadius: 3,
-                      boxShadow: theme.shadows[4],
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        boxShadow: theme.shadows[8],
-                      }
-                    }}>
-                      <motion.div
-                        animate={{
-                          scale: [1, 1.1, 1],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "easeInOut",
-                        }}
-                      >
-                        <Typography variant="h2" sx={{ mb: 2 }}>
-                          {logro.icono}
-                        </Typography>
-                      </motion.div>
-                      <Typography variant="h6" component="h3" gutterBottom fontWeight={600}>
-                        {logro.titulo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {logro.descripcion}
-                      </Typography>
-                    </Card>
-                  </motion.div>
-                </ScrollReveal>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Información del Repartidor */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <ScrollReveal>
-          <Card sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: theme.shadows[4] }}>
-            <CardContent sx={{ p: 4 }}>
-              <Grid container spacing={4} alignItems="center">
-                <Grid item xs={12} md={8}>
-                  <Typography variant="h4" component="h2" gutterBottom fontWeight={700}>
-                    Información del Repartidor
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <TwoWheeler sx={{ mr: 2, color: 'primary.main' }} />
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Vehículo
-                          </Typography>
-                          <Typography variant="body1" fontWeight={600}>
-                            {datosRepartidor.vehiculo}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Phone sx={{ mr: 2, color: 'primary.main' }} />
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Teléfono
-                          </Typography>
-                          <Typography variant="body1" fontWeight={600}>
-                            {datosRepartidor.telefono}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Email sx={{ mr: 2, color: 'primary.main' }} />
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Email
-                          </Typography>
-                          <Typography variant="body1" fontWeight={600}>
-                            {datosRepartidor.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <MonetizationOn sx={{ mr: 2, color: 'primary.main' }} />
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            Ganancias Semana
-                          </Typography>
-                          <Typography variant="body1" fontWeight={600} color="success.main">
-                            ${datosRepartidor.gananciasSemana.toLocaleString()}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Avatar 
-                        sx={{ 
-                          width: 120, 
-                          height: 120, 
-                          mx: 'auto', 
-                          mb: 2,
-                          bgcolor: theme.palette.primary.main,
-                          fontSize: '3rem'
-                        }}
-                      >
-                        🚀
-                      </Avatar>
-                      <Typography variant="h6" color="primary" fontWeight={700}>
-                        Nivel {datosRepartidor.nivel}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ¡Sigue así!
-                      </Typography>
-                    </Box>
-                  </motion.div>
-                </Grid>
-              </Grid>
+                    ))}
+                  </Box>
+                }
+              />
+              <ResponsiveContainer width="100%" height={240}>
+                <AreaChart data={ventasData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gradVentas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={C.rosa} stopOpacity={0.15} />
+                      <stop offset="95%" stopColor={C.rosa} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.gris200} vertical={false} />
+                  <XAxis
+                    dataKey="mes"
+                    tick={{ fontSize: 11, fill: C.gris600 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: C.gris600 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: `1px solid ${C.gris200}`,
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+                      fontSize: 12,
+                    }}
+                    formatter={(val) => [`$${val.toLocaleString()}`, "Ventas"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="ventas"
+                    stroke={C.rosa}
+                    strokeWidth={2.5}
+                    fill="url(#gradVentas)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: C.rosa }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
-        </ScrollReveal>
-      </Container>
-    </Box>
-  )
-}
+        </Grid>
 
-export default PaginaPrincipalRepartidor;
+        {/* Actividad reciente */}
+        <Grid item xs={12} md={4} lg={4}>
+          <Card
+            elevation={0}
+            sx={{ border: `1px solid ${C.gris200}`, borderRadius: 3, height: "100%" }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <SeccionTitulo titulo="Actividad Reciente" />
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {actividad.map((item, idx) => {
+                  const colores = {
+                    venta: { bg: C.rosaClaro, color: C.rosa },
+                    usuario: { bg: "#E3F2FD", color: "#1565C0" },
+                    inventario: { bg: C.doradoClaro, color: C.dorado },
+                    producto: { bg: C.verdeClaro, color: C.verde },
+                  };
+                  const estilo = colores[item.tipo] || colores.venta;
+                  return (
+                    <Box key={item.id}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <Box
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 2,
+                            backgroundColor: estilo.bg,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              backgroundColor: estilo.color,
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 600, color: C.chocolate, lineHeight: 1.3, fontSize: 12.5 }}
+                            noWrap
+                          >
+                            {item.descripcion}
+                          </Typography>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Typography variant="caption" sx={{ color: C.gris400 }}>
+                              {item.hora}
+                            </Typography>
+                            {item.monto && (
+                              <Typography variant="caption" sx={{ fontWeight: 700, color: C.rosa }}>
+                                {item.monto}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </Box>
+                      {idx < actividad.length - 1 && (
+                        <Divider sx={{ mt: 1.5, borderColor: C.gris100 }} />
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* ── Productos top + Alertas de inventario ── */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Productos más vendidos */}
+        <Grid item xs={12} md={7} lg={7}>
+          <Card
+            elevation={0}
+            sx={{ border: `1px solid ${C.gris200}`, borderRadius: 3 }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <SeccionTitulo titulo="Productos Más Vendidos" subtitulo="Top 5 este mes" />
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    {["Producto", "Categoría", "Ventas", "Ingreso", "Tendencia"].map((h) => (
+                      <TableCell
+                        key={h}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: 11,
+                          color: C.gris600,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          borderBottom: `2px solid ${C.gris200}`,
+                          pb: 1,
+                        }}
+                      >
+                        {h}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {productosTop.map((prod, idx) => (
+                    <TableRow
+                      key={prod.id}
+                      sx={{
+                        "&:hover": { backgroundColor: C.gris50 },
+                        "& td": { borderBottom: `1px solid ${C.gris100}` },
+                      }}
+                    >
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1.5,
+                              backgroundColor: idx === 0 ? C.doradoClaro : C.gris100,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontSize: 11,
+                                fontWeight: 800,
+                                color: idx === 0 ? C.dorado : C.gris400,
+                              }}
+                            >
+                              {idx + 1}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: C.chocolate }}>
+                            {prod.nombre}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={prod.categoria}
+                          size="small"
+                          sx={{
+                            fontSize: 10,
+                            fontWeight: 600,
+                            backgroundColor: C.rosaClaro,
+                            color: C.rosa,
+                            height: 20,
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: C.chocolate }}>
+                          {prod.ventas}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: C.rosa }}>
+                          ${prod.ingreso.toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <BadgeTendencia valor={prod.tendencia} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Alertas de inventario */}
+        <Grid item xs={12} md={5} lg={5}>
+          <Card
+            elevation={0}
+            sx={{ border: `1px solid ${C.gris200}`, borderRadius: 3, height: "100%" }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <SeccionTitulo
+                titulo="Alertas de Inventario"
+                subtitulo="Productos con stock bajo"
+                accion={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      backgroundColor: C.rojoClaro,
+                      borderRadius: 99,
+                      px: 1.5,
+                      py: 0.4,
+                    }}
+                  >
+                    <Warning sx={{ fontSize: 13, color: C.rojo }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: C.rojo }}>
+                      {alertas.length} alertas
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {alertas.map((alerta, idx) => {
+                  const critico = alerta.nivel === "critico";
+                  const porcentaje = Math.round((alerta.stock / alerta.minimo) * 100);
+                  return (
+                    <Box key={alerta.id}>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 2,
+                          backgroundColor: critico ? C.rojoClaro : C.ambarClaro,
+                          border: `1px solid ${critico ? "#FFCDD2" : "#FDE68A"}`,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.8 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: C.chocolate, fontSize: 12.5 }}>
+                            {alerta.producto}
+                          </Typography>
+                          <Chip
+                            label={critico ? "Critico" : "Bajo"}
+                            size="small"
+                            sx={{
+                              fontSize: 9,
+                              fontWeight: 800,
+                              height: 18,
+                              backgroundColor: critico ? C.rojo : C.ambar,
+                              color: C.blanco,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.04em",
+                            }}
+                          />
+                        </Box>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
+                          <Typography variant="caption" sx={{ color: C.gris600 }}>
+                            Stock actual: <strong>{alerta.stock}</strong>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: C.gris600 }}>
+                            Minimo: <strong>{alerta.minimo}</strong>
+                          </Typography>
+                        </Box>
+                        {/* Barra de progreso manual */}
+                        <Box sx={{ height: 5, borderRadius: 99, backgroundColor: C.gris200, overflow: "hidden" }}>
+                          <Box
+                            sx={{
+                              height: "100%",
+                              width: `${Math.min(porcentaje, 100)}%`,
+                              borderRadius: 99,
+                              backgroundColor: critico ? C.rojo : C.ambar,
+                              transition: "width 0.6s ease",
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* ── Gráfica de pedidos por mes ── */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12}>
+          <Card
+            elevation={0}
+            sx={{ border: `1px solid ${C.gris200}`, borderRadius: 3 }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <SeccionTitulo titulo="Pedidos por Mes" subtitulo="Cantidad de ordenes procesadas" />
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={ventasData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.gris200} vertical={false} />
+                  <XAxis
+                    dataKey="mes"
+                    tick={{ fontSize: 11, fill: C.gris600 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: C.gris600 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      borderRadius: 10,
+                      border: `1px solid ${C.gris200}`,
+                      fontSize: 12,
+                    }}
+                    formatter={(val) => [val, "Pedidos"]}
+                  />
+                  <Bar
+                    dataKey="pedidos"
+                    fill={C.rosaClaro}
+                    stroke={C.rosa}
+                    strokeWidth={1.5}
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+}

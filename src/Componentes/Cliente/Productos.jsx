@@ -9,7 +9,6 @@ import {
   SearchOutlined,
   TagOutlined,
   DollarOutlined,
-  AppstoreOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
 import {

@@ -1,18 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  DownloadOutlined,
   UploadOutlined,
   FileExcelOutlined,
   FileTextOutlined,
-  CheckCircleOutlined,
   EyeOutlined,
   ReloadOutlined,
-  ExportOutlined,
   ImportOutlined,
   DatabaseOutlined,
-  FilterOutlined,
   SaveOutlined,
-  PlusOutlined,
   ClearOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
@@ -20,9 +15,9 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import {
   Box, Button, Typography, Paper, Checkbox, Table, TableBody, TableCell, TableHead, TableRow,
-  Select, MenuItem, Stack, CircularProgress, Chip, IconButton, Tooltip, Avatar, Divider,
-  Alert, AlertTitle, Grid, FormControl, InputLabel, LinearProgress, Fade, Badge, TableContainer,
-  useMediaQuery, Container
+  Select, MenuItem, Stack, CircularProgress, Chip, IconButton, Avatar, Divider,
+  Grid, FormControl, InputLabel, LinearProgress, TableContainer,
+  Container
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -68,8 +63,7 @@ const ExportacionImportacion = () => {
   const [selectAll, setSelectAll] = useState(false);
 
   const token = localStorage.getItem("token");
-  const isMobile = useMediaQuery("(max-width:600px)");
-  const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
+  const axiosConfig = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
 
   const obtenerDatos = useCallback(async () => {
     try {
@@ -81,7 +75,7 @@ const ExportacionImportacion = () => {
     } catch (error) {
       MySwal.fire({ icon: "error", title: "Error", text: "No se pudieron cargar los datos", confirmButtonColor: COLORS.accent });
     } finally { setLoading(false); }
-  }, [tabla]);
+  }, [tabla, axiosConfig]);
 
   useEffect(() => { obtenerDatos(); setPreview([]); setArchivo(null); }, [tabla, obtenerDatos]);
 

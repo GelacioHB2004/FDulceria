@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
-  Database, Clock, Play, Download, Trash2, Settings,
+  Database, Clock, Download, Trash2, Settings,
   CheckCircle2, XCircle, AlertCircle, RefreshCw, Calendar,
-  HardDrive, Server, Plus, MoreHorizontal, Search, Filter, Pause
+  HardDrive, Server, Plus, MoreHorizontal, Search
 } from "lucide-react";
 
 // ─── Configuración ──────────────────────────────────────────────────────────
@@ -164,38 +164,38 @@ export default function RespaldoBD() {
   // Form nueva/editar tarea
   const [formTarea, setFormTarea] = useState({ id: null, nombre: "", base_datos: "dulceria_angelitos", tipo: "completo", frecuencia: "diario", hora: "02:00" });
 
+  const cargarHistorial = useCallback(async () => {
+    try {
+      const resp = await axios.get(`${API}/api/respaldo_bd/historial`);
+      setRespaldos(resp.data);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const cargarTareas = useCallback(async () => {
+    try {
+      const resp = await axios.get(`${API}/api/respaldo_bd/configuracion`);
+      setTareas(resp.data);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const cargarLogs = useCallback(async () => {
+    try {
+      const resp = await axios.get(`${API}/api/respaldo_bd/logs`);
+      setLogs(resp.data);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const cargarDatos = useCallback(() => {
+    cargarHistorial();
+    cargarTareas();
+    cargarLogs();
+  }, [cargarHistorial, cargarTareas, cargarLogs]);
+
   useEffect(() => {
     cargarDatos();
     const interval = setInterval(cargarDatos, 12000); 
     return () => clearInterval(interval);
-  }, []);
-
-  const cargarDatos = () => {
-    cargarHistorial();
-    cargarTareas();
-    cargarLogs();
-  };
-
-  const cargarHistorial = async () => {
-    try {
-      const resp = await axios.get(`${API}/api/respaldo_bd/historial`);
-      setRespaldos(resp.data);
-    } catch (err) {}
-  };
-
-  const cargarTareas = async () => {
-    try {
-      const resp = await axios.get(`${API}/api/respaldo_bd/configuracion`);
-      setTareas(resp.data);
-    } catch (err) {}
-  };
-
-  const cargarLogs = async () => {
-    try {
-      const resp = await axios.get(`${API}/api/respaldo_bd/logs`);
-      setLogs(resp.data);
-    } catch (err) {}
-  };
+  }, [cargarDatos]);
 
   const showToast = (msg, tipo = "success") => {
     setToast({ msg, tipo });
@@ -343,6 +343,12 @@ export default function RespaldoBD() {
                 <Search size={16} style={{ position: "absolute", left: 12, top: 12, color: "#aaa" }} />
                 <Inp style={{ paddingLeft: 36 }} placeholder="Buscar archivos por nombre..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
               </div>
+              <Sel style={{ width: 140 }} value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
+                <option value="todos">Todos los estados</option>
+                <option value="completado">Completados</option>
+                <option value="error">Errores</option>
+                <option value="en_progreso">En progreso</option>
+              </Sel>
               <Btn variant="outline" onClick={cargarHistorial}><RefreshCw size={16} /></Btn>
             </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Typography,
   Container,
@@ -33,17 +33,7 @@ const CarritoCompras = () => {
   const [loading, setLoading] = useState(true);
   const [direccion, setDireccion] = useState('');
 
-  useEffect(() => {
-    cargarCarrito();
-  }, []);
-
-  const cargarCarrito = () => {
-    const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
-    setCarrito(carritoStorage);
-    validarCarrito(carritoStorage);
-  };
-
-  const validarCarrito = async (items) => {
+  const validarCarrito = useCallback(async (items) => {
     if (items.length === 0) {
       setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
       setLoading(false);
@@ -67,7 +57,23 @@ const CarritoCompras = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const cargarCarrito = useCallback(() => {
+    try {
+      const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
+      setCarrito(carritoStorage);
+      validarCarrito(carritoStorage);
+    } catch (e) {
+      console.error("Error al leer el carrito del storage", e);
+      setCarrito([]);
+      setLoading(false);
+    }
+  }, [validarCarrito]);
+
+  useEffect(() => {
+    cargarCarrito();
+  }, [cargarCarrito]);
 
   const eliminarProducto = (id_producto) => {
     const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];

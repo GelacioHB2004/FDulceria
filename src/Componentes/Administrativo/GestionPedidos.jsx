@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { 
-  Container, Typography, Card, CardContent, Table, 
-  TableBody, TableCell, TableContainer, TableHead, 
-  TableRow, Paper, Button, Chip, Select, MenuItem, 
+import {
+  Container, Typography, Card, Table,
+  TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Paper, Button, Chip, Select, MenuItem,
   Dialog, DialogTitle, DialogContent, DialogActions,
   FormControl, InputLabel, Box
 } from "@mui/material";
@@ -14,11 +14,11 @@ const API_BASE_URL = "http://localhost:3000";
 const GestionPedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [repartidores, setRepartidores] = useState([]);
-  
+
   // Para el modal de detalles
   const [modalOpen, setModalOpen] = useState(false);
   const [pedidoActivo, setPedidoActivo] = useState(null);
-  
+
   // Para la edicion en el modal
   const [selectedRepartidor, setSelectedRepartidor] = useState("");
   const [selectedEstado, setSelectedEstado] = useState("");
@@ -119,8 +119,8 @@ const GestionPedidos = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      <b>Ped:</b> {p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'N/A'}<br/>
-                      <b>Env:</b> {p.fecha_envio ? new Date(p.fecha_envio).toLocaleDateString() : 'Pend.'}<br/>
+                      <b>Ped:</b> {p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'N/A'}<br />
+                      <b>Env:</b> {p.fecha_envio ? new Date(p.fecha_envio).toLocaleDateString() : 'Pend.'}<br />
                       <b>Ent:</b> {p.fecha_entrega ? new Date(p.fecha_entrega).toLocaleDateString() : 'Pend.'}
                     </Typography>
                   </TableCell>
@@ -185,7 +185,7 @@ const GestionPedidos = () => {
               </Table>
 
               <Typography variant="subtitle2" color="secondary" gutterBottom>🚚 Despacho y Logística</Typography>
-              
+
               <FormControl fullWidth sx={{ mb: 2, mt: 1 }}>
                 <InputLabel>Repartidor Asignado</InputLabel>
                 <Select

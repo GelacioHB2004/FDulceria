@@ -27,6 +27,17 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Componente de Búsqueda Simple
  * Barra de búsqueda con autocompletado y sugerencias
  */
+// Sugerencias de ejemplo (en producción vendrían del backend)
+const ALL_SUGGESTIONS = [
+  'Chocolates',
+  'Gomitas',
+  'Paletas',
+  'Caramelos',
+  'Dulces Mexicanos',
+  'Trufas',
+  'Bombones'
+];
+
 const BusquedaSimple = ({ 
   onSearch, 
   placeholder = "Buscar productos...",
@@ -43,21 +54,11 @@ const BusquedaSimple = ({
   const inputRef = useRef(null);
   const searchBoxRef = useRef(null);
 
-  // Sugerencias de ejemplo (en producción vendrían del backend)
-  const allSuggestions = [
-    'Chocolates',
-    'Gomitas',
-    'Paletas',
-    'Caramelos',
-    'Dulces Mexicanos',
-    'Trufas',
-    'Bombones'
-  ];
 
   // Función para filtrar sugerencias
   const filterSuggestions = useCallback((term) => {
     if (term.trim().length > 0) {
-      const filtered = allSuggestions.filter(item =>
+      const filtered = ALL_SUGGESTIONS.filter(item =>
         item.toLowerCase().includes(term.toLowerCase())
       );
       setSuggestions(filtered);
@@ -66,7 +67,7 @@ const BusquedaSimple = ({
       setSuggestions([]);
       setShowSuggestions(false);
     }
-  }, [allSuggestions]); // Added allSuggestions as a dependency
+  }, []);
 
   // Filtrar sugerencias basadas en el término de búsqueda
   useEffect(() => {

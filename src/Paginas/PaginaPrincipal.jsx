@@ -11,26 +11,19 @@ import {
   Chip,
   IconButton,
   Avatar,
-  Fade,
-  Grow,
-  ScaleBlur,
   Skeleton,
   Paper
 } from "@mui/material";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   StarFilled,
   HeartOutlined,
-  HeartFilled,
   ArrowRightOutlined,
   SafetyCertificateOutlined,
   CarOutlined,
   GiftOutlined,
   TeamOutlined,
   TrophyOutlined,
-  EnvironmentOutlined,
-  MailOutlined,
-  PhoneOutlined,
   WhatsAppOutlined,
   FacebookOutlined,
   InstagramOutlined
@@ -39,7 +32,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const MotionBox = motion(Box);
-const MotionTypography = motion(Typography);
 const MotionCard = motion(Card);
 
 const COLORS = {

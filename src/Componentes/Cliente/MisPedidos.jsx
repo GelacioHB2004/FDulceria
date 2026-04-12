@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
-  Container, Typography, Card, CardContent, Grid,
-  Chip, Avatar, Divider, Box, Button, Tabs, Tab,
+  Container, Typography, Avatar, Box, Button,
   Skeleton, IconButton, Tooltip, Paper
 } from "@mui/material";
 import {
-  ShoppingOutlined,
   CarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -16,8 +14,7 @@ import {
   UserOutlined,
   CreditCardOutlined,
   InboxOutlined,
-  ReloadOutlined,
-  RightOutlined
+  ReloadOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 

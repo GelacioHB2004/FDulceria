@@ -51,7 +51,7 @@ const DetalleProducto = () => {
 
   const obtenerDetalle = useCallback(async () => {
     try {
-      const res = await axios.get(`https://backenddulceria.onrender.com/api/productos/catalogo/detalle/${id}`);
+      const res = await axios.get(`http://localhost:3000/api/productos/catalogo/detalle/${id}`);
       setProducto(res.data);
     } catch (error) {
       console.error("Error al obtener detalle", error);

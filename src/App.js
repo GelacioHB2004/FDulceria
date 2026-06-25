@@ -24,6 +24,8 @@ import CarritoComprasPublico from './Componentes/Publico/CarritoCompras.jsx';
 
 //Rutas Repartidor
 import PerfilRepartidor from './Componentes/Repartidor/PerfilRepartidor.jsx';
+import ListaPedidosRepartidor from './Componentes/Repartidor/ListaPedidos.jsx';
+import HistorialEntregasRepartidor from './Componentes/Repartidor/HistorialEntregas.jsx';
 
 //Rutas Cliente
 import PerfilUsuario from './Componentes/Cliente/PerfilUsuario.jsx';
@@ -120,6 +122,8 @@ const App = () => {
               {/* Rutas repartidor */}
               <Route path="/repartidor" element={<PaginaPrincipalRepartidor />} />
               <Route path="/repartidor/perfilusuario" element={<PerfilRepartidor />} />
+              <Route path="/repartidor/entregas" element={<ListaPedidosRepartidor />} />
+              <Route path="/repartidor/historial" element={<HistorialEntregasRepartidor />} />
 
               {/* Rutas de error */}
               <Route path="/error500" element={<Error500 />} />

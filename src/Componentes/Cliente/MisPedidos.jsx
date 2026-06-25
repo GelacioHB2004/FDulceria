@@ -1,518 +1,200 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
-  Container, Typography, Avatar, Box, Button,
-  Skeleton, IconButton, Tooltip, Paper
+  Container, Typography, Box, Button,
+  Skeleton, IconButton, Stepper, Step, StepLabel, StepConnector,
+  stepConnectorClasses, styled, Fade, alpha, Stack, Card, Divider, Chip
 } from "@mui/material";
 import {
   CarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
-  GiftOutlined,
-  EnvironmentOutlined,
-  UserOutlined,
-  CreditCardOutlined,
   InboxOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  CreditCardOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+const API_BASE_URL = "http://localhost:3000";
 
-// Paleta minimalista
 const COLORES = {
-  primario: '#1a1a1a',
+  primario: '#d4a373',
   secundario: '#6b7280',
-  acento: '#e91e63',
-  acentoSuave: '#fdf2f8',
-  exito: '#10b981',
-  exitoSuave: '#ecfdf5',
-  advertencia: '#f59e0b',
-  advertenciaSuave: '#fffbeb',
-  error: '#ef4444',
-  errorSuave: '#fef2f2',
-  info: '#3b82f6',
-  infoSuave: '#eff6ff',
+  exito: '#4CAF50',
+  info: '#2196f3',
   borde: '#e5e7eb',
-  fondo: '#fafafa',
-  blanco: '#ffffff'
+  fondo: '#fefaf6',
+  white: '#ffffff'
 };
+
+const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: { top: 22 },
+  [`&.${stepConnectorClasses.active}`]: { [`& .${stepConnectorClasses.line}`]: { backgroundColor: COLORES.primario } },
+  [`&.${stepConnectorClasses.completed}`]: { [`& .${stepConnectorClasses.line}`]: { backgroundColor: COLORES.primario } },
+  [`& .${stepConnectorClasses.line}`]: { height: 3, border: 0, backgroundColor: '#eaeaf0', borderRadius: 1 },
+}));
+
+const ColorlibStepIconRoot = styled('div')(({ theme, ownerState }) => ({
+  backgroundColor: '#ccc', zIndex: 1, color: '#fff', width: 50, height: 50, display: 'flex',
+  borderRadius: '50%', justifyContent: 'center', alignItems: 'center',
+  ...(ownerState.active && { backgroundColor: COLORES.primario, boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)' }),
+  ...(ownerState.completed && { backgroundColor: COLORES.primario }),
+}));
+
+function ColorlibStepIcon(props) {
+  const { active, completed, className, icon } = props;
+  const icons = {
+    1: <CreditCardOutlined />,
+    2: <CarOutlined className={active ? "anim-truck" : ""} />,
+    3: <CheckCircleOutlined />,
+  };
+  return (
+    <ColorlibStepIconRoot ownerState={{ completed, active }} className={className}>
+      {icons[String(icon)]}
+    </ColorlibStepIconRoot>
+  );
+}
 
 const MisPedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [tabActual, setTabActual] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    cargarHistorial();
-  }, []);
-
-  const cargarHistorial = async () => {
-    setCargando(true);
+  const cargarHistorial = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-
       const res = await axios.get(`${API_BASE_URL}/api/mispedidos/historial`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPedidos(res.data);
-    } catch (error) {
-      console.error("Error al obtener el historial", error);
-    } finally {
-      setCargando(false);
-    }
-  };
+    } catch (error) { console.error(error); } 
+    finally { setCargando(false); }
+  }, []);
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return "Pendiente";
-    return new Date(fecha).toLocaleDateString("es-MX", {
-      year: "numeric", month: "short", day: "numeric"
-    });
+  useEffect(() => {
+    cargarHistorial();
+    const interval = setInterval(cargarHistorial, 30000);
+    return () => clearInterval(interval);
+  }, [cargarHistorial]);
+
+  const getStepIndex = (estado) => {
+    switch (estado) {
+      case 'Confirmado': return 0;
+      case 'En camino': return 1;
+      case 'Entregado': return 2;
+      default: return 0;
+    }
   };
 
   const getStatusConfig = (estado) => {
     const configs = {
-      'Pendiente': {
-        icon: <ClockCircleOutlined />,
-        label: 'Pendiente',
-        bgColor: COLORES.advertenciaSuave,
-        color: COLORES.advertencia
-      },
-      'Confirmado': {
-        icon: <CheckCircleOutlined />,
-        label: 'Confirmado',
-        bgColor: COLORES.infoSuave,
-        color: COLORES.info
-      },
-      'En_preparacion': {
-        icon: <GiftOutlined />,
-        label: 'Preparando',
-        bgColor: COLORES.acentoSuave,
-        color: COLORES.acento
-      },
-      'En_camino': {
-        icon: <CarOutlined />,
-        label: 'En Camino',
-        bgColor: COLORES.infoSuave,
-        color: COLORES.info
-      },
-      'Entregado': {
-        icon: <CheckCircleOutlined />,
-        label: 'Entregado',
-        bgColor: COLORES.exitoSuave,
-        color: COLORES.exito
-      },
-      'Cancelado': {
-        icon: <CloseCircleOutlined />,
-        label: 'Cancelado',
-        bgColor: COLORES.errorSuave,
-        color: COLORES.error
-      }
+      'Confirmado': { label: 'Pagado', color: COLORES.info, icon: <CheckCircleOutlined /> },
+      'En camino': { label: '¡En camino!', color: COLORES.primario, icon: <CarOutlined /> },
+      'Entregado': { label: 'Entregado', color: COLORES.exito, icon: <CheckCircleOutlined /> },
+      'Cancelado': { label: 'Cancelado', color: '#f44336', icon: <CloseCircleOutlined /> }
     };
-    return configs[estado] || {
-      icon: <ClockCircleOutlined />,
-      label: estado,
-      bgColor: COLORES.fondo,
-      color: COLORES.secundario
-    };
+    return configs[estado] || { label: estado, color: COLORES.secundario, icon: <ClockCircleOutlined /> };
   };
 
-  const renderSkeleton = () => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[1, 2, 3].map(i => (
-        <Box key={i} sx={{ p: 3, bgcolor: COLORES.blanco, borderRadius: 2, border: `1px solid ${COLORES.borde}` }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-            <Skeleton variant="text" width={100} height={28} />
-            <Skeleton variant="rounded" width={90} height={28} />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Skeleton variant="rounded" width={56} height={56} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="60%" height={20} />
-              <Skeleton variant="text" width="40%" height={16} />
-            </Box>
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
-
-  const pedidosFiltrados = pedidos.filter(p => {
-    if (tabActual === 0) {
-      return p.estado !== 'Entregado' && p.estado !== 'Cancelado';
-    } else {
-      return p.estado === 'Entregado' || p.estado === 'Cancelado';
-    }
-  });
-
-  const contadorActivos = pedidos.filter(p => p.estado !== 'Entregado' && p.estado !== 'Cancelado').length;
-  const contadorCompletados = pedidos.filter(p => p.estado === 'Entregado' || p.estado === 'Cancelado').length;
+  const steps = ['Pagado', 'En camino', '¡Entregado!'];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: COLORES.fondo }}>
-      {/* Header minimalista */}
-      <Box sx={{ bgcolor: COLORES.blanco, borderBottom: `1px solid ${COLORES.borde}` }}>
-        <Container maxWidth="md" sx={{ py: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 700,
-                  color: COLORES.primario,
-                  letterSpacing: '-0.02em',
-                  mb: 0.5
-                }}
-              >
-                Mis Pedidos
-              </Typography>
-              <Typography variant="body2" sx={{ color: COLORES.secundario }}>
-                {pedidos.length} {pedidos.length === 1 ? 'pedido' : 'pedidos'} en total
-              </Typography>
-            </Box>
-            <Tooltip title="Actualizar">
-              <IconButton
-                onClick={cargarHistorial}
-                sx={{
-                  bgcolor: COLORES.fondo,
-                  border: `1px solid ${COLORES.borde}`,
-                  '&:hover': { bgcolor: COLORES.borde }
-                }}
-              >
-                <ReloadOutlined style={{ fontSize: 18, color: COLORES.primario }} spin={cargando} />
-              </IconButton>
-            </Tooltip>
+    <Box sx={{ minHeight: '100vh', bgcolor: COLORES.fondo, pb: 10 }}>
+        <style>{`
+          @keyframes moveTruck { 0% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 100% { transform: translateX(-3px); } }
+          .anim-truck { animation: moveTruck 1s infinite ease-in-out; }
+        `}</style>
+      
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <Box>
+            <Typography variant="h3" fontWeight="800" sx={{ color: COLORES.primario, mb: 1 }}>Mis Pedidos</Typography>
+            <Typography variant="body1" color="textSecondary">Rastrea tus dulces en tiempo real</Typography>
           </Box>
-        </Container>
-      </Box>
-
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        {/* Tabs minimalistas */}
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            mb: 4,
-            p: 0.5,
-            bgcolor: COLORES.blanco,
-            borderRadius: 2,
-            border: `1px solid ${COLORES.borde}`
-          }}
-        >
-          <Button
-            fullWidth
-            onClick={() => setTabActual(0)}
-            sx={{
-              py: 1.5,
-              borderRadius: 1.5,
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              bgcolor: tabActual === 0 ? COLORES.primario : 'transparent',
-              color: tabActual === 0 ? COLORES.blanco : COLORES.secundario,
-              '&:hover': {
-                bgcolor: tabActual === 0 ? COLORES.primario : COLORES.fondo
-              }
-            }}
-          >
-            En Curso
-            {contadorActivos > 0 && (
-              <Box
-                component="span"
-                sx={{
-                  ml: 1,
-                  px: 1,
-                  py: 0.25,
-                  borderRadius: 1,
-                  fontSize: '0.75rem',
-                  bgcolor: tabActual === 0 ? 'rgba(255,255,255,0.2)' : COLORES.acento,
-                  color: tabActual === 0 ? COLORES.blanco : COLORES.blanco
-                }}
-              >
-                {contadorActivos}
-              </Box>
-            )}
-          </Button>
-          <Button
-            fullWidth
-            onClick={() => setTabActual(1)}
-            sx={{
-              py: 1.5,
-              borderRadius: 1.5,
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              bgcolor: tabActual === 1 ? COLORES.primario : 'transparent',
-              color: tabActual === 1 ? COLORES.blanco : COLORES.secundario,
-              '&:hover': {
-                bgcolor: tabActual === 1 ? COLORES.primario : COLORES.fondo
-              }
-            }}
-          >
-            Historial
-            {contadorCompletados > 0 && (
-              <Box
-                component="span"
-                sx={{
-                  ml: 1,
-                  px: 1,
-                  py: 0.25,
-                  borderRadius: 1,
-                  fontSize: '0.75rem',
-                  bgcolor: tabActual === 1 ? 'rgba(255,255,255,0.2)' : COLORES.fondo,
-                  color: tabActual === 1 ? COLORES.blanco : COLORES.secundario
-                }}
-              >
-                {contadorCompletados}
-              </Box>
-            )}
-          </Button>
+          <IconButton onClick={() => { setCargando(true); cargarHistorial(); }} sx={{ bgcolor: 'white', boxShadow: 1 }}>
+            <ReloadOutlined spin={cargando} />
+          </IconButton>
         </Box>
 
-        {/* Contenido */}
-        {cargando ? renderSkeleton() : (
-          pedidosFiltrados.length === 0 ? (
-            <Box
-              sx={{
-                py: 8,
-                textAlign: 'center',
-                bgcolor: COLORES.blanco,
-                borderRadius: 3,
-                border: `1px solid ${COLORES.borde}`
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: COLORES.fondo,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3
-                }}
-              >
-                <InboxOutlined style={{ fontSize: 32, color: COLORES.secundario }} />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: COLORES.primario, mb: 1 }}>
-                {tabActual === 0 ? "Sin pedidos activos" : "Sin historial"}
-              </Typography>
-              <Typography variant="body2" sx={{ color: COLORES.secundario, mb: 3, maxWidth: 300, mx: 'auto' }}>
-                {tabActual === 0
-                  ? "Cuando realices un pedido aparecera aqui"
-                  : "Tus pedidos completados se mostraran aqui"}
-              </Typography>
-              {tabActual === 0 && (
-                <Button
-                  variant="contained"
-                  onClick={() => navigate('/cliente/productos')}
-                  sx={{
-                    bgcolor: COLORES.primario,
-                    color: COLORES.blanco,
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    boxShadow: 'none',
-                    '&:hover': {
-                      bgcolor: '#333',
-                      boxShadow: 'none'
-                    }
-                  }}
-                >
-                  Explorar Productos
-                </Button>
-              )}
+        {cargando ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><Skeleton variant="rounded" width="100%" height={200} /></Box>
+        ) : (
+          pedidos.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 10 }}>
+              <InboxOutlined style={{ fontSize: 60, color: '#ccc' }} />
+              <Typography variant="h6" sx={{ mt: 2 }}>No tienes pedidos aún</Typography>
+              <Button onClick={() => navigate('/cliente/productos')} sx={{ mt: 2, color: COLORES.primario }}>Ir a la tienda</Button>
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {pedidosFiltrados.map(p => {
-                const statusConfig = getStatusConfig(p.estado);
+            <Stack spacing={4}>
+              {pedidos.map(p => {
+                const stepIdx = getStepIndex(p.estado);
+                const config = getStatusConfig(p.estado);
 
                 return (
-                  <Paper
-                    key={p.id_pedido}
-                    elevation={0}
-                    sx={{
-                      borderRadius: 3,
-                      overflow: 'hidden',
-                      border: `1px solid ${COLORES.borde}`,
-                      bgcolor: COLORES.blanco,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        borderColor: COLORES.acento,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
-                      }
-                    }}
-                  >
-                    {/* Header del pedido */}
-                    <Box sx={{ p: 3, borderBottom: `1px solid ${COLORES.borde}` }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Box>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: COLORES.secundario,
-                              fontWeight: 500,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.05em'
-                            }}
-                          >
-                            Pedido
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: COLORES.primario }}>
-                            #{String(p.id_pedido).padStart(5, '0')}
-                          </Typography>
+                  <Fade in key={p.id_pedido}>
+                    <Card elevation={0} sx={{ borderRadius: 5, border: '1px solid #eee', overflow: 'hidden', bgcolor: 'white' }}>
+                      <Box sx={{ p: 4 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
+                          <Box>
+                            <Typography variant="caption" fontWeight="bold" color="textSecondary">ORDEN #{p.id_pedido}</Typography>
+                            <Typography variant="h6" fontWeight="bold">{new Date(p.fecha_creacion).toLocaleDateString()}</Typography>
+                          </Box>
+                          <Chip 
+                            icon={config.icon} 
+                            label={config.label} 
+                            sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 'bold', p: 1 }} 
+                          />
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Typography variant="body2" sx={{ color: COLORES.secundario }}>
-                            {formatearFecha(p.fecha_creacion)}
-                          </Typography>
-                          <Box
-                            sx={{
-                              px: 2,
-                              py: 0.75,
-                              borderRadius: 2,
-                              bgcolor: statusConfig.bgColor,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.75
-                            }}
-                          >
-                            <Box sx={{ color: statusConfig.color, display: 'flex', fontSize: 14 }}>
-                              {statusConfig.icon}
+
+                        {p.estado !== 'Cancelado' && (
+                          <Box sx={{ mb: 4, mt: 2 }}>
+                            <Stepper alternativeLabel activeStep={stepIdx} connector={<ColorlibConnector />}>
+                              {steps.map((label) => (
+                                <Step key={label}>
+                                  <StepLabel StepIconComponent={ColorlibStepIcon} sx={{ '& .MuiStepLabel-label': { fontWeight: 'bold', fontSize: '0.75rem' } }}>
+                                    {label}
+                                  </StepLabel>
+                                </Step>
+                              ))}
+                            </Stepper>
+                          </Box>
+                        )}
+
+                        <Divider sx={{ my: 3 }} />
+
+                        <Stack spacing={2}>
+                          {p.detalles?.slice(0, 2).map(d => (
+                            <Box key={d.id_producto} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Typography variant="body2">{d.cantidad}x {d.producto_nombre}</Typography>
+                              <Typography variant="body2" fontWeight="bold">${d.subtotal}</Typography>
                             </Box>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: 600,
-                                color: statusConfig.color,
-                                letterSpacing: '0.02em'
-                              }}
-                            >
-                              {statusConfig.label}
-                            </Typography>
+                          ))}
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2, borderTop: '1px dashed #eee' }}>
+                            <Typography variant="h6" fontWeight="bold">Total Pagado</Typography>
+                            <Typography variant="h5" fontWeight="900" color={COLORES.exito}>${p.total}</Typography>
                           </Box>
-                        </Box>
+                        </Stack>
                       </Box>
-                    </Box>
-
-                    {/* Productos */}
-                    <Box sx={{ p: 3 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {p.detalles && p.detalles.slice(0, 3).map(d => (
-                          <Box
-                            key={d.id_detallepedido || Math.random()}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2
-                            }}
-                          >
-                            <Avatar
-                              src={d.imagen || ''}
-                              alt={d.producto_nombre}
-                              variant="rounded"
-                              sx={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: 2,
-                                bgcolor: COLORES.fondo
-                              }}
-                            >
-                              <GiftOutlined style={{ color: COLORES.secundario }} />
-                            </Avatar>
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontWeight: 600,
-                                  color: COLORES.primario,
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis'
-                                }}
-                              >
-                                {d.producto_nombre}
-                              </Typography>
-                              <Typography variant="caption" sx={{ color: COLORES.secundario }}>
-                                {d.cantidad} x ${d.precio_unitario}
-                              </Typography>
-                            </Box>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600, color: COLORES.primario }}
-                            >
-                              ${d.subtotal}
+                      
+                      <Box sx={{ bgcolor: alpha(COLORES.primario, 0.03), p: 2, px: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CarOutlined style={{ color: COLORES.secundario }} />
+                            <Typography variant="caption" color="textSecondary">{p.direccion_entrega}</Typography>
+                         </Box>
+                         {p.estado === 'En camino' && (
+                            <Typography variant="caption" sx={{ color: COLORES.info, fontWeight: 'bold' }}>
+                               🚚 ¡Tu pedido ya salió a entrega!
                             </Typography>
-                          </Box>
-                        ))}
-
-                        {p.detalles && p.detalles.length > 3 && (
-                          <Typography variant="caption" sx={{ color: COLORES.secundario, pl: 9 }}>
-                            +{p.detalles.length - 3} productos mas
-                          </Typography>
-                        )}
+                         )}
                       </Box>
-                    </Box>
-
-                    {/* Footer con info adicional */}
-                    <Box
-                      sx={{
-                        px: 3,
-                        py: 2.5,
-                        bgcolor: COLORES.fondo,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', gap: 4 }}>
-                        {p.direccion_entrega && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <EnvironmentOutlined style={{ fontSize: 14, color: COLORES.secundario }} />
-                            <Typography variant="caption" sx={{ color: COLORES.secundario, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {p.direccion_entrega}
-                            </Typography>
-                          </Box>
-                        )}
-                        {p.nombre_repartidor && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <UserOutlined style={{ fontSize: 14, color: COLORES.secundario }} />
-                            <Typography variant="caption" sx={{ color: COLORES.secundario }}>
-                              {p.nombre_repartidor}
-                            </Typography>
-                          </Box>
-                        )}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CreditCardOutlined style={{ fontSize: 14, color: COLORES.secundario }} />
-                          <Typography variant="caption" sx={{ color: COLORES.secundario }}>
-                            {p.metodo_pago || 'Efectivo'}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography variant="caption" sx={{ color: COLORES.secundario }}>
-                            Total
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: COLORES.exito, lineHeight: 1 }}>
-                            ${p.total}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Paper>
+                    </Card>
+                  </Fade>
                 );
               })}
-            </Box>
+            </Stack>
           )
         )}
       </Container>

@@ -12,7 +12,7 @@ import {
   Fade,
   Skeleton,
   TextField,
-  InputAdornment
+  Stack
 } from '@mui/material';
 import {
   DeleteOutlined,
@@ -44,7 +44,7 @@ const CarritoCompras = () => {
         id_producto: it.id_producto,
         cantidad: it.cantidad
       }));
-      const resp = await axios.post('https://backenddulceria.onrender.com/api/carrito/validar', { carrito: itemsReducidos });
+      const resp = await axios.post('http://localhost:3000/api/carrito/validar', { carrito: itemsReducidos });
       setCarrito(resp.data.items);
       setTotales({
         subtotal: resp.data.subtotal,
@@ -108,34 +108,28 @@ const CarritoCompras = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const itemsReducidos = carrito.map(it => ({
-        id_producto: it.id_producto,
-        cantidad: it.cantidad
-      }));
 
-      const res = await axios.post('https://backenddulceria.onrender.com/api/carrito/checkout', {
-        carrito: itemsReducidos,
-        direccion_entrega: direccion,
-        notas: ''
+      // Ya no llamamos a /checkout aquí. Vamos directo a crear la preferencia de Mercado Pago.
+      // Así cumplimos con tu requisito de que no se registre nada hasta que el pago sea exitoso.
+      const respMP = await axios.post('http://localhost:3000/api/mercadopago/crear-preferencia', {
+        items: carrito,
+        direccion_entrega: direccion
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      Swal.fire({
-        icon: 'success',
-        title: '¡Compra Exitosa!',
-        text: `Tu pedido ha sido creado. Folio: ${res.data.numero_pedido}`,
-        confirmButtonColor: '#d4a373'
-      });
-
+      // Limpiamos el carrito local para que el usuario sienta que su orden ya está en proceso
       localStorage.removeItem('carrito');
       setCarrito([]);
       setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
       setDireccion('');
       window.dispatchEvent(new Event('carritoActualizado'));
 
+      // Redirigir inmediatamente a Mercado Pago
+      window.location.href = respMP.data.init_point;
+
     } catch (error) {
-      const msg = error.response?.data?.error || 'No se pudo procesar la compra';
+      const msg = error.response?.data?.details || error.response?.data?.error || 'No se pudo iniciar el proceso de pago';
       Swal.fire('Error', msg, 'error');
     }
   };
@@ -152,6 +146,38 @@ const CarritoCompras = () => {
     success: '#7cb57c',
     error: '#e57373',
     white: '#FFFFFF'
+  };
+
+  // Lógica para obtener ubicación actual por GPS
+  const obtenerUbicacion = () => {
+    if (!navigator.geolocation) {
+      return Swal.fire('Error', 'Tu navegador no soporta geolocalización', 'error');
+    }
+
+    Swal.fire({
+      title: 'Obteniendo tu ubicación...',
+      text: 'Por favor permite el acceso al GPS para detectar tu domicilio.',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = response.data;
+        if (data && data.display_name) {
+          setDireccion(data.display_name);
+          Swal.fire({ title: '¡Ubicación detectada!', icon: 'success', timer: 2000, showConfirmButton: false });
+        } else { throw new Error(); }
+      } catch (error) {
+        Swal.fire('Error', 'No pudimos obtener la dirección exacta. Por favor escríbela manualmente.', 'error');
+      }
+    }, (error) => {
+      let msg = 'Ocurrió un error al obtener la ubicación.';
+      if (error.code === 1) msg = 'Por favor activa los permisos de ubicación en tu navegador.';
+      Swal.fire('Atención', msg, 'info');
+    });
   };
 
   if (loading) {
@@ -483,22 +509,30 @@ const CarritoCompras = () => {
                   </Box>
 
                   <Box sx={{ mt: 3, mb: 3 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text, mb: 1 }}>
-                      Direccion de Entrega
-                    </Typography>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: colors.text }}>
+                        Dirección de Entrega
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        startIcon={<CompassOutlined />}
+                        onClick={obtenerUbicacion}
+                        sx={{ textTransform: 'none', color: colors.primary, fontSize: '0.75rem', fontWeight: 600 }}
+                      >
+                        Detectar ubicación
+                      </Button>
+                    </Stack>
                     <TextField
                       fullWidth
-                      placeholder="Calle, numero, colonia..."
+                      multiline
+                      rows={2}
+                      placeholder="Calle, número, colonia, referencias..."
                       size="small"
                       value={direccion}
                       onChange={(e) => setDireccion(e.target.value)}
                       InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CompassOutlined style={{ color: colors.primary }} />
-                          </InputAdornment>
-                        ),
-                        sx: { borderRadius: 2, fontSize: '0.9rem' }
+                        sx: { borderRadius: 3, fontSize: '0.9rem', bgcolor: colors.white }
                       }}
                     />
                   </Box>

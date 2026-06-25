@@ -3,7 +3,6 @@ import {
   LogoutOutlined,
   HomeOutlined,
   ShopOutlined,
-  ApartmentOutlined,
   UserOutlined,
   MenuOutlined,
   CloseOutlined,
@@ -115,22 +114,13 @@ const EncabezadoRepartidor = () => {
         navigate('/repartidor');
         break;
       case "altapropiedades":
-        navigate('/repartidor/hoteles');
-        break;
-      case "tiposhabitaciones":
-        navigate('/repartidor/tiposhabitaciones');
-        break;
-      case "ConexionMP":
-        navigate('/repartidor/conexionmp');
+        navigate('/repartidor/entregas');
         break;
       case "GestionReservas":
-        navigate('/repartidor/gestionreservas');
+        navigate('/repartidor/historial');
         break;
       case "Reportes":
         navigate('/repartidor/reportes');
-        break;
-      case "Promociones":
-        navigate('/repartidor/promociones');
         break;
       case "MiPerfil":
         navigate('/repartidor/perfilusuario');
@@ -155,21 +145,10 @@ const EncabezadoRepartidor = () => {
       label: "Pedidos",
       icon: <ShopOutlined />,
       submenu: [
-        { key: "altapropiedades", label: "Entregas" },
-        { key: "tiposhabitaciones", label: "Rutas" },
-        { key: "ConexionMP", label: "Mercado Pago" },
+        { key: "altapropiedades", label: "Ver Mis Entregas" },
+        { key: "GestionReservas", label: "Historial Realizado" },
       ],
     },
-    {
-      key: "gestion",
-      label: "Gestión",
-      icon: <ShopOutlined />,
-      submenu: [
-        { key: "GestionReservas", label: "Rutas" },
-        { key: "Reportes", label: "Generar Reporte" },
-      ],
-    },
-    { key: "Promociones", label: "Promociones", icon: <ApartmentOutlined /> },
     { key: "MiPerfil", label: "Perfil", icon: <UserOutlined /> },
     { key: "cerrarSesion", label: "Cerrar Sesión", icon: <LogoutOutlined /> },
   ];

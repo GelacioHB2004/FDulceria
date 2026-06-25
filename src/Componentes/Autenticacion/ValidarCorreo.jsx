@@ -5,7 +5,7 @@ import {
   Container, Card, CardContent, TextField, Button, Typography, Box,
   CircularProgress, Alert, InputAdornment
 } from '@mui/material';
-import { Email, ArrowForward, ArrowBack, LockReset, CheckCircle } from '@mui/icons-material';
+import { Email, ArrowBack, LockReset, CheckCircle } from '@mui/icons-material';
 
 function ValidarCorreo() {
   const navigate = useNavigate();

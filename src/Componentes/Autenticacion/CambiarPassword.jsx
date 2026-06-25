@@ -6,10 +6,7 @@ import {
   Container, Card, CardContent, TextField, Button, Typography, Box,
   CircularProgress, Alert, InputAdornment, IconButton
 } from '@mui/material';
-import {
-  LockOutline as LockIcon, Visibility, VisibilityOff, CheckCircle,
-  VpnKey as KeyIcon
-} from '@mui/icons-material';
+import { Visibility, VisibilityOff, VpnKey as KeyIcon } from '@mui/icons-material';
 
 function CambiarPassword() {
   const navigate = useNavigate();

@@ -5,7 +5,7 @@ import {
   Container, Card, CardContent, TextField, Button, Typography, Box,
   CircularProgress, Alert
 } from '@mui/material';
-import { ArrowForward, ArrowBack, LockOutlined, CheckCircle } from '@mui/icons-material';
+import { ArrowBack, LockOutlined, CheckCircle } from '@mui/icons-material';
 
 function ValidarCodigo() {
   const navigate = useNavigate();

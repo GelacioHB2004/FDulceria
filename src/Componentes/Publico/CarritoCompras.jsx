@@ -24,6 +24,8 @@ import {
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+const API_BASE_URL = "https://backenddulceria.onrender.com";
+
 const CarritoCompras = () => {
   const [carrito, setCarrito] = useState([]);
   const [totales, setTotales] = useState({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
@@ -40,7 +42,7 @@ const CarritoCompras = () => {
         id_producto: it.id_producto,
         cantidad: it.cantidad
       }));
-      const resp = await axios.post('https://backenddulceria.onrender.com/api/carrito/validar', { carrito: itemsReducidos });
+      const resp = await axios.post(`${API_BASE_URL}/api/carrito/validar`, { carrito: itemsReducidos });
       setCarrito(resp.data.items);
       setTotales({
         subtotal: resp.data.subtotal,
@@ -292,16 +294,28 @@ const CarritoCompras = () => {
                         >
                           {item.nombre}
                         </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 700,
-                            color: colors.primary,
-                            mb: 1.5
-                          }}
-                        >
-                          ${(item.precio || 0).toFixed(2)}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              color: item.tienesPromo ? '#FF4D4F' : colors.primary
+                            }}
+                          >
+                            ${(item.precio || 0).toFixed(2)}
+                          </Typography>
+                          {item.tienesPromo && (
+                            <Typography
+                              sx={{
+                                textDecoration: 'line-through',
+                                color: colors.textLight,
+                                fontSize: '0.9rem'
+                              }}
+                            >
+                              ${parseFloat(item.precioOriginal).toFixed(2)}
+                            </Typography>
+                          )}
+                        </Box>
 
                         {/* Controles de cantidad */}
                         <Box

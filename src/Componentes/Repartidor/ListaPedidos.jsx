@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-    Box, Typography, Grid, Card, CardContent, Button, Stack, 
+import {
+    Box, Typography, Grid, Card, CardContent, Button, Stack,
     Chip, Divider, Dialog, DialogTitle, DialogContent,
     DialogActions, TextField, Alert, CircularProgress, alpha, Container, Avatar,
     Paper
 } from '@mui/material';
-import { 
-    MapOutlined as MapIcon, 
-    CheckCircleOutlined as SuccessIcon, 
+import {
+    MapOutlined as MapIcon,
+    CheckCircleOutlined as SuccessIcon,
     WarningOutlined as IncidentIcon,
     PhoneOutlined as PhoneIcon,
     LocationOnOutlined as LocationIcon,
@@ -19,7 +19,7 @@ import {
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 const ListaPedidos = () => {
     const [pedidos, setPedidos] = useState([]);
@@ -119,7 +119,7 @@ const ListaPedidos = () => {
                         <Stack direction="row" spacing={2} alignItems="center">
                             <Avatar sx={{ bgcolor: '#D4A017' }}><MoneyIcon /></Avatar>
                             <Box>
-                                <Typography variant="h4" fontWeight="bold" color="#9C7B16">${(stats.dinero_entregado || 0).toFixed(2)}</Typography>
+                                <Typography variant="h4" fontWeight="bold" color="#9C7B16">${Number(stats.dinero_entregado || 0).toFixed(2)}</Typography>
                                 <Typography variant="body2" color="text.secondary">Dinero total gestionado hoy</Typography>
                             </Box>
                         </Stack>
@@ -139,9 +139,9 @@ const ListaPedidos = () => {
                         <Grid item xs={12} key={p.id_pedido}>
                             <Card sx={{ borderRadius: 4, border: '1px solid #EDEDED', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'visible' }}>
                                 {p.estado === 'En camino' && (
-                                    <Chip 
-                                        label="En Camino" 
-                                        color="primary" 
+                                    <Chip
+                                        label="En Camino"
+                                        color="primary"
                                         sx={{ position: 'absolute', top: -10, left: 20, fontWeight: 'bold', boxShadow: 3 }}
                                     />
                                 )}
@@ -151,7 +151,7 @@ const ListaPedidos = () => {
                                             <Typography variant="h5" fontWeight="bold" color="primary" sx={{ mb: 2 }}>
                                                 Pedido #{p.id_pedido}
                                             </Typography>
-                                            
+
                                             <Stack spacing={2}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                     <Avatar sx={{ bgcolor: alpha('#D4A017', 0.1), color: '#D4A017' }}><PersonIcon /></Avatar>
@@ -170,9 +170,9 @@ const ListaPedidos = () => {
                                                 </Box>
 
                                                 {/* LLAMADA RÁPIDA */}
-                                                <Button 
+                                                <Button
                                                     href={`tel:${p.telefono_cliente}`}
-                                                    variant="outlined" 
+                                                    variant="outlined"
                                                     size="small"
                                                     startIcon={<PhoneIcon />}
                                                     sx={{ alignSelf: 'flex-start', borderRadius: 2, textTransform: 'none' }}
@@ -182,7 +182,7 @@ const ListaPedidos = () => {
                                             </Stack>
 
                                             <Divider sx={{ my: 3 }} />
-                                            
+
                                             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>Detalles del Pedido:</Typography>
                                             <Box sx={{ bgcolor: '#F8F9FA', p: 2, borderRadius: 2 }}>
                                                 {p.detalles.map((d, i) => (
@@ -197,7 +197,7 @@ const ListaPedidos = () => {
                                         <Grid item xs={12} md={4}>
                                             <Stack spacing={2} sx={{ height: '100%', justifyContent: 'center' }}>
                                                 {p.estado === 'Confirmado' ? (
-                                                    <Button 
+                                                    <Button
                                                         fullWidth variant="contained" size="large"
                                                         startIcon={<DeliveryIcon />}
                                                         onClick={() => handleAction(p.id_pedido, 'iniciar')}
@@ -206,7 +206,7 @@ const ListaPedidos = () => {
                                                         Iniciar Entrega
                                                     </Button>
                                                 ) : (
-                                                    <Button 
+                                                    <Button
                                                         fullWidth variant="contained" size="large"
                                                         startIcon={<SuccessIcon />}
                                                         onClick={() => handleAction(p.id_pedido, 'entregar')}
@@ -215,8 +215,8 @@ const ListaPedidos = () => {
                                                         Confirmar Entrega
                                                     </Button>
                                                 )}
-                                                
-                                                <Button 
+
+                                                <Button
                                                     fullWidth variant="outlined" size="large"
                                                     startIcon={<MapIcon />}
                                                     onClick={() => abrirMapa(p.direccion_entrega)}
@@ -225,7 +225,7 @@ const ListaPedidos = () => {
                                                     Ver Ruta GPS
                                                 </Button>
 
-                                                <Button 
+                                                <Button
                                                     fullWidth variant="text" color="error"
                                                     startIcon={<IncidentIcon />}
                                                     onClick={() => { setIdPedidoIncidencia(p.id_pedido); setOpenIncidencia(true); }}
@@ -259,8 +259,8 @@ const ListaPedidos = () => {
                 </DialogContent>
                 <DialogActions sx={{ p: 3 }}>
                     <Button onClick={() => setOpenIncidencia(false)}>Cancelar</Button>
-                    <Button 
-                        variant="contained" color="error" 
+                    <Button
+                        variant="contained" color="error"
                         onClick={handleReportarIncidencia}
                         disabled={!descripcionIncidencia.trim()}
                         sx={{ borderRadius: 2 }}

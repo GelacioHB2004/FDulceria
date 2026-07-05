@@ -16,7 +16,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 const COLORES = {
   primario: '#d4a373',
@@ -69,7 +69,7 @@ const MisPedidos = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPedidos(res.data);
-    } catch (error) { console.error(error); } 
+    } catch (error) { console.error(error); }
     finally { setCargando(false); }
   }, []);
 
@@ -102,11 +102,11 @@ const MisPedidos = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: COLORES.fondo, pb: 10 }}>
-        <style>{`
+      <style>{`
           @keyframes moveTruck { 0% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 100% { transform: translateX(-3px); } }
           .anim-truck { animation: moveTruck 1s infinite ease-in-out; }
         `}</style>
-      
+
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <Box>
@@ -119,7 +119,7 @@ const MisPedidos = () => {
         </Box>
 
         {cargando ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><Skeleton variant="rounded" width="100%" height={200} /></Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><Skeleton variant="rounded" width="100%" height={200} /></Box>
         ) : (
           pedidos.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 10 }}>
@@ -142,10 +142,10 @@ const MisPedidos = () => {
                             <Typography variant="caption" fontWeight="bold" color="textSecondary">ORDEN #{p.id_pedido}</Typography>
                             <Typography variant="h6" fontWeight="bold">{new Date(p.fecha_creacion).toLocaleDateString()}</Typography>
                           </Box>
-                          <Chip 
-                            icon={config.icon} 
-                            label={config.label} 
-                            sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 'bold', p: 1 }} 
+                          <Chip
+                            icon={config.icon}
+                            label={config.label}
+                            sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 'bold', p: 1 }}
                           />
                         </Box>
 
@@ -178,17 +178,17 @@ const MisPedidos = () => {
                           </Box>
                         </Stack>
                       </Box>
-                      
+
                       <Box sx={{ bgcolor: alpha(COLORES.primario, 0.03), p: 2, px: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <CarOutlined style={{ color: COLORES.secundario }} />
-                            <Typography variant="caption" color="textSecondary">{p.direccion_entrega}</Typography>
-                         </Box>
-                         {p.estado === 'En camino' && (
-                            <Typography variant="caption" sx={{ color: COLORES.info, fontWeight: 'bold' }}>
-                               🚚 ¡Tu pedido ya salió a entrega!
-                            </Typography>
-                         )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CarOutlined style={{ color: COLORES.secundario }} />
+                          <Typography variant="caption" color="textSecondary">{p.direccion_entrega}</Typography>
+                        </Box>
+                        {p.estado === 'En camino' && (
+                          <Typography variant="caption" sx={{ color: COLORES.info, fontWeight: 'bold' }}>
+                            🚚 ¡Tu pedido ya salió a entrega!
+                          </Typography>
+                        )}
                       </Box>
                     </Card>
                   </Fade>

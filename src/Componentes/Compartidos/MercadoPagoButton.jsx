@@ -11,7 +11,7 @@ const MercadoPagoButton = ({ items, id_pedido, total }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:3000/api/mercadopago/crear-preferencia', {
+            const response = await axios.post('https://backenddulceria.onrender.com/api/mercadopago/crear-preferencia', {
                 id_pedido,
                 items: items.map(it => ({
                     id_producto: it.id_producto,
@@ -24,10 +24,10 @@ const MercadoPagoButton = ({ items, id_pedido, total }) => {
             });
 
             const { init_point } = response.data;
-            
+
             // Redirigir a Mercado Pago
             window.location.href = init_point;
-            
+
         } catch (error) {
             console.error('Error al iniciar el pago:', error);
             Swal.fire('Error', 'No se pudo conectar con Mercado Pago. Intenta más tarde.', 'error');

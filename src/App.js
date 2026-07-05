@@ -55,6 +55,7 @@ import VisionEmpresa from './Componentes/Administrativo/VisionEmpresa.jsx';
 import Vision from './Componentes/Administrativo/Vision.jsx';
 import ExportacionImportacion from './Componentes/Administrativo/ExportacionImportacion.jsx';
 import MonitoreoBD from './Componentes/Administrativo/MonitoreoBD.jsx';
+import Promociones from './Componentes/Administrativo/Promociones.jsx';
 
 
 //Error 404
@@ -109,6 +110,7 @@ const App = () => {
               <Route path="/admin/vision" element={<Vision />} />
               <Route path="/admin/exportacion_importacion" element={<ExportacionImportacion />} />
               <Route path="/admin/monitoreo_bd" element={<MonitoreoBD />} />
+              <Route path="/admin/promociones" element={<Promociones />} />
 
 
               {/* Rutas clientes*/}

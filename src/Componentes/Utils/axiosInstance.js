@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://backenddulceria.onrender.com';
 
 const instance = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +10,18 @@ const instance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Interceptor para añadir el TOKEN a cada petición
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 instance.interceptors.response.use(
   (response) => response,

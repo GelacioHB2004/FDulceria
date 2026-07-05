@@ -8,18 +8,18 @@ import {
   FormControl, InputLabel, Box, TextField, InputAdornment,
   Tooltip, Badge, Grid, alpha
 } from "@mui/material";
-import { 
-  Search, 
-  WarningAmber, 
-  Visibility, 
-  LocalShipping, 
-  Person, 
-  Assignment 
+import {
+  Search,
+  WarningAmber,
+  Visibility,
+  LocalShipping,
+  Person,
+  Assignment
 } from "@mui/icons-material";
 import Swal from "sweetalert2";
 
 // Usamos localhost para desarrollo, puedes cambiarlo a tu URL de Render luego
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 const GestionPedidos = () => {
   const [pedidos, setPedidos] = useState([]);
@@ -60,8 +60,8 @@ const GestionPedidos = () => {
 
   // Filtrado en tiempo real
   useEffect(() => {
-    const filtrados = pedidos.filter(p => 
-      String(p.id_pedido).includes(busqueda) || 
+    const filtrados = pedidos.filter(p =>
+      String(p.id_pedido).includes(busqueda) ||
       p.nombre_cliente.toLowerCase().includes(busqueda.toLowerCase())
     );
     setPedidosFiltrados(filtrados);
@@ -71,7 +71,7 @@ const GestionPedidos = () => {
     setPedidoActivo(pedido);
     setSelectedEstado(pedido.estado);
     setSelectedRepartidor(pedido.id_repartidor || "");
-    
+
     // Cargar incidencias si existen
     if (pedido.num_incidencias > 0) {
       try {
@@ -84,7 +84,7 @@ const GestionPedidos = () => {
     } else {
       setIncidenciasActivas([]);
     }
-    
+
     setModalOpen(true);
   };
 
@@ -125,7 +125,7 @@ const GestionPedidos = () => {
             Monitorea ventas, asigna repartidores y resuelve incidencias.
           </Typography>
         </Box>
-        
+
         <TextField
           placeholder="Buscar Pedido o Cliente..."
           size="small"
@@ -188,22 +188,22 @@ const GestionPedidos = () => {
                     <Typography fontWeight="bold" color="#2E7D32">${p.total}</Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <Chip 
-                      label={p.estado} 
-                      sx={{ 
-                        bgcolor: alpha(getStatusColor(p.estado), 0.1), 
+                    <Chip
+                      label={p.estado}
+                      sx={{
+                        bgcolor: alpha(getStatusColor(p.estado), 0.1),
                         color: getStatusColor(p.estado),
                         fontWeight: 'bold',
                         border: `1px solid ${getStatusColor(p.estado)}`
-                      }} 
-                      size="small" 
+                      }}
+                      size="small"
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Button 
-                      variant="outlined" 
-                      startIcon={<Visibility />} 
-                      size="small" 
+                    <Button
+                      variant="outlined"
+                      startIcon={<Visibility />}
+                      size="small"
                       onClick={() => abrirModal(p)}
                       sx={{ borderRadius: 2, textTransform: 'none' }}
                     >
@@ -245,7 +245,7 @@ const GestionPedidos = () => {
                   ))}
                 </TableBody>
               </Table>
-              
+
               {incidenciasActivas.length > 0 && (
                 <Box sx={{ mt: 3, p: 2, bgcolor: '#FFF5F5', borderRadius: 2, border: '1px solid #FFCDD2' }}>
                   <Typography variant="subtitle2" color="error" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -266,7 +266,7 @@ const GestionPedidos = () => {
               <Typography variant="subtitle2" color="secondary" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocalShipping fontSize="small" /> Logística de Entrega
               </Typography>
-              
+
               <FormControl fullWidth sx={{ mt: 2, mb: 3 }}>
                 <InputLabel>Asignar Repartidor</InputLabel>
                 <Select

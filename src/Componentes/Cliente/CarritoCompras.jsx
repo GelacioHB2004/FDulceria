@@ -44,7 +44,7 @@ const CarritoCompras = () => {
         id_producto: it.id_producto,
         cantidad: it.cantidad
       }));
-      const resp = await axios.post('http://localhost:3000/api/carrito/validar', { carrito: itemsReducidos });
+      const resp = await axios.post('https://backenddulceria.onrender.com/api/carrito/validar', { carrito: itemsReducidos });
       setCarrito(resp.data.items);
       setTotales({
         subtotal: resp.data.subtotal,
@@ -111,7 +111,7 @@ const CarritoCompras = () => {
 
       // Ya no llamamos a /checkout aquí. Vamos directo a crear la preferencia de Mercado Pago.
       // Así cumplimos con tu requisito de que no se registre nada hasta que el pago sea exitoso.
-      const respMP = await axios.post('http://localhost:3000/api/mercadopago/crear-preferencia', {
+      const respMP = await axios.post('https://backenddulceria.onrender.com/api/mercadopago/crear-preferencia', {
         items: carrito,
         direccion_entrega: direccion
       }, {
@@ -348,16 +348,27 @@ const CarritoCompras = () => {
                         >
                           {item.nombre}
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                           <Typography
                             variant="h6"
-                            sx={{ fontWeight: 700, color: colors.primary }}
+                            sx={{
+                              fontWeight: 700,
+                              color: item.tienesPromo ? '#FF4D4F' : colors.primary
+                            }}
                           >
                             ${(item.precio || 0).toFixed(2)}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: colors.textLight }}>
-                            x unidad
-                          </Typography>
+                          {item.tienesPromo && (
+                            <Typography
+                              sx={{
+                                textDecoration: 'line-through',
+                                color: colors.textLight,
+                                fontSize: '0.9rem'
+                              }}
+                            >
+                              ${parseFloat(item.precioOriginal).toFixed(2)}
+                            </Typography>
+                          )}
                         </Box>
 
                         {/* Controles de cantidad */}

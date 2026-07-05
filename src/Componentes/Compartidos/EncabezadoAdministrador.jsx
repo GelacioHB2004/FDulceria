@@ -93,6 +93,7 @@ const menuItems = [
       { key: "categorias", label: "Categorias" },
       { key: "productos", label: "Productos" },
       { key: "pedidos", label: "Gestión Pedidos" },
+      { key: "promociones", label: "Promociones" },
     ],
   },
   {
@@ -142,6 +143,7 @@ const routes = {
   perfilusuarioadmin: "/admin/perfilusuarioadmin",
   exportacionimportacion: "/admin/exportacion_importacion",
   monitoreobd: "/admin/monitoreo_bd",
+  promociones: "/admin/promociones",
 };
 
 /* ─────────────────────────────────────── */

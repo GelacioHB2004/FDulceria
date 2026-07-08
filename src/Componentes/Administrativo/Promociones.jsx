@@ -66,7 +66,15 @@ const Promociones = () => {
 
   // Función para saber si un producto tiene promoción activa
   const getPromoActiva = useCallback((idProducto) => {
-    return promos.find(p => p.id_producto === idProducto && new Date(p.fecha_fin) >= new Date());
+    return promos.find(p => {
+      if (p.id_producto !== idProducto) return false;
+      if (!p.fecha_fin) return p.estado === 'Activo';
+      
+      const datePart = p.fecha_fin.substring(0, 10); // "YYYY-MM-DD"
+      const [year, month, day] = datePart.split('-').map(Number);
+      const limite = new Date(year, month - 1, day + 1, 0, 0, 0, 0); // Límite: las 00:00:00 del día siguiente
+      return new Date() < limite && p.estado === 'Activo';
+    });
   }, [promos]);
 
   const filteredProducts = useMemo(() => {
@@ -301,7 +309,15 @@ const Promociones = () => {
             </TableHead>
             <TableBody>
               {promos.map(pr => {
-                const esVencida = new Date(pr.fecha_fin) < new Date();
+                const datePart = pr.fecha_fin ? pr.fecha_fin.substring(0, 10) : "";
+                let esVencida = false;
+                let finalDateObj = null;
+                if (datePart) {
+                  const [year, month, day] = datePart.split('-').map(Number);
+                  const limite = new Date(year, month - 1, day + 1, 0, 0, 0, 0);
+                  esVencida = new Date() >= limite;
+                  finalDateObj = new Date(year, month - 1, day, 0, 0, 0, 0);
+                }
                 return (
                   <TableRow key={pr.id_promocion} sx={{ opacity: esVencida ? 0.5 : 1, bgcolor: esVencida ? '#fafafa' : 'transparent' }}>
                     <TableCell>
@@ -310,7 +326,7 @@ const Promociones = () => {
                     </TableCell>
                     <TableCell>{pr.nombre_producto || pr.nombre_categoria || 'General'}</TableCell>
                     <TableCell>{pr.tipo_descuento === 'Porcentaje' ? `${pr.valor_descuento}%` : `$${pr.valor_descuento}`}</TableCell>
-                    <TableCell>{new Date(pr.fecha_fin).toLocaleDateString()}</TableCell>
+                    <TableCell>{finalDateObj ? finalDateObj.toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell align="right">
                       <IconButton onClick={() => handleDelete(pr.id_promocion)} color="error" size="small"><DeleteIcon fontSize="small" /></IconButton>
                     </TableCell>

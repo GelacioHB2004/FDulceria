@@ -75,6 +75,36 @@ const CarritoCompras = () => {
 
   const cargarCarrito = useCallback(() => {
     try {
+      const params = new URLSearchParams(window.location.search);
+      const paymentStatus = params.get('payment');
+
+      if (paymentStatus === 'success') {
+        localStorage.removeItem('carrito');
+        setCarrito([]);
+        setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
+        setDireccion('');
+        setLoading(false);
+        window.dispatchEvent(new Event('carritoActualizado'));
+
+        Swal.fire({
+          title: '¡Pago Exitoso!',
+          text: 'Tu pedido ha sido registrado correctamente y los productos han sido apartados.',
+          icon: 'success',
+          confirmButtonColor: colors.primary
+        });
+        
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return; // Retornar temprano para que no se intente validar el carrito anterior
+      } else if (paymentStatus === 'error') {
+        Swal.fire({
+          title: 'Error en el pago',
+          text: 'Hubo un problema al procesar tu pago. Por favor intenta de nuevo.',
+          icon: 'error',
+          confirmButtonColor: colors.primary
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
       const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
       setCarrito(carritoStorage);
       validarCarrito(carritoStorage);
@@ -88,37 +118,6 @@ const CarritoCompras = () => {
   useEffect(() => {
     cargarCarrito();
   }, [cargarCarrito]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get('payment');
-    
-    if (paymentStatus === 'success') {
-      Swal.fire({
-        title: '¡Pago Exitoso!',
-        text: 'Tu pedido ha sido registrado correctamente y los productos han sido apartados.',
-        icon: 'success',
-        confirmButtonColor: colors.primary
-      });
-      // Limpiar formalmente el carrito al volver exitoso
-      localStorage.removeItem('carrito');
-      setCarrito([]);
-      setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
-      setDireccion('');
-      window.dispatchEvent(new Event('carritoActualizado'));
-      
-      // Limpiar la URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (paymentStatus === 'error') {
-      Swal.fire({
-        title: 'Error en el pago',
-        text: 'Hubo un problema al procesar tu pago. Por favor intenta de nuevo.',
-        icon: 'error',
-        confirmButtonColor: colors.primary
-      });
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
 
   const eliminarProducto = (id_producto) => {
     const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];

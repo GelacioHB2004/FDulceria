@@ -49,6 +49,8 @@ import {
   Bar,
 } from "recharts";
 import axios from "axios";
+const API_BASE_URL = "https://backenddulceria.onrender.com"; // Cambiar a http://localhost:3000 para local
+
 
 // ─── Paleta ────────────────────────────────────────────────────────────────
 const C = {
@@ -165,7 +167,7 @@ function AlexaPinCard() {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        'https://backenddulceria.onrender.com/api/alexa/generar-pin',
+        `${API_BASE_URL}/api/alexa/generar-pin`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -369,10 +371,10 @@ export default function DashboardAdmin() {
     setError(null);
     try {
       const [statsRes, prodRes, invRes, actRes] = await Promise.allSettled([
-        axios.get("https://backenddulceria.onrender.com/api/dashboard/estadisticas"),
-        axios.get("https://backenddulceria.onrender.com/api/dashboard/productos-top"),
-        axios.get("https://backenddulceria.onrender.com/api/dashboard/alertas-inventario"),
-        axios.get("https://backenddulceria.onrender.com/api/dashboard/actividad-reciente"),
+        axios.get(`${API_BASE_URL}/api/dashboard/estadisticas`),
+        axios.get(`${API_BASE_URL}/api/dashboard/productos-top`),
+        axios.get(`${API_BASE_URL}/api/dashboard/alertas-inventario`),
+        axios.get(`${API_BASE_URL}/api/dashboard/actividad-reciente`),
       ]);
       if (statsRes.status === "fulfilled") setStats(statsRes.value.data);
       if (prodRes.status === "fulfilled") setProductos(prodRes.value.data);

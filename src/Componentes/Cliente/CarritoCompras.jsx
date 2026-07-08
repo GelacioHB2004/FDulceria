@@ -27,6 +27,20 @@ import {
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// Colores de la paleta (Sincronizados con el publico)
+const colors = {
+  primary: '#d4a373',
+  primaryLight: '#e9d5c9',
+  primaryDark: '#b8956e',
+  accent: '#f8e8dc',
+  background: '#fefaf6',
+  text: '#5c4033',
+  textLight: '#8b7355',
+  success: '#7cb57c',
+  error: '#e57373',
+  white: '#FFFFFF'
+};
+
 const CarritoCompras = () => {
   const [carrito, setCarrito] = useState([]);
   const [totales, setTotales] = useState({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
@@ -75,6 +89,37 @@ const CarritoCompras = () => {
     cargarCarrito();
   }, [cargarCarrito]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    
+    if (paymentStatus === 'success') {
+      Swal.fire({
+        title: '¡Pago Exitoso!',
+        text: 'Tu pedido ha sido registrado correctamente y los productos han sido apartados.',
+        icon: 'success',
+        confirmButtonColor: colors.primary
+      });
+      // Limpiar formalmente el carrito al volver exitoso
+      localStorage.removeItem('carrito');
+      setCarrito([]);
+      setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
+      setDireccion('');
+      window.dispatchEvent(new Event('carritoActualizado'));
+      
+      // Limpiar la URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'error') {
+      Swal.fire({
+        title: 'Error en el pago',
+        text: 'Hubo un problema al procesar tu pago. Por favor intenta de nuevo.',
+        icon: 'error',
+        confirmButtonColor: colors.primary
+      });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const eliminarProducto = (id_producto) => {
     const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
     const nuevoCarrito = carritoStorage.filter(item => item.id_producto !== id_producto);
@@ -118,13 +163,9 @@ const CarritoCompras = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // Limpiamos el carrito local para que el usuario sienta que su orden ya está en proceso
-      localStorage.removeItem('carrito');
-      setCarrito([]);
-      setTotales({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
-      setDireccion('');
-      window.dispatchEvent(new Event('carritoActualizado'));
-
+      // Ya no limpiamos el carrito aquí, dejaremos que se limpie al retornar con éxito
+      // o que el usuario lo mantenga si el pago falla.
+      
       // Redirigir inmediatamente a Mercado Pago
       window.location.href = respMP.data.init_point;
 
@@ -132,20 +173,6 @@ const CarritoCompras = () => {
       const msg = error.response?.data?.details || error.response?.data?.error || 'No se pudo iniciar el proceso de pago';
       Swal.fire('Error', msg, 'error');
     }
-  };
-
-  // Colores de la paleta (Sincronizados con el publico)
-  const colors = {
-    primary: '#d4a373',
-    primaryLight: '#e9d5c9',
-    primaryDark: '#b8956e',
-    accent: '#f8e8dc',
-    background: '#fefaf6',
-    text: '#5c4033',
-    textLight: '#8b7355',
-    success: '#7cb57c',
-    error: '#e57373',
-    white: '#FFFFFF'
   };
 
   // Lógica para obtener ubicación actual por GPS

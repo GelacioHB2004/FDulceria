@@ -20,7 +20,8 @@ import {
   CarOutlined,
   SafetyOutlined,
   FireOutlined,
-  StarFilled
+  StarFilled,
+  GiftOutlined
 } from '@ant-design/icons';
 import Swal from 'sweetalert2';
 import axios from 'axios';

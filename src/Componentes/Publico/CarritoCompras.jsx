@@ -72,7 +72,9 @@ const CarritoCompras = () => {
     }
   }, [validarCarrito]);
 
+  // Ping preventivo: despierta el modelo de Python en Render al abrir el carrito
   useEffect(() => {
+    axios.get(`${API_BASE_URL}/api/recomendaciones/ping-modelo`).catch(() => {});
     cargarCarrito();
   }, [cargarCarrito]);
 
@@ -88,11 +90,24 @@ const CarritoCompras = () => {
       try {
         const resp = await axios.post(`${API_BASE_URL}/api/recomendaciones/carrito`, { 
           ids_productos: ids, 
-          id_empresa: 1 // Por defecto
+          id_empresa: 1
         });
-        setRecomendaciones(resp.data.recomendaciones || []);
+        const recs = resp.data.recomendaciones || [];
+        setRecomendaciones(recs);
+        
+        // Si el modelo estaba dormido y devolvió vacío, reintenta una vez tras 8s
+        if (recs.length === 0 && resp.data.aviso === 'modelo_no_disponible') {
+          setTimeout(async () => {
+            try {
+              const retry = await axios.post(`${API_BASE_URL}/api/recomendaciones/carrito`, { 
+                ids_productos: ids, id_empresa: 1 
+              });
+              setRecomendaciones(retry.data.recomendaciones || []);
+            } catch (_) { /* silencioso */ }
+          }, 8000);
+        }
       } catch (error) {
-        console.error("Error al obtener recomendaciones:", error);
+        console.error('Error al obtener recomendaciones:', error);
       }
     };
     fetchRecomendaciones();

@@ -783,7 +783,7 @@ const CarritoCompras = () => {
                       
                       <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 800, color: colors.primary }}>
-                          ${(rec.precio || 0).toFixed(2)}
+                          ${parseFloat(rec.precio || 0).toFixed(2)}
                         </Typography>
                         <Button
                           variant="contained"

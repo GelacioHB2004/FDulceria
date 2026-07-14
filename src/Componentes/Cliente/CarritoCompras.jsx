@@ -163,7 +163,12 @@ const CarritoCompras = () => {
     const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
     const existe = carritoStorage.find(item => item.id_producto === producto.id_producto);
     if (!existe) {
-      carritoStorage.push({ ...producto, cantidad: 1 });
+      // Normalizar precio a número para evitar errores de .toFixed() al renderizar el carrito
+      carritoStorage.push({ 
+        ...producto, 
+        precio: parseFloat(producto.precio || 0),
+        cantidad: 1 
+      });
       localStorage.setItem('carrito', JSON.stringify(carritoStorage));
       cargarCarrito();
       window.dispatchEvent(new Event('carritoActualizado'));
@@ -444,7 +449,7 @@ const CarritoCompras = () => {
                               color: item.tienesPromo ? '#FF4D4F' : colors.primary
                             }}
                           >
-                            ${(item.precio || 0).toFixed(2)}
+                            ${parseFloat(item.precio || 0).toFixed(2)}
                           </Typography>
                           {item.tienesPromo && (
                             <Typography
@@ -528,7 +533,7 @@ const CarritoCompras = () => {
                           variant="h6"
                           sx={{ fontWeight: 700, color: colors.text, mb: 1 }}
                         >
-                          ${((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
+                          ${(parseFloat(item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
                         </Typography>
                         <IconButton
                           onClick={() => eliminarProducto(item.id_producto)}

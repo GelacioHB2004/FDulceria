@@ -17,9 +17,10 @@ import {
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,
-  GiftOutlined,
   CarOutlined,
-  SafetyOutlined
+  SafetyOutlined,
+  FireOutlined,
+  StarFilled
 } from '@ant-design/icons';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -30,6 +31,7 @@ const CarritoCompras = () => {
   const [carrito, setCarrito] = useState([]);
   const [totales, setTotales] = useState({ subtotal: 0, envio: 0, total: 0, esMayoreo: false });
   const [loading, setLoading] = useState(true);
+  const [recomendaciones, setRecomendaciones] = useState([]);
 
   const validarCarrito = useCallback(async (items) => {
     if (items.length === 0) {
@@ -72,6 +74,50 @@ const CarritoCompras = () => {
   useEffect(() => {
     cargarCarrito();
   }, [cargarCarrito]);
+
+  const idsArrString = JSON.stringify(carrito.map(i => i.id_producto).sort());
+  
+  useEffect(() => {
+    const fetchRecomendaciones = async () => {
+      const ids = JSON.parse(idsArrString);
+      if (ids.length === 0) {
+        setRecomendaciones([]);
+        return;
+      }
+      try {
+        const resp = await axios.post(`${API_BASE_URL}/api/recomendaciones/carrito`, { 
+          ids_productos: ids, 
+          id_empresa: 1 // Por defecto
+        });
+        setRecomendaciones(resp.data.recomendaciones || []);
+      } catch (error) {
+        console.error("Error al obtener recomendaciones:", error);
+      }
+    };
+    fetchRecomendaciones();
+  }, [idsArrString]);
+
+  const agregarRecomendacion = (producto) => {
+    const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
+    const existe = carritoStorage.find(item => item.id_producto === producto.id_producto);
+    if (!existe) {
+      carritoStorage.push({ ...producto, cantidad: 1 });
+      localStorage.setItem('carrito', JSON.stringify(carritoStorage));
+      cargarCarrito();
+      window.dispatchEvent(new Event('carritoActualizado'));
+      
+      Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'success',
+        title: 'Agregado al carrito',
+        showConfirmButton: false,
+        timer: 1500,
+        background: '#fefaf6',
+        color: '#5c4033'
+      });
+    }
+  };
 
   const eliminarProducto = (id_producto) => {
     const carritoStorage = JSON.parse(localStorage.getItem('carrito')) || [];
@@ -509,6 +555,136 @@ const CarritoCompras = () => {
               </Card>
             </Box>
           </Box>
+        )}
+
+        {/* =============== SECCIÓN DE RECOMENDACIONES PREDICTIVAS =============== */}
+        {recomendaciones.length > 0 && (
+          <Fade in timeout={800}>
+            <Box sx={{ mt: { xs: 6, md: 8 }, mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
+                <FireOutlined style={{ fontSize: 28, color: '#FF4D4F' }} />
+                <Typography variant="h5" sx={{ fontWeight: 800, color: colors.text, letterSpacing: '-0.5px' }}>
+                  Frecuentemente comprados juntos
+                </Typography>
+              </Box>
+
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 3, 
+                overflowX: 'auto', 
+                pb: 3,
+                pt: 1,
+                px: 1,
+                '::-webkit-scrollbar': { height: 8 },
+                '::-webkit-scrollbar-thumb': { bgcolor: colors.primaryLight, borderRadius: 4 }
+              }}>
+                {recomendaciones.map((rec, index) => (
+                  <Card
+                    key={rec.id_producto}
+                    elevation={0}
+                    sx={{
+                      minWidth: 260,
+                      maxWidth: 260,
+                      borderRadius: 4,
+                      border: `1px solid ${colors.primaryLight}`,
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      flexShrink: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: 'pointer',
+                      bgcolor: 'white',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: `0 12px 28px ${colors.primaryLight}`,
+                        borderColor: colors.primary,
+                        '& .img-hover': { transform: 'scale(1.08)' }
+                      }
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        height: 180,
+                        bgcolor: colors.accent,
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}
+                    >
+                      {rec.imagen ? (
+                        <Box
+                          component="img"
+                          className="img-hover"
+                          src={rec.imagen}
+                          alt={rec.nombre}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transition: 'transform 0.5s ease-out',
+                          }}
+                        />
+                      ) : (
+                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <GiftOutlined style={{ fontSize: 40, color: colors.textLight }} />
+                        </Box>
+                      )}
+                      
+                      {rec.confianza > 0.4 && (
+                        <Chip 
+                          label="Perfecta Combinación" 
+                          size="small"
+                          icon={<StarFilled style={{ color: '#FAAD14', fontSize: 14 }} />}
+                          sx={{ 
+                            position: 'absolute', 
+                            top: 12, 
+                            right: 12, 
+                            bgcolor: 'rgba(255, 255, 255, 0.95)', 
+                            color: colors.text,
+                            fontWeight: 700,
+                            backdropFilter: 'blur(8px)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                            '& .MuiChip-icon': { ml: 1 }
+                          }} 
+                        />
+                      )}
+                    </Box>
+
+                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.text, mb: 1, lineHeight: 1.3 }}>
+                        {rec.nombre}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: colors.textLight, mb: 2, display: 'block' }}>
+                        En base a tu selección actual
+                      </Typography>
+                      
+                      <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: colors.primary }}>
+                          ${(rec.precio || 0).toFixed(2)}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => agregarRecomendacion(rec)}
+                          sx={{
+                            bgcolor: colors.primary,
+                            borderRadius: '50%',
+                            minWidth: 42,
+                            width: 42,
+                            height: 42,
+                            p: 0,
+                            boxShadow: `0 4px 12px ${colors.primaryLight}`,
+                            transition: 'all 0.2s',
+                            '&:hover': { bgcolor: colors.primaryDark, transform: 'scale(1.1)' }
+                          }}
+                        >
+                          <PlusOutlined style={{ fontSize: 18 }} />
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Box>
+          </Fade>
         )}
       </Container>
     </Box>

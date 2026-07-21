@@ -23,8 +23,6 @@ import {
   CarOutlined,
   SafetyOutlined,
   CompassOutlined,
-  FireOutlined,
-  StarFilled
 } from '@ant-design/icons';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -95,7 +93,7 @@ const CarritoCompras = () => {
           icon: 'success',
           confirmButtonColor: colors.primary
         });
-        
+
         window.history.replaceState({}, document.title, window.location.pathname);
         return; // Retornar temprano para que no se intente validar el carrito anterior
       } else if (paymentStatus === 'error') {
@@ -120,12 +118,12 @@ const CarritoCompras = () => {
 
   // Ping preventivo: despierta el modelo de Python en Render al abrir el carrito
   useEffect(() => {
-    axios.get('https://backenddulceria.onrender.com/api/recomendaciones/ping-modelo').catch(() => {});
+    axios.get('https://backenddulceria.onrender.com/api/recomendaciones/ping-modelo').catch(() => { });
     cargarCarrito();
   }, [cargarCarrito]);
 
   const idsArrString = JSON.stringify(carrito.map(i => i.id_producto).sort());
-  
+
   useEffect(() => {
     const fetchRecomendaciones = async () => {
       const ids = JSON.parse(idsArrString);
@@ -134,8 +132,8 @@ const CarritoCompras = () => {
         return;
       }
       try {
-        const resp = await axios.post('https://backenddulceria.onrender.com/api/recomendaciones/carrito', { 
-          ids_productos: ids, 
+        const resp = await axios.post('https://backenddulceria.onrender.com/api/recomendaciones/carrito', {
+          ids_productos: ids,
           id_empresa: 1
         });
         const recs = resp.data.recomendaciones || [];
@@ -145,8 +143,8 @@ const CarritoCompras = () => {
         if (recs.length === 0 && resp.data.aviso === 'modelo_no_disponible') {
           setTimeout(async () => {
             try {
-              const retry = await axios.post('https://backenddulceria.onrender.com/api/recomendaciones/carrito', { 
-                ids_productos: ids, id_empresa: 1 
+              const retry = await axios.post('https://backenddulceria.onrender.com/api/recomendaciones/carrito', {
+                ids_productos: ids, id_empresa: 1
               });
               setRecomendaciones(retry.data.recomendaciones || []);
             } catch (_) { /* silencioso */ }
@@ -164,15 +162,15 @@ const CarritoCompras = () => {
     const existe = carritoStorage.find(item => item.id_producto === producto.id_producto);
     if (!existe) {
       // Normalizar precio a número para evitar errores de .toFixed() al renderizar el carrito
-      carritoStorage.push({ 
-        ...producto, 
+      carritoStorage.push({
+        ...producto,
         precio: parseFloat(producto.precio || 0),
-        cantidad: 1 
+        cantidad: 1
       });
       localStorage.setItem('carrito', JSON.stringify(carritoStorage));
       cargarCarrito();
       window.dispatchEvent(new Event('carritoActualizado'));
-      
+
       Swal.fire({
         toast: true,
         position: 'bottom-end',
@@ -231,7 +229,7 @@ const CarritoCompras = () => {
 
       // Ya no limpiamos el carrito aquí, dejaremos que se limpie al retornar con éxito
       // o que el usuario lo mantenga si el pago falla.
-      
+
       // Redirigir inmediatamente a Mercado Pago
       window.location.href = respMP.data.init_point;
 
@@ -692,16 +690,15 @@ const CarritoCompras = () => {
           <Fade in timeout={800}>
             <Box sx={{ mt: { xs: 6, md: 8 }, mb: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
-                <FireOutlined style={{ fontSize: 28, color: '#FF4D4F' }} />
                 <Typography variant="h5" sx={{ fontWeight: 800, color: colors.text, letterSpacing: '-0.5px' }}>
-                  Frecuentemente comprados juntos
+                  Productos Similares
                 </Typography>
               </Box>
 
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 3, 
-                overflowX: 'auto', 
+              <Box sx={{
+                display: 'flex',
+                gap: 3,
+                overflowX: 'auto',
                 pb: 3,
                 pt: 1,
                 px: 1,
@@ -757,25 +754,6 @@ const CarritoCompras = () => {
                           <GiftOutlined style={{ fontSize: 40, color: colors.textLight }} />
                         </Box>
                       )}
-                      
-                      {rec.confianza > 0.4 && (
-                        <Chip 
-                          label="Perfecta Combinación" 
-                          size="small"
-                          icon={<StarFilled style={{ color: '#FAAD14', fontSize: 14 }} />}
-                          sx={{ 
-                            position: 'absolute', 
-                            top: 12, 
-                            right: 12, 
-                            bgcolor: 'rgba(255, 255, 255, 0.95)', 
-                            color: colors.text,
-                            fontWeight: 700,
-                            backdropFilter: 'blur(8px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                            '& .MuiChip-icon': { ml: 1 }
-                          }} 
-                        />
-                      )}
                     </Box>
 
                     <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
@@ -785,7 +763,7 @@ const CarritoCompras = () => {
                       <Typography variant="caption" sx={{ color: colors.textLight, mb: 2, display: 'block' }}>
                         En base a tu selección actual
                       </Typography>
-                      
+
                       <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Typography variant="h6" sx={{ fontWeight: 800, color: colors.primary }}>
                           ${parseFloat(rec.precio || 0).toFixed(2)}

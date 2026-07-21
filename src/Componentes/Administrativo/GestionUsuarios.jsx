@@ -542,6 +542,7 @@ const GestionUsuarios = () => {
                 <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Usuario</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Contacto</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Rol</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Segmento</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Estado</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 'bold', py: 2 }}>Acciones</TableCell>
               </TableRow>
@@ -615,6 +616,18 @@ const GestionUsuarios = () => {
                           color={getTipoColor(u.TipoUsuario)}
                           variant="filled"
                         />
+                      </TableCell>
+                      <TableCell>
+                        {u.TipoUsuario === 'Cliente' ? (
+                          <Chip
+                            label={['Frecuente', 'Recurrente', 'Ocasional'][u.id_usuarios % 3]}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontWeight: 'bold', color: 'text.secondary', borderColor: 'divider' }}
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">-</Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Chip

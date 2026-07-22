@@ -1,57 +1,36 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import axios from 'axios';
 import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  TextField,
-  Paper,
-  Stack,
-  CircularProgress,
-  Alert,
-  useTheme,
-  alpha,
-} from "@mui/material";
-import {
-  Email,
-  VerifiedUser,
-  Refresh,
-  ArrowBack,
-} from "@mui/icons-material";
-import { motion } from "framer-motion";
-const MySwal = withReactContent(Swal);
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+  TextField, Button, Typography, Box,
+  CircularProgress, Alert
+} from '@mui/material';
+import { BadgeOutlined, VerifiedUser, Refresh } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const MotionPaper = motion(Paper);
-const MotionBox = motion(Box);
+const MySwal = withReactContent(Swal);
+const API_BASE_URL = 'https://backenddulceria.onrender.com';
 
 function VerificacionCorreo() {
-  const [verificationCode, setVerificationCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const theme = useTheme();
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setVerificationCode(e.target.value);
-    setError("");
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setError('');
 
     if (!verificationCode?.trim()) {
-      MySwal.fire({
-        icon: "error",
-        title: "Código requerido",
-        text: "Por favor introduce el código de verificación.",
-      });
+      setError('Por favor introduce el codigo de verificacion.');
       setIsLoading(false);
       return;
     }
@@ -62,56 +41,41 @@ function VerificacionCorreo() {
       );
 
       await MySwal.fire({
-        icon: "success",
-        title: "¡Correo verificado!",
-        text: "Tu correo electrónico ha sido verificado exitosamente.",
-        confirmButtonColor: theme.palette.primary.main,
+        icon: 'success',
+        title: 'Correo verificado',
+        text: 'Tu correo electronico ha sido verificado exitosamente.',
+        confirmButtonColor: '#111827',
       });
 
-      navigate("/login");
+      navigate('/login');
 
-    } catch (error) {
-      const status = error.response?.status;
+    } catch (err) {
+      const status = err.response?.status;
       const message =
-        error.response?.data?.message ||
-        "Ocurrió un error al verificar el código. Intenta de nuevo.";
+        err.response?.data?.message ||
+        'Ocurrio un error al verificar el codigo. Intenta de nuevo.';
 
-      // 400 → errores controlados
       if (status === 400) {
-        if (message === "La cuenta ya está verificada. Inicia sesión para continuar.") {
+        if (message === 'La cuenta ya esta verificada. Inicia sesion para continuar.') {
           await MySwal.fire({
-            icon: "info",
-            title: "Cuenta ya verificada",
+            icon: 'info',
+            title: 'Cuenta ya verificada',
             text: message,
-            confirmButtonColor: theme.palette.info.main,
+            confirmButtonColor: '#111827',
           });
-          navigate("/login");
+          navigate('/login');
           return;
         }
-
         setError(message);
-        MySwal.fire({
-          icon: "error",
-          title: "Error de verificación",
-          text: message,
-          confirmButtonColor: theme.palette.error.main,
-        });
         return;
       }
 
-      // 500 → error del servidor
       if (status === 500) {
-        navigate("/500");
+        navigate('/500');
         return;
       }
 
-      // Otros errores (red, timeout, etc.)
-      MySwal.fire({
-        icon: "error",
-        title: "Error inesperado",
-        text: "No se pudo verificar el correo. Intenta más tarde.",
-      });
-
+      setError('No se pudo verificar el correo. Intenta mas tarde.');
     } finally {
       setIsLoading(false);
     }
@@ -119,226 +83,362 @@ function VerificacionCorreo() {
 
   const handleResendCode = async () => {
     try {
-      // Aquí iría la lógica para reenviar el código
       MySwal.fire({
-        icon: "info",
-        title: "Código reenviado",
-        text: "Se ha enviado un nuevo código a tu correo electrónico.",
-        confirmButtonColor: theme.palette.info.main,
+        icon: 'info',
+        title: 'Codigo reenviado',
+        text: 'Se ha enviado un nuevo codigo a tu correo electronico.',
+        confirmButtonColor: '#111827',
       });
-    } catch (error) {
+    } catch (err) {
       MySwal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudo reenviar el código. Intenta más tarde.",
-        confirmButtonColor: theme.palette.error.main,
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo reenviar el codigo. Intenta mas tarde.',
+        confirmButtonColor: '#ef4444',
       });
     }
+  };
+
+  const inputStyles = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '10px',
+      backgroundColor: '#f9fafb',
+      transition: 'all 0.2s ease',
+      '& fieldset': { borderColor: '#e5e7eb', transition: 'all 0.2s ease' },
+      '&:hover fieldset': { borderColor: '#9ca3af' },
+      '&.Mui-focused': { backgroundColor: '#ffffff' },
+      '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: '1.5px' },
+    },
   };
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)} 0%, ${alpha(theme.palette.secondary.light, 0.1)} 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        py: 4,
-        px: 2
+        bgcolor: '#cbd5e1',
+        p: { xs: 2, md: 4 },
       }}
     >
-      <Container component="main" maxWidth="sm">
-        <MotionPaper
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          elevation={8}
+      <Box
+        component={motion.div}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          width: '100%',
+          maxWidth: '1000px',
+          minHeight: { md: '600px' },
+          bgcolor: '#ffffff',
+          borderRadius: '24px',
+          overflow: 'hidden',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        }}
+      >
+        {/* LEFT PANEL */}
+        <Box
           sx={{
-            borderRadius: 4,
-            overflow: 'hidden',
-            background: 'white',
+            display: { xs: 'none', md: 'flex' },
+            flex: 1,
+            position: 'relative',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 6,
+            bgcolor: '#4b5563',
           }}
         >
-          {/* Header */}
+        <Box
+          component="img"
+          src="/login-bg.png"
+          alt=""
+          sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(10,14,26,0.95) 0%, rgba(10,14,26,0.55) 50%, rgba(10,14,26,0.2) 100%)',
+          }}
+        />
+
+        {/* Logo */}
+        <Box
+          sx={{
+            position: 'absolute', top: 36, left: 40,
+            display: 'flex', alignItems: 'center', gap: 1.5, zIndex: 2,
+          }}
+        >
           <Box
             sx={{
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              py: 6,
-              textAlign: 'center',
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden'
+              width: 38, height: 38, borderRadius: '10px',
+              bgcolor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(255,255,255,0.1)',
-              }}
-            />
-            <MotionBox
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-              sx={{ position: 'relative', zIndex: 1 }}
-            >
-              <Email sx={{ fontSize: 80, mb: 2, opacity: 0.9 }} />
-              <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
-                Verificar Correo
-              </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                Introduce el código de verificación
-              </Typography>
-            </MotionBox>
+            <BadgeOutlined sx={{ color: '#fff', fontSize: '1.2rem' }} />
           </Box>
+          <Typography variant="body1" fontWeight={700} sx={{ color: '#fff', fontSize: '0.95rem' }}>
+            Dulceria Angelitos
+          </Typography>
+        </Box>
 
-          {/* Form */}
-          <Box sx={{ p: 6 }}>
-            <Stack spacing={4}>
-              {error && (
-                <Alert severity="error" sx={{ borderRadius: 2 }}>
-                  {error}
-                </Alert>
-              )}
+        {/* Welcome text */}
+        <Box
+          component={motion.div}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          sx={{ position: 'relative', zIndex: 2 }}
+        >
+          <Typography
+            variant="overline"
+            sx={{ color: 'rgba(255,255,255,0.55)', letterSpacing: '0.15em', fontSize: '0.7rem', mb: 1, display: 'block' }}
+          >
+            Activacion de cuenta
+          </Typography>
+          <Typography
+            variant="h3"
+            fontWeight={800}
+            sx={{ color: '#fff', lineHeight: 1.15, letterSpacing: '-0.03em', mb: 2, fontSize: { md: '2rem', lg: '2.5rem' } }}
+          >
+            Un paso mas<br />para comenzar
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', maxWidth: 340, lineHeight: 1.7 }}>
+            Verifica tu correo electronico para activar tu cuenta y comenzar a disfrutar de todos los beneficios de Dulceria Angelitos.
+          </Typography>
 
-              <form onSubmit={handleSubmit}>
-                <Stack spacing={4}>
-                  <Box>
-                    <Typography variant="h6" gutterBottom fontWeight="600">
-                      Código de verificación (6 dígitos)
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      placeholder="000000"
-                      value={verificationCode}
-                      onChange={handleChange}
-                      inputProps={{
-                        maxLength: 6,
-                        style: {
-                          textAlign: 'center',
-                          fontSize: '1.5rem',
-                          letterSpacing: '0.5em',
-                          fontFamily: 'monospace'
-                        }
-                      }}
-                      onKeyPress={(e) => {
-                        if (!/[0-9]/.test(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          bgcolor: 'grey.50',
-                          '&.Mui-focused': {
-                            bgcolor: 'white',
-                          }
-                        }
-                      }}
-                    />
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-                      Revisa tu bandeja de entrada o spam
-                    </Typography>
-                  </Box>
-
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    size="large"
-                    disabled={isLoading || verificationCode.length !== 6}
-                    sx={{
-                      py: 2,
-                      fontSize: '1.1rem',
-                      fontWeight: 'bold',
-                      borderRadius: 2,
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: 4
-                      },
-                      '&:disabled': {
-                        background: 'grey.400'
-                      },
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    {isLoading ? (
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <CircularProgress size={24} color="inherit" />
-                        <Typography>Verificando...</Typography>
-                      </Stack>
-                    ) : (
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <VerifiedUser />
-                        <Typography>Verificar Código</Typography>
-                      </Stack>
-                    )}
-                  </Button>
-                </Stack>
-              </form>
-
-              {/* Additional Actions */}
-              <Stack spacing={3} sx={{ pt: 3, borderTop: 1, borderColor: 'divider' }}>
-                <Button
-                  startIcon={<Refresh />}
-                  onClick={handleResendCode}
-                  variant="outlined"
-                  sx={{
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 'bold'
-                  }}
-                >
-                  ¿No recibiste el código? Reenviar
-                </Button>
-
-                <Button
-                  startIcon={<ArrowBack />}
-                  onClick={() => navigate("/login")}
-                  variant="text"
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  Volver al Login
-                </Button>
-              </Stack>
-            </Stack>
+          {/* Feature pills */}
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, flexWrap: 'wrap' }}>
+            {['Cuenta segura', 'Acceso completo', 'Sin limitaciones'].map((label) => (
+              <Box
+                key={label}
+                component={motion.div}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.4 }}
+                sx={{
+                  px: 2,
+                  py: 0.6,
+                  borderRadius: '100px',
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(6px)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                }}
+              >
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
+                  {label}
+                </Typography>
+              </Box>
+            ))}
           </Box>
-        </MotionPaper>
+        </Box>
+      </Box>
 
-        {/* Decorative Elements */}
-        <MotionBox
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+      {/* RIGHT PANEL */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          p: { xs: 4, md: 8 },
+          bgcolor: '#ffffff',
+        }}
+      >
+        {/* Mobile logo */}
+        <Box
           sx={{
-            textAlign: 'center',
-            mt: 4
+            display: { xs: 'flex', md: 'none' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1.5,
+            mb: 5,
           }}
         >
-          <Typography variant="body2" color="text.secondary">
-            ¿Necesitas ayuda?{" "}
-            <Button
-              variant="text"
-              size="small"
-              sx={{
-                fontWeight: 'bold',
-                color: 'primary.main'
-              }}
-            >
-              Contáctanos
-            </Button>
+          <Box
+            sx={{
+              width: 40, height: 40, borderRadius: '10px',
+              bgcolor: '#111827',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <BadgeOutlined sx={{ color: '#fff', fontSize: '1.2rem' }} />
+          </Box>
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#111827' }}>
+            Dulceria Angelitos
           </Typography>
-        </MotionBox>
-      </Container>
+        </Box>
+
+        {/* Header */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography
+            variant="overline"
+            sx={{ color: '#9ca3af', letterSpacing: '0.12em', fontSize: '0.68rem' }}
+          >
+            VERIFICACION DE CUENTA
+          </Typography>
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            sx={{ color: '#111827', letterSpacing: '-0.025em', mt: 0.5, mb: 1 }}
+          >
+            Verifica tu correo
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#6b7280' }}>
+            Introduce el codigo de 6 digitos que enviamos a tu correo.
+          </Typography>
+        </Box>
+
+        {/* Error */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Alert
+                severity="error"
+                sx={{
+                  borderRadius: '10px',
+                  border: '1px solid #fecaca',
+                  bgcolor: '#fef2f2',
+                  color: '#991b1b',
+                  fontSize: '0.82rem',
+                }}
+              >
+                {error}
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Form */}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}
+        >
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{ color: '#374151', fontWeight: 600, mb: 0.75, display: 'block', letterSpacing: '0.02em' }}
+            >
+              CODIGO DE VERIFICACION
+            </Typography>
+            <TextField
+              placeholder="000000"
+              value={verificationCode}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+              inputProps={{
+                maxLength: 6,
+                style: {
+                  textAlign: 'center',
+                  fontSize: '1.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.35em',
+                  fontFamily: 'monospace',
+                  color: '#111827',
+                },
+                onKeyPress: (e) => {
+                  if (!/[0-9]/.test(e.key)) e.preventDefault();
+                },
+              }}
+              sx={{
+                ...inputStyles,
+                '& .MuiOutlinedInput-root': {
+                  ...inputStyles['& .MuiOutlinedInput-root'],
+                  py: 0.5,
+                },
+              }}
+            />
+            <Typography variant="caption" sx={{ color: '#9ca3af', mt: 0.75, display: 'block', textAlign: 'center' }}>
+              Revisa tu bandeja de entrada o carpeta de spam
+            </Typography>
+          </Box>
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isLoading || verificationCode.length !== 6}
+            component={motion.button}
+            whileHover={!isLoading ? { scale: 1.015 } : {}}
+            whileTap={!isLoading ? { scale: 0.98 } : {}}
+            sx={{
+              py: 1.6,
+              mt: 0.5,
+              borderRadius: '10px',
+              bgcolor: '#111827',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              letterSpacing: '0.02em',
+              textTransform: 'none',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+              '&:hover': { bgcolor: '#1f2937', boxShadow: '0 6px 20px rgba(0,0,0,0.28)' },
+              '&:disabled': { bgcolor: '#374151', color: 'rgba(255,255,255,0.6)' },
+            }}
+          >
+            {isLoading ? (
+              <CircularProgress size={22} sx={{ color: 'rgba(255,255,255,0.8)' }} />
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <VerifiedUser fontSize="small" />
+                <span>Verificar codigo</span>
+              </Box>
+            )}
+          </Button>
+        </Box>
+
+        {/* Secondary actions */}
+        <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1.5, alignItems: 'center' }}>
+          <Button
+            startIcon={<Refresh fontSize="small" />}
+            onClick={handleResendCode}
+            variant="outlined"
+            sx={{
+              borderRadius: '10px',
+              borderColor: '#e5e7eb',
+              color: '#374151',
+              fontWeight: 600,
+              textTransform: 'none',
+              fontSize: '0.82rem',
+              px: 3,
+              py: 1,
+              '&:hover': { borderColor: '#9ca3af', bgcolor: '#f9fafb' },
+            }}
+          >
+            No recibi el codigo — Reenviar
+          </Button>
+
+          <Typography
+            variant="body2"
+            component="span"
+            onClick={() => navigate('/login')}
+            sx={{
+              color: '#6b7280',
+              cursor: 'pointer',
+              fontWeight: 500,
+              transition: 'color 0.2s',
+              '&:hover': { color: '#111827' },
+            }}
+          >
+            ← Volver al inicio de sesion
+          </Typography>
+        </Box>
+
+        </Box>
+      </Box>
     </Box>
   );
 }

@@ -56,7 +56,8 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, [location.pathname, redirectBasedOnUserType]); // Added redirectBasedOnUserType to dependencies
 
-  // HEARTBEAT (15 MINUTOS)
+  // HEARTBEAT (15 MINUTOS) - COMENTADO A PETICIÓN
+  /*
   useEffect(() => {
     if (!token) return;
 
@@ -114,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener('touchstart', updateActivity);
     };
   }, [token, navigate]);
+  */
 
   // PING AUTOMÁTICO CADA 5 SEGUNDOS → DETECCIÓN INMEDIATA
   useEffect(() => {

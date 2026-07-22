@@ -5,16 +5,8 @@ import {
   Skeleton, IconButton, Stepper, Step, StepLabel, StepConnector,
   stepConnectorClasses, styled, Fade, alpha, Stack, Card, Divider, Chip
 } from "@mui/material";
-import {
-  CarOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-  InboxOutlined,
-  ReloadOutlined,
-  CreditCardOutlined
-} from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { CarOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, InboxOutlined, ReloadOutlined, CreditCardOutlined } from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const API_BASE_URL = "https://backenddulceria.onrender.com";
 
@@ -60,6 +52,18 @@ const MisPedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const status = query.get("status");
+    if (status === "success" || status === "approved") {
+      localStorage.removeItem("carrito");
+      // Opcional: limpiar la URL para que no vuelva a dispararse si recarga la página
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.dispatchEvent(new Event("carritoActualizado")); // Avisa al Header para actualizar burbuja al instante
+    }
+  }, [location]);
 
   const cargarHistorial = useCallback(async () => {
     try {

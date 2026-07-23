@@ -582,7 +582,7 @@ const CarritoCompras = () => {
             <Box sx={{ mt: { xs: 6, md: 8 }, mb: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
                 <Typography variant="h5" sx={{ fontWeight: 800, color: colors.text, letterSpacing: '-0.5px' }}>
-                  Frecuentemente comprados juntos
+                  Dulces que te pueden interesar
                 </Typography>
               </Box>
 

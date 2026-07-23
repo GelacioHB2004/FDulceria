@@ -17,7 +17,6 @@ import {
   Link,
 } from "@mui/material";
 import {
-  ArrowLeftOutlined,
   ShoppingCartOutlined,
   PlusOutlined,
   MinusOutlined,

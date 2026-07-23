@@ -137,7 +137,6 @@ const ProductosDetalle = () => {
       Swal.fire("Atención", "Cantidad no válida", "warning");
       return;
     }
-    const precioFinal = calcularPrecioFinal();
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     const index = carrito.findIndex((item) => item.id_producto === producto.id_producto);
     if (index >= 0) {

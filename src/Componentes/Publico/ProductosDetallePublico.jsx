@@ -109,12 +109,15 @@ const DetalleProducto = () => {
   const obtenerDatos = useCallback(async () => {
     try {
       setLoading(true);
-      const [resProd, resPromos] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/productos/catalogo/detalle/${id}`),
-        axios.get(`${API_BASE_URL}/api/promociones`),
-      ]);
+      const resProd = await axios.get(`${API_BASE_URL}/api/productos/catalogo/detalle/${id}`);
       setProducto(resProd.data);
-      setPromo(getPromoParaProducto(resPromos.data || [], id));
+      
+      try {
+        const resPromos = await axios.get(`${API_BASE_URL}/api/promociones`);
+        setPromo(getPromoParaProducto(resPromos.data || [], id));
+      } catch (e) {
+        // Promociones opcionales
+      }
     } catch (error) {
       console.error("Error al obtener datos", error);
     } finally {

@@ -222,7 +222,8 @@ const CarritoCompras = () => {
       // Así cumplimos con tu requisito de que no se registre nada hasta que el pago sea exitoso.
       const respMP = await axios.post('https://backenddulceria.onrender.com/api/mercadopago/crear-preferencia', {
         items: carrito,
-        direccion_entrega: direccion
+        direccion_entrega: direccion,
+        return_url: window.location.origin
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -10,14 +10,14 @@ import {
   Chip, IconButton, Fade
 } from "@mui/material";
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
+  Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList
 } from "recharts";
 import { WarningOutlined, RobotFilled, CloseOutlined, SearchOutlined, ThunderboltFilled } from "@ant-design/icons";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+const API_BASE_URL = "https://backenddulceria.onrender.com"; // Cambia esto a la URL de tu backend
 
 // ============================================================
 // SISTEMA DE DISEÑO — tokens visuales (no altera datos ni lógica)
@@ -38,8 +38,6 @@ const UI = {
 
 const ACCENT_PINK = "#EC4899";
 
-// Paleta moderna solo para representar categorías en las gráficas (Recharts) — no altera datos
-const COLORS = ['#2563EB', '#7C3AED', '#22C55E', '#F59E0B', '#EF4444', '#06B6D4', '#EC4899', '#84CC16', '#F97316', '#6366F1'];
 
 const cardSx = {
   borderRadius: "16px",
@@ -91,27 +89,84 @@ const obtenerDiaSemana = (fechaStr) => {
   return DIAS_SEMANA[d.getDay()];
 };
 
-// Helper para agrupar las predicciones diarias de la IA en Semanas y Meses
-const agruparPredicciones = (diasPredichos) => {
-  const dia = diasPredichos.slice(0, 14).map(d => ({
-    name: obtenerDiaSemana(d.fecha),
-    fechaLabel: formatFechaCorta(d.fecha),
-    valor: d.unidades_predichas
+const formatearFechaPeriodo = (fecha) => {
+  return fecha.toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const obtenerProximaSemana = () => {
+  const hoy = new Date();
+  const inicio = new Date(hoy);
+  const dia = hoy.getDay();
+  const diasHastaLunes = dia === 0 ? 1 : 8 - dia;
+  inicio.setDate(hoy.getDate() + diasHastaLunes);
+  inicio.setHours(0, 0, 0, 0);
+
+  const fin = new Date(inicio);
+  fin.setDate(inicio.getDate() + 6);
+  return { inicio, fin, label: `${formatearFechaPeriodo(inicio)} al ${formatearFechaPeriodo(fin)}` };
+};
+
+const obtenerProximoMes = () => {
+  const hoy = new Date();
+  const inicio = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);
+  const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 2, 0);
+  return {
+    inicio,
+    fin,
+    label: inicio.toLocaleDateString("es-MX", { month: "long", year: "numeric" }),
+    rango: `${formatearFechaPeriodo(inicio)} al ${formatearFechaPeriodo(fin)}`
+  };
+};
+
+const calcularCompraPeriodo = (prediccionesPeriodo = []) => {
+  if (!prediccionesPeriodo.length) return { compra: 0, inventario: 0, stockSeguridad: 0 };
+  const demanda = prediccionesPeriodo.reduce((acc, curr) => acc + (Number(curr.unidades_predichas) || 0), 0);
+  const stockActual = Number(prediccionesPeriodo[0].stock_actual) || 0;
+  const stockSeguridad = Math.max(...prediccionesPeriodo.map(p => Number(p.stock_seguridad) || 0));
+  const inventario = demanda + stockSeguridad;
+  return {
+    compra: Math.max(0, inventario - stockActual),
+    inventario,
+    stockSeguridad
+  };
+};
+
+// Helper para mostrar las predicciones semanales reales del modelo Flask/Render.
+const agruparPredicciones = (prediccionesSemanales = []) => {
+  const semanas = Array.isArray(prediccionesSemanales) ? prediccionesSemanales : [];
+  const proximaSemana = obtenerProximaSemana();
+  const proximoMes = obtenerProximoMes();
+
+  const dia = semanas.slice(0, 1).flatMap((semana, idxSem) => {
+    const ventaDiaria = Math.ceil((Number(semana.unidades_predichas) || 0) / 7);
+    return Array.from({ length: 7 }, (_, idxDia) => ({
+      name: DIAS_SEMANA[(idxDia + 1) % 7],
+      fechaLabel: proximaSemana.label,
+      valor: ventaDiaria
+    }));
+  });
+
+  const primeraSemana = semanas.slice(0, 1);
+  const compraSemana = calcularCompraPeriodo(primeraSemana);
+  const semana = primeraSemana.map((item) => ({
+    name: `Próxima semana`,
+    periodo: proximaSemana.label,
+    valor: Number(item.unidades_predichas) || 0,
+    compra: compraSemana.compra,
+    inventario: compraSemana.inventario,
+    stockSeguridad: compraSemana.stockSeguridad
   }));
 
-  const semana = [];
-  for (let i = 0; i < 4; i++) {
-    const chunk = diasPredichos.slice(i * 7, (i + 1) * 7);
-    const suma = chunk.reduce((acc, curr) => acc + curr.unidades_predichas, 0);
-    semana.push({ name: `Semana ${i + 1}`, valor: suma });
-  }
-
-  const mes = [];
-  for (let i = 0; i < 2; i++) {
-    const chunk = diasPredichos.slice(i * 30, (i + 1) * 30);
-    const suma = chunk.reduce((acc, curr) => acc + curr.unidades_predichas, 0);
-    mes.push({ name: `Mes ${i + 1}`, valor: suma });
-  }
+  const semanasMes = semanas.slice(0, 4);
+  const compraMes = calcularCompraPeriodo(semanasMes);
+  const mes = [{
+    name: `Próximo mes: ${proximoMes.label}`,
+    periodo: proximoMes.rango,
+    valor: semanasMes.reduce((acc, curr) => acc + (Number(curr.unidades_predichas) || 0), 0),
+    compra: compraMes.compra,
+    inventario: compraMes.inventario,
+    stockSeguridad: compraMes.stockSeguridad
+  }];
 
   return { dia, semana, mes };
 };
@@ -235,8 +290,7 @@ const GraficaTendencia = ({ dataset, dataKey, tabIndex, colorPrincipal, colorDes
 
 
 const Reportes = () => {
-  const [frecuentes, setFrecuentes] = useState([]);
-  const [masVendidos, setMasVendidos] = useState([]);
+
 
   // Productos y Filtros
   const [productosOriginales, setProductosOriginales] = useState([]);
@@ -250,8 +304,7 @@ const Reportes = () => {
 
   // Modales y Visores
   const [modalVentasOpen, setModalVentasOpen] = useState(false);
-  const [modalClientesOpen, setModalClientesOpen] = useState(false);
-  const [selectedSegment, setSelectedSegment] = useState(null);
+
   const [modalPrediccionOpen, setModalPrediccionOpen] = useState(false);
   const [selectedProdTitle, setSelectedProdTitle] = useState("");
   const [historialData, setHistorialData] = useState({ dia: [], semana: [], mes: [] });
@@ -262,22 +315,7 @@ const Reportes = () => {
   const [pdfParams, setPdfParams] = useState("semana");
   const [isPdfGenerating, setIsPdfGenerating] = useState(false);
 
-  // Datos mock temporal para Propuesta 3 (Mayoristas y Ocasionales)
-  const mayoristas = [
-    { name: "abarrotes_centro@gmail.com", val: 12500, label: "$12,500 gastados" },
-    { name: "eventos_liz@hotmail.com", val: 8900, label: "$8,900 gastados" },
-    { name: "dulceria_perez@yahoo.com", val: 7200, label: "$7,200 gastados" },
-    { name: "fiestas_magicas@gmail.com", val: 5400, label: "$5,400 gastados" },
-    { name: "regalos_xpress@hotmail.com", val: 4100, label: "$4,100 gastados" }
-  ];
 
-  const ocasionales = [
-    { name: "carlos_88@gmail.com", val: 2, label: "2 pedidos" },
-    { name: "maria.lopez99@hotmail.com", val: 1, label: "1 pedido" },
-    { name: "jorge_v@yahoo.com", val: 1, label: "1 pedido" },
-    { name: "anna_paola@gmail.com", val: 1, label: "1 pedido" },
-    { name: "luis.martinez@tecnm.mx", val: 1, label: "1 pedido" }
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -285,15 +323,11 @@ const Reportes = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const [reqClientes, reqProductos, reqTodos, reqAlertas] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/reportes/clientes-frecuentes`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/api/reportes/productos-vendidos`, { headers: { Authorization: `Bearer ${token}` } }),
+        const [reqTodos, reqAlertas] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/reportes/listado-productos`, { headers: { Authorization: `Bearer ${token}` } }),
           axios.get(`${API_BASE_URL}/api/predicciones/alertas`, { headers: { Authorization: `Bearer ${token}` } }).catch(() => ({ data: [] }))
         ]);
 
-        setFrecuentes(reqClientes.data.map(c => ({ name: c.Correo, val: parseInt(c.total_pedidos) })));
-        setMasVendidos(reqProductos.data.map(p => ({ name: p.nombre, val: parseInt(p.unidades_vendidas) })));
         setAlertasDesabasto(reqAlertas.data || []);
 
         const dataProds = reqTodos.data;
@@ -345,12 +379,6 @@ const Reportes = () => {
     }
   };
 
-  const abrirModalSegmento = (segName) => {
-    if (segName) {
-      setSelectedSegment(segName);
-      setModalClientesOpen(true);
-    }
-  };
 
   const abrirModalPrediccion = async (prod) => {
     const token = localStorage.getItem("token");
@@ -359,15 +387,14 @@ const Reportes = () => {
     setPrediccionData({ isLoading: true, data: null, error: false });
     setModalPrediccionOpen(true);
 
-    // IMPORTANTE: Pedimos 60 días al backend de Python para poder agruparlo en Semanas y Meses!
+    // Pedimos 8 semanas al backend; la vista semanal usa la primera y la mensual agrega las primeras 4.
     setTabIndex(1);
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/predicciones/producto/${prod.id_producto}?dias=60`, {
+      const res = await axios.get(`${API_BASE_URL}/api/predicciones/producto/${prod.id_producto}?semanas=8`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const dataProcesada = res.data;
-      // Agrupamos en JS para Diaria, Semanal, Mensual
-      dataProcesada.agrupado = agruparPredicciones(res.data.pronostico_diario);
+      dataProcesada.agrupado = agruparPredicciones(res.data.pronostico_semanal);
 
       setPrediccionData({ isLoading: false, data: dataProcesada, error: false });
     } catch (e) {
@@ -386,13 +413,19 @@ const Reportes = () => {
       });
 
       const doc = new jsPDF();
-      doc.text(`Proyeccion de Demanda AI (${pdfParams === 'semana' ? 'Proximas 4 Semanas' : 'Proximos 2 Meses'})`, 14, 15);
+      const periodoSemana = obtenerProximaSemana();
+      const periodoMes = obtenerProximoMes();
+      const tituloPeriodo = pdfParams === 'semana'
+        ? `Próxima semana: ${periodoSemana.label}`
+        : `Próximo mes: ${periodoMes.label}`;
+
+      doc.text(`Proyección de Demanda AI (${tituloPeriodo})`, 14, 15);
 
       let head = [];
       if (pdfParams === 'semana') {
-        head = [["ID", "Producto", "Categoria", "Stock", "Semana 1", "Semana 2", "Semana 3", "Semana 4"]];
+        head = [["ID", "Producto", "Categoría", "Stock", "Demanda", "Comprar", "Inventario Rec."]];
       } else {
-        head = [["ID", "Producto", "Categoria", "Stock", "Mes 1", "Mes 2"]];
+        head = [["ID", "Producto", "Categoría", "Stock", "Demanda Mes", "Comprar", "Inventario Rec."]];
       }
 
       const body = res.data.map(p => {
@@ -400,20 +433,25 @@ const Reportes = () => {
         const stock = prodOrig?.stock || 0;
         const cat = prodOrig?.categoria || 'Sin Categoría';
         if (pdfParams === 'semana') {
-          return [p.id_producto, p.nombre, cat, stock,
-          Math.ceil(p.semanas[0] / 7) * 7,
-          Math.ceil(p.semanas[1] / 7) * 7,
-          Math.ceil(p.semanas[2] / 7) * 7,
-          Math.ceil(p.semanas[3] / 7) * 7];
+          const demanda = Number(p.semanas?.[0]) || 0;
+          const inventarioBase = Number(p.inventario_recomendado_semanal?.[0]) || demanda;
+          const stockSeguridad = Math.max(0, inventarioBase - demanda);
+          const inventario = demanda + stockSeguridad;
+          const compra = Math.max(0, inventario - stock);
+          return [p.id_producto, p.nombre, cat, stock, demanda, compra, inventario];
         } else {
-          const vd1 = Math.ceil(p.semanas[0] / 7);
-          const vd2 = Math.ceil(p.semanas[4] / 7);
-          return [p.id_producto, p.nombre, cat, stock, vd1 * 30, vd2 * 26];
+          const semanasMes = (p.semanas || []).slice(0, 4).map(Number);
+          const inventariosMes = (p.inventario_recomendado_semanal || []).slice(0, 4).map(Number);
+          const demanda = semanasMes.reduce((acc, val) => acc + (val || 0), 0);
+          const stockSeguridad = Math.max(0, ...inventariosMes.map((inv, idx) => (inv || 0) - (semanasMes[idx] || 0)));
+          const inventario = demanda + stockSeguridad;
+          const compra = Math.max(0, inventario - stock);
+          return [p.id_producto, p.nombre, cat, stock, demanda, compra, inventario];
         }
       });
 
       autoTable(doc, {
-        startY: 20,
+        startY: 24,
         head: head,
         body: body,
         theme: 'grid',
@@ -441,6 +479,16 @@ const Reportes = () => {
     if (tabIndex === 0) return prediccionData.data.agrupado.dia;
     if (tabIndex === 1) return prediccionData.data.agrupado.semana;
     return prediccionData.data.agrupado.mes;
+  };
+
+  const getResumenPrediccion = () => {
+    const dataset = getCurrentPrediccionDataset();
+    return {
+      demanda: dataset.reduce((acc, cur) => acc + (Number(cur.valor) || 0), 0),
+      compra: dataset.reduce((acc, cur) => acc + (Number(cur.compra) || 0), 0),
+      inventario: dataset.reduce((acc, cur) => acc + (Number(cur.inventario) || 0), 0),
+      periodo: dataset[0]?.periodo || dataset[0]?.name || ''
+    };
   };
 
   const etiquetaPeriodo = (cantidad) => {
@@ -545,146 +593,6 @@ const Reportes = () => {
 
 
 
-
-        {/* GRÁFICAS DEL DASHBOARD PRINCIPAL */}
-        <Grid container spacing={3} sx={{ mb: 5 }}>
-          {/* Gráfica Circular Clientes Recurrentes */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ ...cardSx, height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={700} sx={{ color: UI.textPrimary, mb: 1 }}>
-                  Clientes Recurrentes
-                </Typography>
-                <Typography variant="body2" sx={{ color: UI.textSecondary, mb: 2 }}>
-                  Da clic en la gráfica para ver todos los {frecuentes.length} clientes
-                </Typography>
-                <Box sx={{ width: '100%', height: 280, cursor: 'pointer' }}>
-                  {frecuentes.length > 0 ? (
-                    <ResponsiveContainer>
-                      <PieChart>
-                        <Pie
-                          data={frecuentes.slice(0, 5)}
-                          dataKey="val"
-                          nameKey="name"
-                          cx="50%" cy="50%"
-                          outerRadius={90}
-                          onClick={() => abrirModalSegmento('Recurrentes')}
-                          label
-                        >
-                          {frecuentes.slice(0, 5).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={UI.card} strokeWidth={2} />
-                          ))}
-                        </Pie>
-                        <Tooltip contentStyle={{ borderRadius: 10, border: `1px solid ${UI.border}`, boxShadow: "0 8px 24px rgba(15,23,42,0.1)" }} />
-                        <Legend wrapperStyle={{ fontSize: "0.8rem", color: UI.textSecondary }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <Typography align="center" mt={10} sx={{ color: UI.textSecondary }}>No hay suficientes datos registrados</Typography>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Gráfica Circular Mayoristas */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ ...cardSx, height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={700} sx={{ color: UI.textPrimary, mb: 1 }}>
-                  Clientes Mayoristas
-                </Typography>
-                <Typography variant="body2" sx={{ color: UI.textSecondary, mb: 2 }}>
-                  Da clic en la gráfica para ver todos los {mayoristas.length} mayoristas
-                </Typography>
-                <Box sx={{ width: '100%', height: 280, cursor: 'pointer' }}>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie
-                        data={mayoristas}
-                        dataKey="val"
-                        nameKey="name"
-                        cx="50%" cy="50%"
-                        outerRadius={90}
-                        onClick={() => abrirModalSegmento('Mayoristas')}
-                        label
-                      >
-                        {mayoristas.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[(index + 5) % COLORS.length]} stroke={UI.card} strokeWidth={2} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ borderRadius: 10, border: `1px solid ${UI.border}`, boxShadow: "0 8px 24px rgba(15,23,42,0.1)" }} />
-                      <Legend wrapperStyle={{ fontSize: "0.8rem", color: UI.textSecondary }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Gráfica Circular Ocasionales */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ ...cardSx, height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={700} sx={{ color: UI.textPrimary, mb: 1 }}>
-                  Clientes Ocasionales
-                </Typography>
-                <Typography variant="body2" sx={{ color: UI.textSecondary, mb: 2 }}>
-                  Da clic en la gráfica para ver todos los {ocasionales.length} ocasionales
-                </Typography>
-                <Box sx={{ width: '100%', height: 280, cursor: 'pointer' }}>
-                  <ResponsiveContainer>
-                    <PieChart>
-                      <Pie
-                        data={ocasionales}
-                        dataKey="val"
-                        nameKey="name"
-                        cx="50%" cy="50%"
-                        outerRadius={90}
-                        onClick={() => abrirModalSegmento('Ocasionales')}
-                        label
-                      >
-                        {ocasionales.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} stroke={UI.card} strokeWidth={2} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ borderRadius: 10, border: `1px solid ${UI.border}`, boxShadow: "0 8px 24px rgba(15,23,42,0.1)" }} />
-                      <Legend wrapperStyle={{ fontSize: "0.8rem", color: UI.textSecondary }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Gráfica Circular Productos Más Vendidos */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ ...cardSx, height: '100%' }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={700} sx={{ color: UI.textPrimary, mb: 2 }}>
-                  Top 5 Productos Más Vendidos
-                </Typography>
-                <Box sx={{ width: '100%', height: 280 }}>
-                  {masVendidos.length > 0 ? (
-                    <ResponsiveContainer>
-                      <PieChart>
-                        <Pie data={masVendidos.slice(0, 5)} dataKey="val" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} label>
-                          {masVendidos.slice(0, 5).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[(index + 4) % COLORS.length]} stroke={UI.card} strokeWidth={2} />
-                          ))}
-                        </Pie>
-                        <Tooltip contentStyle={{ borderRadius: 10, border: `1px solid ${UI.border}`, boxShadow: "0 8px 24px rgba(15,23,42,0.1)" }} />
-                        <Legend wrapperStyle={{ fontSize: "0.8rem", color: UI.textSecondary }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <Typography align="center" mt={10} sx={{ color: UI.textSecondary }}>No hay suficientes datos registrados</Typography>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
 
 
         <Typography variant="h5" sx={{ ...sectionTitleSx, fontSize: "1.3rem", mb: 2.5 }}>
@@ -986,16 +894,23 @@ const Reportes = () => {
                   "&::before": { content: '""', position: "absolute", left: 0, top: 0, bottom: 0, width: "4px", bgcolor: UI.secondary },
                 }}>
                   <Typography variant="body2" fontWeight={700} sx={{ color: UI.textPrimary, textTransform: "uppercase", letterSpacing: "0.04em", fontSize: "0.72rem" }}>
-                    Resumen Analítico (Próximas 8 Semanas)
+                    Resumen Analítico ({tabIndex === 1 ? 'Próxima semana' : 'Próximo mes'})
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: UI.textSecondary, mt: 0.5 }}>
+                    {getResumenPrediccion().periodo}
                   </Typography>
                   <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} sm={4}>
                       <Typography variant="body2" sx={{ color: UI.textSecondary }}>Proyección Total Esperada</Typography>
-                      <Typography variant="h5" fontWeight={700} sx={{ color: UI.secondary }}>{prediccionData.data.total_predicho} unidades</Typography>
+                      <Typography variant="h5" fontWeight={700} sx={{ color: UI.secondary }}>{getResumenPrediccion().demanda} unidades</Typography>
                     </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="body2" sx={{ color: UI.textSecondary }}>Confianza (R² Mod)</Typography>
-                      <Typography variant="h6" fontWeight={700} sx={{ color: UI.secondary }}>R² = {prediccionData.data.metricas_modelo?.r2 || '0.92'}</Typography>
+                    <Grid item xs={12} sm={4}>
+                      <Typography variant="body2" sx={{ color: UI.textSecondary }}>Compra Sugerida</Typography>
+                      <Typography variant="h5" fontWeight={700} sx={{ color: UI.warning }}>{getResumenPrediccion().compra} unidades</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Typography variant="body2" sx={{ color: UI.textSecondary }}>Confianza (RÂ² Mod)</Typography>
+                      <Typography variant="h6" fontWeight={700} sx={{ color: UI.secondary }}>R² = {prediccionData.data.metricas_modelo?.r2 ?? 'N/D'}</Typography>
                     </Grid>
                   </Grid>
                 </Box>
@@ -1006,7 +921,7 @@ const Reportes = () => {
                       Predicción de Demanda
                     </Typography>
                     <Typography variant="body2" sx={{ color: UI.textSecondary, mb: 2 }}>
-                      {selectedProdTitle} · {tabIndex === 1 ? 'Próximas 4 semanas' : 'Próximos 2 meses'}
+                      {selectedProdTitle} · {getResumenPrediccion().periodo}
                     </Typography>
                     <Chip
                       label="Modelo: Random Forest"
@@ -1038,15 +953,19 @@ const Reportes = () => {
                         <TableRow>
                           <TableCell sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>Período Evaluado</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>Demanda Estimada</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>Comprar</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>Inventario Rec.</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {getCurrentPrediccionDataset().map((row, i) => (
                           <TableRow key={i} sx={{ "& td": { borderBottom: `1px solid ${UI.border}` }, "&:last-child td": { borderBottom: 0 } }}>
                             <TableCell sx={{ color: UI.textPrimary }}>
-                              {tabIndex === 0 ? `${row.name} · ${row.fechaLabel}` : row.name}
+                              {row.periodo ? `${row.name} · ${row.periodo}` : row.name}
                             </TableCell>
                             <TableCell align="right" sx={{ color: UI.secondary, fontWeight: 700 }}>{row.valor} und.</TableCell>
+                            <TableCell align="right" sx={{ color: UI.warning, fontWeight: 700 }}>{row.compra || 0} und.</TableCell>
+                            <TableCell align="right" sx={{ color: UI.success, fontWeight: 700 }}>{row.inventario || 0} und.</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -1092,8 +1011,8 @@ const Reportes = () => {
               onChange={(e, v) => { if (v) setPdfParams(v); }}
               sx={{ "& .MuiToggleButton-root": { borderRadius: "10px !important", textTransform: "none", fontWeight: 600 } }}
             >
-              <ToggleButton value="semana">4 Semanas</ToggleButton>
-              <ToggleButton value="mes">2 Meses</ToggleButton>
+              <ToggleButton value="semana">Próxima semana</ToggleButton>
+              <ToggleButton value="mes">Próximo mes</ToggleButton>
             </ToggleButtonGroup>
           </DialogContent>
           <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${UI.border}` }}>
@@ -1109,60 +1028,6 @@ const Reportes = () => {
           </DialogActions>
         </Dialog>
 
-
-        {/* Modal: SEGMENTACION DE CLIENTES */}
-        <Dialog
-          open={modalClientesOpen}
-          onClose={() => setModalClientesOpen(false)}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{ sx: { borderRadius: "18px", boxShadow: "0 24px 48px rgba(15,23,42,0.18)" } }}
-        >
-          <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pt: 2.5, pb: 2, borderBottom: `1px solid ${UI.border}` }}>
-            <Box>
-              <Typography variant="h6" fontWeight={700} sx={{ color: UI.textPrimary }}>Segmento: {selectedSegment}</Typography>
-              <Typography variant="body2" sx={{ color: UI.textSecondary }}>Listado de usuarios clasificados en este segmento</Typography>
-            </Box>
-            <IconButton size="small" onClick={() => setModalClientesOpen(false)} sx={{ color: UI.textSecondary }}>
-              <CloseOutlined style={{ fontSize: 16 }} />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ px: 3, py: 3 }}>
-            <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${UI.border}`, borderRadius: "12px", overflow: "hidden" }}>
-              <Table size="small">
-                <TableHead sx={{ bgcolor: UI.bg }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>Correo del Cliente</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700, color: UI.textSecondary, fontSize: "0.75rem", textTransform: "uppercase" }}>{selectedSegment === 'Recurrentes' ? 'Total Pedidos' : 'Volumen / Estado'}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {selectedSegment === 'Recurrentes' && frecuentes.map((c, i) => (
-                    <TableRow key={i} sx={{ "& td": { borderBottom: `1px solid ${UI.border}` }, "&:last-child td": { borderBottom: 0 } }}>
-                      <TableCell sx={{ color: UI.textPrimary }}>{c.name}</TableCell>
-                      <TableCell align="right" sx={{ color: UI.textPrimary, fontWeight: 600 }}>{c.val} pedidos</TableCell>
-                    </TableRow>
-                  ))}
-                  {selectedSegment === 'Mayoristas' && mayoristas.map((c, i) => (
-                    <TableRow key={i} sx={{ "& td": { borderBottom: `1px solid ${UI.border}` }, "&:last-child td": { borderBottom: 0 } }}>
-                      <TableCell sx={{ color: UI.textPrimary }}>{c.name}</TableCell>
-                      <TableCell align="right" sx={{ color: UI.textPrimary, fontWeight: 600 }}>{c.label}</TableCell>
-                    </TableRow>
-                  ))}
-                  {selectedSegment === 'Ocasionales' && ocasionales.map((c, i) => (
-                    <TableRow key={i} sx={{ "& td": { borderBottom: `1px solid ${UI.border}` }, "&:last-child td": { borderBottom: 0 } }}>
-                      <TableCell sx={{ color: UI.textPrimary }}>{c.name}</TableCell>
-                      <TableCell align="right" sx={{ color: UI.textSecondary, fontSize: "0.85rem" }}>{c.label}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${UI.border}` }}>
-            <Button variant="contained" sx={{ ...buttonBaseSx, bgcolor: UI.primary, "&:hover": { ...buttonBaseSx["&:hover"], bgcolor: UI.primaryDark } }} onClick={() => setModalClientesOpen(false)}>Cerrar Listado</Button>
-          </DialogActions>
-        </Dialog>
 
 
       </Container>

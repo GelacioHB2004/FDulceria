@@ -6,7 +6,7 @@ import {
   TableRow, Paper, Button, Chip, Select, MenuItem,
   Dialog, DialogTitle, DialogContent, DialogActions,
   FormControl, InputLabel, Box, TextField, InputAdornment,
-  Tooltip, Badge, Grid, alpha
+  Tooltip, Badge, Grid, alpha, TablePagination
 } from "@mui/material";
 import {
   Search,
@@ -19,13 +19,16 @@ import {
 import Swal from "sweetalert2";
 
 // Usamos localhost para desarrollo, puedes cambiarlo a tu URL de Render luego
-const API_BASE_URL = "https://backenddulceria.onrender.com";
+const API_BASE_URL = "https://backenddulceria.onrender.com"; // Cambia esto a tu URL de Render cuando sea necesario
 
 const GestionPedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [pedidosFiltrados, setPedidosFiltrados] = useState([]);
   const [repartidores, setRepartidores] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [pedidoActivo, setPedidoActivo] = useState(null);
@@ -65,7 +68,17 @@ const GestionPedidos = () => {
       p.nombre_cliente.toLowerCase().includes(busqueda.toLowerCase())
     );
     setPedidosFiltrados(filtrados);
+    setPage(0);
   }, [busqueda, pedidos]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const abrirModal = async (pedido) => {
     setPedidoActivo(pedido);
@@ -156,65 +169,78 @@ const GestionPedidos = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {pedidosFiltrados.map((p) => (
-                <TableRow key={p.id_pedido} hover>
-                  <TableCell>
-                    <Typography fontWeight="bold">#{p.id_pedido}</Typography>
-                    {p.num_incidencias > 0 && (
-                      <Tooltip title={`${p.num_incidencias} incidencias reportadas`}>
-                        <Badge badgeContent={p.num_incidencias} color="error">
-                          <WarningAmber sx={{ color: '#d32f2f', fontSize: 20 }} />
-                        </Badge>
-                      </Tooltip>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight="600">{p.nombre_cliente}</Typography>
-                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>{p.direccion_entrega}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Person sx={{ fontSize: 16, color: '#757575' }} />
-                      <Typography variant="body2">{p.nombre_repartidor || 'Sin repartidor'}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                      <LocalShipping sx={{ fontSize: 16, color: '#757575' }} />
-                      <Typography variant="caption" color="textSecondary">
-                        {p.fecha_envio ? `Envió: ${new Date(p.fecha_envio).toLocaleDateString()}` : 'No enviado'}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography fontWeight="bold" color="#2E7D32">${p.total}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={p.estado}
-                      sx={{
-                        bgcolor: alpha(getStatusColor(p.estado), 0.1),
-                        color: getStatusColor(p.estado),
-                        fontWeight: 'bold',
-                        border: `1px solid ${getStatusColor(p.estado)}`
-                      }}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="outlined"
-                      startIcon={<Visibility />}
-                      size="small"
-                      onClick={() => abrirModal(p)}
-                      sx={{ borderRadius: 2, textTransform: 'none' }}
-                    >
-                      Gestionar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {pedidosFiltrados
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((p) => (
+                  <TableRow key={p.id_pedido} hover>
+                    <TableCell>
+                      <Typography fontWeight="bold">#{p.id_pedido}</Typography>
+                      {p.num_incidencias > 0 && (
+                        <Tooltip title={`${p.num_incidencias} incidencias reportadas`}>
+                          <Badge badgeContent={p.num_incidencias} color="error">
+                            <WarningAmber sx={{ color: '#d32f2f', fontSize: 20 }} />
+                          </Badge>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="600">{p.nombre_cliente}</Typography>
+                      <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>{p.direccion_entrega}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Person sx={{ fontSize: 16, color: '#757575' }} />
+                        <Typography variant="body2">{p.nombre_repartidor || 'Sin repartidor'}</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                        <LocalShipping sx={{ fontSize: 16, color: '#757575' }} />
+                        <Typography variant="caption" color="textSecondary">
+                          {p.fecha_envio ? `Envió: ${new Date(p.fecha_envio).toLocaleDateString()}` : 'No enviado'}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography fontWeight="bold" color="#2E7D32">${p.total}</Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={p.estado}
+                        sx={{
+                          bgcolor: alpha(getStatusColor(p.estado), 0.1),
+                          color: getStatusColor(p.estado),
+                          fontWeight: 'bold',
+                          border: `1px solid ${getStatusColor(p.estado)}`
+                        }}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant="outlined"
+                        startIcon={<Visibility />}
+                        size="small"
+                        onClick={() => abrirModal(p)}
+                        sx={{ borderRadius: 2, textTransform: 'none' }}
+                      >
+                        Gestionar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          component="div"
+          count={pedidosFiltrados.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
       </Card>
 
       {/* Modal Moderno */}

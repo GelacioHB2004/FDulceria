@@ -8,6 +8,7 @@ import {
   CloseOutlined,
   DownOutlined,
   RightOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -113,10 +114,10 @@ const EncabezadoRepartidor = () => {
       case "home":
         navigate('/repartidor');
         break;
-      case "altapropiedades":
+      case "entregas":
         navigate('/repartidor/entregas');
         break;
-      case "GestionReservas":
+      case "historial":
         navigate('/repartidor/historial');
         break;
       case "Reportes":
@@ -140,15 +141,8 @@ const EncabezadoRepartidor = () => {
 
   const menuItems = [
     { key: "home", label: "Inicio", icon: <HomeOutlined /> },
-    {
-      key: "propiedades",
-      label: "Pedidos",
-      icon: <ShopOutlined />,
-      submenu: [
-        { key: "altapropiedades", label: "Ver Mis Entregas" },
-        { key: "GestionReservas", label: "Historial Realizado" },
-      ],
-    },
+    { key: "entregas", label: "Pedidos Asignados", icon: <ShopOutlined /> },
+    { key: "historial", label: "Historial de Entregas", icon: <HistoryOutlined /> },
     { key: "MiPerfil", label: "Perfil", icon: <UserOutlined /> },
     { key: "cerrarSesion", label: "Cerrar Sesión", icon: <LogoutOutlined /> },
   ];

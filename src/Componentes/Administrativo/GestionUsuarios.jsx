@@ -67,6 +67,7 @@ const GestionUsuarios = () => {
   const theme = useTheme();
   const [usuarios, setUsuarios] = useState([]);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState([]);
+  const [segmentosClientes, setSegmentosClientes] = useState({});
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -99,7 +100,7 @@ const GestionUsuarios = () => {
     }
   }), [token]);
 
-  // Estadísticas
+  // EstadÃ­sticas
   const [stats, setStats] = useState({
     total: 0,
     clientes: 0,
@@ -112,7 +113,25 @@ const GestionUsuarios = () => {
   const obtenerUsuarios = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://backenddulceria.onrender.com/api/gestion_usuarios", config());
+      const [res, resSegmentos] = await Promise.all([
+        axios.get("https://backenddulceria.onrender.com/api/gestion_usuarios", config()),
+        axios.get("https://backenddulceria.onrender.com/api/segmentacion-clientes/usuarios", config())
+          .catch((error) => {
+            console.warn("No se pudo cargar segmentacion de clientes:", error);
+            return { data: [] };
+          })
+      ]);
+
+      const segmentosMap = {};
+      (resSegmentos.data || []).forEach((item) => {
+        const idSegmento = Number(item.id_usuario ?? item.id_usuarios ?? item.id);
+        if (!Number.isNaN(idSegmento)) {
+          segmentosMap[idSegmento] = item;
+          segmentosMap[String(idSegmento)] = item;
+        }
+      });
+
+      setSegmentosClientes(segmentosMap);
       setUsuarios(res.data);
 
       const total = res.data.length;
@@ -261,6 +280,15 @@ const GestionUsuarios = () => {
       case 'Repartidor': return 'warning';
       default: return 'info';
     }
+  };
+
+  const getSegmentoCliente = (idUsuario) => segmentosClientes[idUsuario];
+
+  const getEtiquetaSegmento = (segmento) => {
+    const texto = (segmento?.interpretacion_sugerida || '').toLowerCase();
+    if (texto.includes('mayor frecuencia')) return 'mayor frecuencia';
+    if (texto.includes('menor frecuencia')) return 'menor frecuencia';
+    return 'sin frecuencia definida';
   };
 
   const statsCards = [
@@ -519,7 +547,7 @@ const GestionUsuarios = () => {
           </Typography>
           <Chip
             icon={<InfoIcon />}
-            label={`Página ${paginaActual} de ${totalPaginas}`}
+            label={`PÃ¡gina ${paginaActual} de ${totalPaginas}`}
             variant="outlined"
           />
         </Box>
@@ -551,7 +579,7 @@ const GestionUsuarios = () => {
               <AnimatePresence>
                 {usuariosActuales.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                    <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
                       <Box>
                         <PersonIcon sx={{ fontSize: 60, color: 'text.disabled', mb: 2, opacity: 0.5 }} />
                         <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -619,12 +647,41 @@ const GestionUsuarios = () => {
                       </TableCell>
                       <TableCell>
                         {u.TipoUsuario === 'Cliente' ? (
-                          <Chip
-                            label={['Frecuente', 'Recurrente', 'Ocasional'][u.id_usuarios % 3]}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontWeight: 'bold', color: 'text.secondary', borderColor: 'divider' }}
-                          />
+                          getSegmentoCliente(u.id_usuarios) ? (
+                            <Tooltip
+                              title={
+                                <>
+                                  <Typography variant="caption" display="block">
+                                    CategorÃ­a favorita: {getSegmentoCliente(u.id_usuarios).categoria_favorita || 'N/D'}
+                                  </Typography>
+                                </>
+                              }
+                            >
+                              <Chip
+                                label={getEtiquetaSegmento(getSegmentoCliente(u.id_usuarios))}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  fontWeight: 'bold',
+                                  maxWidth: 230,
+                                  color: theme.palette.secondary.main,
+                                  borderColor: alpha(theme.palette.secondary.main, 0.35),
+                                  '& .MuiChip-label': {
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }
+                                }}
+                              />
+                            </Tooltip>
+                          ) : (
+                            <Chip
+                              label="Sin segmento"
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontWeight: 'bold', color: 'text.secondary', borderColor: 'divider' }}
+                            />
+                          )
                         ) : (
                           <Typography variant="caption" color="text.secondary">-</Typography>
                         )}
@@ -674,7 +731,7 @@ const GestionUsuarios = () => {
             </TableBody>
           </Table>
 
-          {/* Paginación */}
+          {/* Paginacion */}
           <Box sx={{ p: 3, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
             <Stack direction="row" justifyContent="center" spacing={1}>
               {Array.from({ length: totalPaginas }, (_, i) => (
@@ -695,7 +752,7 @@ const GestionUsuarios = () => {
           </Box>
         </MotionPaper>
 
-        {/* Modal de creación/edición */}
+        {/* Modal de creacion/edicion */}
         <Dialog
           open={openModal}
           onClose={() => setOpenModal(false)}
@@ -771,7 +828,7 @@ const GestionUsuarios = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Correo Electrónico"
+                  label="Correo ElectrÃ³nico"
                   name="Correo"
                   value={formData.Correo}
                   onChange={handleChange}
@@ -784,7 +841,7 @@ const GestionUsuarios = () => {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Teléfono"
+                  label="TelÃ©fono"
                   name="Telefono"
                   value={formData.Telefono}
                   onChange={handleChange}
@@ -799,7 +856,7 @@ const GestionUsuarios = () => {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    label="Contraseña"
+                    label="ContraseÃ±a"
                     name="Password"
                     type="password"
                     value={formData.Password}
@@ -895,7 +952,7 @@ const GestionUsuarios = () => {
           </DialogActions>
         </Dialog>
 
-        {/* FAB para móviles */}
+        {/* FAB para mÃ³viles */}
         <Zoom in={usuarios.length > 0}>
           <Fab
             color="primary"
@@ -932,3 +989,5 @@ const GestionUsuarios = () => {
 };
 
 export default GestionUsuarios;
+
+

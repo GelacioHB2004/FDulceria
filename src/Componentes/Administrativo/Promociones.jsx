@@ -30,6 +30,7 @@ const Promociones = () => {
   const [loading, setLoading] = useState(true);
   const [promos, setPromos] = useState([]);
   const [productosAnalisis, setProductosAnalisis] = useState([]);
+  const [segmentosDisponibles, setSegmentosDisponibles] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -41,18 +42,29 @@ const Promociones = () => {
   const [formData, setFormData] = useState({
     nombre: '', descripcion: '', tipo_descuento: 'Porcentaje',
     valor_descuento: '', fecha_inicio: '', fecha_fin: '',
-    id_producto: '', id_categoria: '', estado: 'Activo'
+    id_producto: '', id_categoria: '', estado: 'Activo',
+    segmento_objetivo: 'Todos'
   });
+
+  const obtenerEtiquetaSegmento = (segmento) => {
+    const texto = String(segmento?.interpretacion_sugerida || segmento || '').toLowerCase();
+    if (texto.includes('mayor frecuencia')) return 'mayor frecuencia';
+    if (texto.includes('menor frecuencia')) return 'menor frecuencia';
+    return '';
+  };
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [resPromos, resAnalisis] = await Promise.all([
+      const [resPromos, resAnalisis, resSegmentos] = await Promise.all([
         api.get(`${API_BASE_URL}/api/promociones`),
-        api.get(`${API_BASE_URL}/api/promociones/analisis-ventas`)
+        api.get(`${API_BASE_URL}/api/promociones/analisis-ventas`),
+        api.get(`${API_BASE_URL}/api/segmentacion-clientes/usuarios`).catch(() => ({ data: [] }))
       ]);
       setPromos(resPromos.data);
       setProductosAnalisis(resAnalisis.data.productos || []);
+      const etiquetas = [...new Set((resSegmentos.data || []).map(obtenerEtiquetaSegmento).filter(Boolean))];
+      setSegmentosDisponibles(etiquetas.length ? etiquetas : ['menor frecuencia', 'mayor frecuencia']);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -69,7 +81,7 @@ const Promociones = () => {
     return promos.find(p => {
       if (p.id_producto !== idProducto) return false;
       if (!p.fecha_fin) return p.estado === 'Activo';
-      
+
       const datePart = p.fecha_fin.substring(0, 10); // "YYYY-MM-DD"
       const [year, month, day] = datePart.split('-').map(Number);
       const limite = new Date(year, month - 1, day + 1, 0, 0, 0, 0); // Límite: las 00:00:00 del día siguiente
@@ -111,7 +123,8 @@ const Promociones = () => {
         nombre: `Liquidación: ${producto.nombre}`,
         id_producto: producto.id_producto,
         descripcion: `Promoción especial para el producto ${producto.nombre}`,
-        id_categoria: ''
+        id_categoria: '',
+        segmento_objetivo: formData.segmento_objetivo || 'Todos'
       });
     } else if (selectedIds.length > 0) {
       setFormData({
@@ -119,13 +132,15 @@ const Promociones = () => {
         nombre: `Oferta por Lote`,
         id_producto: 'MULTIPLE',
         descripcion: 'Promoción masiva aplicada a selección actual.',
-        id_categoria: ''
+        id_categoria: '',
+        segmento_objetivo: formData.segmento_objetivo || 'Todos'
       });
     } else {
       setFormData({
         nombre: '', descripcion: '', tipo_descuento: 'Porcentaje',
         valor_descuento: '', fecha_inicio: '', fecha_fin: '',
-        id_producto: '', id_categoria: '', estado: 'Activo'
+        id_producto: '', id_categoria: '', estado: 'Activo',
+        segmento_objetivo: 'Todos'
       });
     }
     setOpenForm(true);
@@ -324,7 +339,12 @@ const Promociones = () => {
                       <Typography variant="body2" fontWeight="bold">{pr.nombre}</Typography>
                       {esVencida && <Typography variant="caption" color="error">VENCIDA</Typography>}
                     </TableCell>
-                    <TableCell>{pr.nombre_producto || pr.nombre_categoria || 'General'}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{pr.nombre_producto || pr.nombre_categoria || 'General'}</Typography>
+                      {pr.segmento_objetivo && (
+                        <Chip label={pr.segmento_objetivo} color="secondary" size="small" variant="outlined" sx={{ mt: 0.5 }} />
+                      )}
+                    </TableCell>
                     <TableCell>{pr.tipo_descuento === 'Porcentaje' ? `${pr.valor_descuento}%` : `$${pr.valor_descuento}`}</TableCell>
                     <TableCell>{finalDateObj ? finalDateObj.toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell align="right">
@@ -346,6 +366,17 @@ const Promociones = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}><TextField fullWidth label="Nombre Campaña" value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} disabled={isSubmitting} /></Grid>
             <Grid item xs={12}><TextField fullWidth multiline rows={2} label="Descripción" value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} disabled={isSubmitting} /></Grid>
+            <Grid item xs={12}>
+              <TextField select fullWidth label="Aplicar a clientes" value={formData.segmento_objetivo || 'Todos'} onChange={(e) => setFormData({ ...formData, segmento_objetivo: e.target.value })} disabled={isSubmitting}>
+                <MenuItem value="Todos">Todos los clientes</MenuItem>
+                {segmentosDisponibles.map(segmento => (
+                  <MenuItem key={segmento} value={segmento}>{segmento}</MenuItem>
+                ))}
+              </TextField>
+              <Typography variant="caption" color="text.secondary">
+                Usa el modelo de segmentacion para dirigir la promocion solo al tipo de cliente elegido.
+              </Typography>
+            </Grid>
             <Grid item xs={6}>
               <TextField select fullWidth label="Tipo" value={formData.tipo_descuento} onChange={(e) => setFormData({ ...formData, tipo_descuento: e.target.value })} disabled={isSubmitting}>
                 <MenuItem value="Porcentaje">Porcentaje (%)</MenuItem>

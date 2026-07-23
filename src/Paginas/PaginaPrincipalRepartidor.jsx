@@ -1,5 +1,6 @@
+// PaginaPrincipalRepartidor.jsx
 import React, { useRef, useEffect, useState, useCallback } from "react"
-import { motion, useInView } from "framer-motion"
+import { motion } from "framer-motion"
 import {
   Container,
   Grid,
@@ -8,18 +9,17 @@ import {
   Box,
   Chip,
   LinearProgress,
-  Avatar,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   Divider,
-  CircularProgress,
   Stack,
-  Paper,
+  Skeleton,
+  IconButton,
+  alpha,
 } from "@mui/material"
 import {
-  TwoWheeler,
   MonetizationOn,
   Star,
   CheckCircle,
@@ -29,9 +29,14 @@ import {
   Phone,
   Email,
   Timer,
-  MapOutlined as MapIcon,
   Inventory,
   Storefront,
+  NavigateNext,
+  Shield,
+  Person,
+  Route,
+  Schedule,
+  AttachMoney,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -39,30 +44,18 @@ import { useAuth } from "../Componentes/Autenticacion/AuthContext"
 
 const API_BASE_URL = "https://backenddulceria.onrender.com"
 
-// Componente para animaciones con scroll
-const ScrollReveal = ({ children, delay = 0 }) => {
-  const ref = useRef(null)
-  const isInView = useInView(ref, {
-    once: false,
-    margin: "-100px",
-    amount: 0.3,
-  })
+// ============================================
+// COMPONENTES REUTILIZABLES MEJORADOS
+// ============================================
 
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.6, delay }}
-    >
-      {children}
-    </motion.div>
-  )
-}
+// ============================================
+// COMPONENTE PRINCIPAL
+// ============================================
 
 const PaginaPrincipalRepartidor = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const welcomeRef = useRef(null)
 
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ entregas_hoy: 0, dinero_entregado: 0 })
@@ -80,8 +73,8 @@ const PaginaPrincipalRepartidor = () => {
       setStats(resStats.data)
       setPedidosActivos(resPedidos.data)
       setResumenCarga(resCarga.data)
-    } catch (error) {
-      console.error("Error al cargar datos del repartidor", error)
+    } catch (err) {
+      console.error("Error al cargar datos del repartidor", err)
     } finally {
       setLoading(false)
     }
@@ -90,42 +83,6 @@ const PaginaPrincipalRepartidor = () => {
   useEffect(() => {
     fetchRealData()
   }, [fetchRealData])
-
-  // Estadísticas del día formateadas
-  const estadisticasDia = [
-    {
-      titulo: "Pedidos Hoy",
-      valor: stats.entregas_hoy || 0,
-      meta: 10,
-      icono: <CheckCircle sx={{ fontSize: 28 }} />,
-      color: "#10B981",
-      bgColor: "#ECFDF5",
-    },
-    {
-      titulo: "Gestión Hoy",
-      valor: `$${Number(stats.dinero_entregado || 0).toFixed(0)}`,
-      meta: 2000,
-      icono: <MonetizationOn sx={{ fontSize: 28 }} />,
-      color: "#F59E0B",
-      bgColor: "#FFFBEB",
-    },
-    {
-      titulo: "Pendientes",
-      valor: pedidosActivos.length,
-      meta: 5,
-      icono: <Timer sx={{ fontSize: 28 }} />,
-      color: "#3B82F6",
-      bgColor: "#EFF6FF",
-    },
-    {
-      titulo: "Reputación",
-      valor: "5.0",
-      meta: 5.0,
-      icono: <Star sx={{ fontSize: 28 }} />,
-      color: "#8B5CF6",
-      bgColor: "#F5F3FF",
-    }
-  ]
 
   // Función para abrir ruta multi-parada
   const abrirRutaCompleta = () => {
@@ -137,93 +94,181 @@ const PaginaPrincipalRepartidor = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: '#F8FAFC' }}>
-        <CircularProgress sx={{ color: '#3B82F6' }} />
+      <Box sx={{
+        minHeight: '100vh',
+        bgcolor: '#F8FAFC',
+        backgroundImage: 'url("/login-bg.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}>
+        <Container maxWidth="xl" sx={{ pt: 4, pb: 6 }}>
+          <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 4 }} />
+          <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 3, mb: 4 }} />
+          <Grid container spacing={3}>
+            <Grid item xs={12} lg={8}>
+              <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 3 }} />
+            </Grid>
+            <Grid item xs={12} lg={4}>
+              <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 3 }} />
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
     )
   }
 
   return (
     <Box sx={{
-      bgcolor: '#F8FAFC',
-      minHeight: "100vh",
-      pt: 3,
+      minHeight: '100vh',
+      backgroundImage: 'url("/login-bg.png")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+      position: 'relative',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(248, 250, 252, 0.92)',
+        backdropFilter: 'blur(2px)',
+      }
     }}>
-      <Container maxWidth="lg">
-        {/* Header - Perfil del Repartidor */}
-        <ScrollReveal>
-          <Paper
-            elevation={0}
+      <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, pt: 4, pb: 6 }}>
+
+        {/* ============================================= */}
+        {/* SECCIÓN DE BIENVENIDA - FULL WIDTH CON FONDO */}
+        {/* ============================================= */}
+        <motion.div
+          ref={welcomeRef}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box
             sx={{
               borderRadius: 4,
               overflow: 'hidden',
-              border: '1px solid #E2E8F0',
-              bgcolor: 'white',
+              position: 'relative',
               mb: 4,
+              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.92) 100%)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             }}
           >
-            <Box sx={{ p: { xs: 3, md: 4 } }}>
+            {/* Imagen de fondo login-bg.png */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: { xs: '100%', md: '55%' },
+                height: '100%',
+                backgroundImage: 'url("/login-bg.png")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                opacity: { xs: 0.08, md: 0.12 },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(90deg, rgba(15,23,42,0.95) 0%, transparent 70%)',
+                },
+              }}
+            />
+
+            <Box sx={{ position: 'relative', zIndex: 1, p: { xs: 3, md: 5 } }}>
               <Grid container spacing={3} alignItems="center">
                 <Grid item xs={12} md={8}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Typography
+                      variant="h3"
+                      component="h1"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: '2rem', md: '2.8rem' },
+                        color: 'white',
+                        textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      ¡Hola, {user?.Nombre || "Repartidor"}!
+                    </Typography>
+                    <motion.div
+                      animate={{ rotate: [0, 15, -10, 15, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
+                    >
+                      <span style={{ fontSize: '2.8rem' }}>👋</span>
+                    </motion.div>
+                  </Box>
+
                   <Typography
-                    variant="h4"
-                    component="h1"
+                    variant="h6"
                     sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: "1.8rem", md: "2.2rem" },
-                      color: '#0F172A',
-                      mb: 1,
-                    }}
-                  >
-                    ¡Hola, {user?.Nombre || "Repartidor"}! 👋
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#64748B',
-                      fontSize: { xs: "1rem", md: "1.1rem" },
+                      color: alpha('#FFFFFF', 0.7),
+                      fontSize: { xs: '1rem', md: '1.2rem' },
                       mb: 3,
+                      maxWidth: '90%',
+                      fontWeight: 400,
                     }}
                   >
-                    Bienvenido a tu panel de control. Tienes {pedidosActivos.length} entregas pendientes.
+                    Estas son tus entregas programadas para hoy.
+                    <Box component="span" sx={{ display: 'block', mt: 0.5, color: alpha('#FFFFFF', 0.5), fontSize: '0.95rem' }}>
+                      {pedidosActivos.length > 0
+                        ? `📦 Tienes ${pedidosActivos.length} entregas pendientes por realizar.`
+                        : '✅ No tienes entregas pendientes. ¡Excelente trabajo!'}
+                    </Box>
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                       <Button
                         variant="contained"
                         startIcon={<DirectionsBike />}
                         onClick={() => navigate('/repartidor/entregas')}
                         sx={{
                           bgcolor: '#3B82F6',
-                          color: "white",
-                          px: 4,
-                          py: 1,
-                          fontSize: "0.9rem",
+                          color: 'white',
+                          px: 5,
+                          py: 1.4,
+                          fontSize: '1rem',
                           fontWeight: 600,
-                          borderRadius: 2,
+                          borderRadius: 3,
                           textTransform: 'none',
-                          boxShadow: '0 4px 14px rgba(59, 130, 246, 0.3)',
-                          "&:hover": { bgcolor: '#2563EB', boxShadow: '0 6px 20px rgba(59, 130, 246, 0.4)' },
+                          boxShadow: '0 4px 25px rgba(59, 130, 246, 0.4)',
+                          '&:hover': {
+                            bgcolor: '#2563EB',
+                            boxShadow: '0 8px 35px rgba(59, 130, 246, 0.5)',
+                          },
                         }}
                       >
                         Ver Mis Pedidos
                       </Button>
                     </motion.div>
-                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+
+                    <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                       <Button
                         variant="outlined"
                         startIcon={<Assignment />}
                         onClick={() => navigate('/repartidor/historial')}
                         sx={{
-                          borderColor: '#E2E8F0',
-                          color: '#475569',
-                          px: 4,
-                          py: 1,
-                          fontSize: "0.9rem",
+                          borderColor: alpha('#FFFFFF', 0.3),
+                          color: 'white',
+                          px: 5,
+                          py: 1.4,
+                          fontSize: '1rem',
                           fontWeight: 500,
-                          borderRadius: 2,
+                          borderRadius: 3,
                           textTransform: 'none',
-                          "&:hover": { borderColor: '#94A3B8', bgcolor: '#F8FAFC' },
+                          '&:hover': {
+                            borderColor: alpha('#FFFFFF', 0.5),
+                            bgcolor: alpha('#FFFFFF', 0.08),
+                          },
                         }}
                       >
                         Ver Historial
@@ -231,166 +276,298 @@ const PaginaPrincipalRepartidor = () => {
                     </motion.div>
                   </Box>
                 </Grid>
-                <Grid item xs={12} md={4}>
+
+                <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
                   >
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        borderRadius: 3,
-                        overflow: 'hidden',
-                        bgcolor: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
-                        p: 3,
-                        textAlign: 'center',
-                      }}
-                    >
-                      <Avatar
-                        sx={{
-                          width: 72,
-                          height: 72,
-                          mx: 'auto',
-                          mb: 2,
-                          bgcolor: '#3B82F6',
-                        }}
-                      >
-                        <TwoWheeler sx={{ fontSize: 36, color: 'white' }} />
-                      </Avatar>
-                      <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 600 }}>
-                        Repartidor Oficial
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                        <Star sx={{ color: '#FCD34D', mr: 0.5, fontSize: 20 }} />
-                        <Typography variant="h6" sx={{ color: '#0F172A', fontWeight: 600 }}>
-                          5.0
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ color: '#64748B' }}>
-                        Socio Dulcería Angelitos
-                      </Typography>
-                    </Paper>
                   </motion.div>
                 </Grid>
               </Grid>
             </Box>
-          </Paper>
-        </ScrollReveal>
+          </Box>
+        </motion.div>
 
-        {/* Estadísticas - Tarjetas modernas */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {estadisticasDia.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <ScrollReveal delay={index * 0.05}>
-                <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      borderRadius: 3,
-                      p: 3,
-                      bgcolor: 'white',
-                      border: '1px solid #E2E8F0',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        borderColor: stat.color,
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-                      },
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                      <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 2,
-                          bgcolor: stat.bgColor,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: stat.color,
-                        }}
-                      >
-                        {stat.icono}
-                      </Box>
-                      <Chip
-                        label={stat.titulo}
-                        size="small"
-                        sx={{
-                          bgcolor: '#F1F5F9',
-                          color: '#475569',
-                          fontWeight: 500,
-                          fontSize: '0.7rem',
-                          height: 22,
-                        }}
-                      />
-                    </Box>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#0F172A', mb: 1 }}>
-                      {stat.valor}
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min((parseFloat(stat.valor.toString().replace('$', '')) / stat.meta) * 100, 100)}
-                      sx={{
-                        height: 4,
-                        borderRadius: 2,
-                        bgcolor: '#F1F5F9',
-                        '& .MuiLinearProgress-bar': { bgcolor: stat.color, borderRadius: 2 },
-                      }}
-                    />
-                  </Paper>
-                </motion.div>
-              </ScrollReveal>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Mapa de Ruta */}
-        <ScrollReveal>
-          <Paper
-            elevation={0}
+        {/* ============================================= */}
+        {/* ESTADÍSTICAS - DISEÑO FULL WIDTH */}
+        {/* ============================================= */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+        >
+          <Box
             sx={{
-              borderRadius: 3,
-              overflow: 'hidden',
-              border: '1px solid #E2E8F0',
-              bgcolor: 'white',
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' },
+              gap: 3,
               mb: 4,
             }}
           >
-            <Grid container>
-              <Grid item xs={12} md={7} sx={{ position: 'relative', minHeight: 280, bgcolor: '#F1F5F9' }}>
-                <Box sx={{
+            {/* Estadística 1 - Entregas Hoy */}
+            <Box
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 3,
+                p: 3,
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(16, 185, 129, 0.12)',
+                  borderColor: '#10B981',
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" color="#94A3B8" fontWeight={600} textTransform="uppercase">
+                  Entregas Hoy
+                </Typography>
+                <Box sx={{ color: '#10B981' }}>
+                  <CheckCircle />
+                </Box>
+              </Box>
+              <Typography variant="h3" fontWeight={700} color="#0F172A" sx={{ mb: 0.5 }}>
+                {stats.entregas_hoy || 0}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min((stats.entregas_hoy || 0) / 10 * 100, 100)}
+                  sx={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    bgcolor: '#F1F5F9',
+                    '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: 2 },
+                  }}
+                />
+                <Typography variant="caption" color="#94A3B8" fontWeight={500}>
+                  Meta 10
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Estadística 2 - Gestión Hoy */}
+            <Box
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 3,
+                p: 3,
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(245, 158, 11, 0.12)',
+                  borderColor: '#F59E0B',
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" color="#94A3B8" fontWeight={600} textTransform="uppercase">
+                  Gestión Hoy
+                </Typography>
+                <Box sx={{ color: '#F59E0B' }}>
+                  <MonetizationOn />
+                </Box>
+              </Box>
+              <Typography variant="h3" fontWeight={700} color="#0F172A" sx={{ mb: 0.5 }}>
+                ${Number(stats.dinero_entregado || 0).toFixed(0)}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min((Number(stats.dinero_entregado || 0) / 2000) * 100, 100)}
+                  sx={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    bgcolor: '#F1F5F9',
+                    '& .MuiLinearProgress-bar': { bgcolor: '#F59E0B', borderRadius: 2 },
+                  }}
+                />
+                <Typography variant="caption" color="#94A3B8" fontWeight={500}>
+                  Meta $2,000
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Estadística 3 - Pendientes */}
+            <Box
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 3,
+                p: 3,
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(59, 130, 246, 0.12)',
+                  borderColor: '#3B82F6',
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" color="#94A3B8" fontWeight={600} textTransform="uppercase">
+                  Pendientes
+                </Typography>
+                <Box sx={{ color: '#3B82F6' }}>
+                  <Timer />
+                </Box>
+              </Box>
+              <Typography variant="h3" fontWeight={700} color="#0F172A" sx={{ mb: 0.5 }}>
+                {pedidosActivos.length}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={Math.min((pedidosActivos.length / 5) * 100, 100)}
+                  sx={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    bgcolor: '#F1F5F9',
+                    '& .MuiLinearProgress-bar': { bgcolor: '#3B82F6', borderRadius: 2 },
+                  }}
+                />
+                <Typography variant="caption" color="#94A3B8" fontWeight={500}>
+                  Meta 5
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Estadística 4 - Reputación */}
+            <Box
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 3,
+                p: 3,
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(139, 92, 246, 0.12)',
+                  borderColor: '#8B5CF6',
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" color="#94A3B8" fontWeight={600} textTransform="uppercase">
+                  Reputación
+                </Typography>
+                <Box sx={{ color: '#8B5CF6' }}>
+                  <Star />
+                </Box>
+              </Box>
+              <Typography variant="h3" fontWeight={700} color="#0F172A" sx={{ mb: 0.5 }}>
+                5.0
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={100}
+                  sx={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    bgcolor: '#F1F5F9',
+                    '& .MuiLinearProgress-bar': { bgcolor: '#8B5CF6', borderRadius: 2 },
+                  }}
+                />
+                <Typography variant="caption" color="#94A3B8" fontWeight={500}>
+                  Perfecto
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </motion.div>
+
+        {/* ============================================= */}
+        {/* MAPA DE RUTA Y SECUENCIA - FULL WIDTH */}
+        {/* ============================================= */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', lg: '7fr 5fr' },
+              gap: 3,
+              mb: 4,
+            }}
+          >
+            {/* Mapa */}
+            <Box
+              sx={{
+                borderRadius: 3,
+                overflow: 'hidden',
+                border: '1px solid #E2E8F0',
+                bgcolor: 'white',
+                position: 'relative',
+                minHeight: 320,
+                backgroundImage: 'url("https://www.google.com/maps/vt/pb=!1m4!1m3!1i12!2i1152!3i1625!2m3!1e0!2sm!3i633140833!3m8!2ses!3sMX!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!5f2")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                p: 4,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Box
+                sx={{
                   position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  backgroundImage: 'url("https://www.google.com/maps/vt/pb=!1m4!1m3!1i12!2i1152!3i1625!2m3!1e0!2sm!3i633140833!3m8!2ses!3sMX!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!5f2")',
-                  backgroundSize: 'cover',
-                  opacity: 0.5,
-                }} />
-                <Box sx={{ position: 'relative', textAlign: 'center', p: 4, zIndex: 1 }}>
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  bgcolor: 'rgba(255,255,255,0.85)',
+                  backdropFilter: 'blur(4px)',
+                }}
+              />
+
+              <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.35, duration: 0.5 }}
+                >
                   <Box
                     sx={{
-                      width: 56,
-                      height: 56,
+                      width: 72,
+                      height: 72,
                       borderRadius: '50%',
                       bgcolor: 'white',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       mx: 'auto',
-                      mb: 2,
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                      mb: 2.5,
+                      boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
                     }}
                   >
-                    <MapIcon sx={{ fontSize: 28, color: '#3B82F6' }} />
+                    <Route sx={{ fontSize: 34, color: '#3B82F6' }} />
                   </Box>
-                  <Typography variant="h6" fontWeight={600} gutterBottom color="#0F172A">
-                    Plan de Ruta Optimizado
-                  </Typography>
-                  <Typography variant="body2" color="#64748B" sx={{ mb: 3 }}>
-                    Mejor secuencia para tus {pedidosActivos.length} entregas
-                  </Typography>
+                </motion.div>
+
+                <Typography variant="h5" fontWeight={700} gutterBottom color="#0F172A">
+                  Plan de Ruta Optimizado
+                </Typography>
+
+                <Typography variant="body1" color="#64748B" sx={{ mb: 3 }}>
+                  Mejor secuencia para tus {pedidosActivos.length} entregas
+                </Typography>
+
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     variant="contained"
                     size="large"
@@ -398,34 +575,74 @@ const PaginaPrincipalRepartidor = () => {
                     onClick={abrirRutaCompleta}
                     disabled={pedidosActivos.length === 0}
                     sx={{
-                      borderRadius: 2,
-                      px: 4,
-                      py: 1.2,
+                      borderRadius: 3,
+                      px: 5,
+                      py: 1.6,
                       fontWeight: 600,
                       textTransform: 'none',
                       bgcolor: '#3B82F6',
-                      '&:hover': { bgcolor: '#2563EB' },
+                      fontSize: '1rem',
+                      boxShadow: '0 4px 25px rgba(59, 130, 246, 0.35)',
+                      '&:hover': { bgcolor: '#2563EB', boxShadow: '0 8px 35px rgba(59, 130, 246, 0.45)' },
                       '&:disabled': { bgcolor: '#94A3B8' },
                     }}
                   >
                     Abrir Navegación
                   </Button>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={5} sx={{ p: 3, bgcolor: 'white' }}>
-                <Typography variant="subtitle1" fontWeight={600} color="#0F172A" gutterBottom>
+                </motion.div>
+              </Box>
+            </Box>
+
+            {/* Lista de entregas - SECUENCIA */}
+            <Box
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 3,
+                border: '1px solid #E2E8F0',
+                p: 3,
+                maxHeight: 420,
+                overflow: 'auto',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h6" fontWeight={700} color="#0F172A" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Schedule sx={{ fontSize: 22, color: '#3B82F6' }} />
                   Secuencia de Entregas
                 </Typography>
-                <Divider sx={{ mb: 2 }} />
-                {pedidosActivos.length === 0 ? (
-                  <Typography variant="body2" color="#94A3B8" sx={{ py: 3, textAlign: 'center' }}>
+                <Chip
+                  label={pedidosActivos.length}
+                  size="medium"
+                  sx={{
+                    bgcolor: '#3B82F6',
+                    color: 'white',
+                    fontWeight: 700,
+                    borderRadius: 2,
+                  }}
+                />
+              </Box>
+
+              <Divider sx={{ mb: 2 }} />
+
+              {pedidosActivos.length === 0 ? (
+                <Box sx={{ py: 4, textAlign: 'center' }}>
+                  <CheckCircle sx={{ fontSize: 56, color: '#10B981', mb: 2 }} />
+                  <Typography variant="h6" fontWeight={600} color="#0F172A" gutterBottom>
+                    ¡Todo entregado!
+                  </Typography>
+                  <Typography variant="body2" color="#94A3B8">
                     No hay paradas programadas
                   </Typography>
-                ) : (
-                  <Stack spacing={1.5}>
-                    {pedidosActivos.slice(0, 5).map((pedido, index) => (
+                </Box>
+              ) : (
+                <Stack spacing={1.5}>
+                  {pedidosActivos.slice(0, 8).map((pedido, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.04 }}
+                    >
                       <Box
-                        key={index}
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
@@ -433,26 +650,31 @@ const PaginaPrincipalRepartidor = () => {
                           p: 1.5,
                           borderRadius: 2,
                           bgcolor: index === 0 ? '#EFF6FF' : 'transparent',
-                          border: index === 0 ? '1px solid #BFDBFE' : 'none',
+                          border: index === 0 ? '2px solid #BFDBFE' : '1px solid transparent',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            bgcolor: index === 0 ? '#EFF6FF' : '#F8FAFC',
+                          },
                         }}
                       >
                         <Box
                           sx={{
-                            width: 28,
-                            height: 28,
+                            width: 34,
+                            height: 34,
                             borderRadius: '50%',
                             bgcolor: index === 0 ? '#3B82F6' : '#E2E8F0',
                             color: index === 0 ? 'white' : '#475569',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.75rem',
+                            fontSize: '0.85rem',
                             fontWeight: 700,
                             flexShrink: 0,
                           }}
                         >
                           {index + 1}
                         </Box>
+
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="body2" fontWeight={600} noWrap color="#0F172A">
                             {pedido.nombre_cliente}
@@ -461,6 +683,7 @@ const PaginaPrincipalRepartidor = () => {
                             {pedido.direccion_entrega}
                           </Typography>
                         </Box>
+
                         {index === 0 && (
                           <Chip
                             label="Siguiente"
@@ -468,46 +691,61 @@ const PaginaPrincipalRepartidor = () => {
                             sx={{
                               bgcolor: '#3B82F6',
                               color: 'white',
-                              fontWeight: 500,
+                              fontWeight: 600,
                               fontSize: '0.65rem',
-                              height: 20,
+                              height: 22,
+                              borderRadius: 2,
                             }}
                           />
                         )}
                       </Box>
-                    ))}
-                    {pedidosActivos.length > 5 && (
-                      <Typography variant="caption" color="#94A3B8" textAlign="center">
-                        +{pedidosActivos.length - 5} entregas más
-                      </Typography>
-                    )}
-                  </Stack>
-                )}
-              </Grid>
-            </Grid>
-          </Paper>
-        </ScrollReveal>
+                    </motion.div>
+                  ))}
 
-        {/* Pedidos Activos y Carga del Día */}
+                  {pedidosActivos.length > 8 && (
+                    <Typography variant="caption" color="#94A3B8" textAlign="center" sx={{ mt: 1 }}>
+                      +{pedidosActivos.length - 8} entregas más
+                    </Typography>
+                  )}
+                </Stack>
+              )}
+            </Box>
+          </Box>
+        </motion.div>
+
+        {/* ============================================= */}
+        {/* PEDIDOS Y CARGA DEL DÍA - FULL WIDTH */}
+        {/* ============================================= */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {/* Entregas Prioritarias */}
           <Grid item xs={12} lg={8}>
-            <ScrollReveal>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" fontWeight={700} color="#0F172A">
-                  🚀 Entregas Prioritarias
-                </Typography>
-                {pedidosActivos.length > 0 && (
-                  <Typography variant="caption" color="#94A3B8">
-                    {pedidosActivos.length} pendientes
-                  </Typography>
-                )}
-              </Box>
-            </ScrollReveal>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                color="#0F172A"
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}
+              >
+                <Box component="span" sx={{ fontSize: '1.6rem' }}>🚀</Box>
+                Entregas Prioritarias
+              </Typography>
+              {pedidosActivos.length > 0 && (
+                <Chip
+                  label={`${pedidosActivos.length} pendientes`}
+                  size="medium"
+                  sx={{
+                    bgcolor: '#EFF6FF',
+                    color: '#3B82F6',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    px: 1,
+                  }}
+                />
+              )}
+            </Box>
 
             {pedidosActivos.length === 0 ? (
-              <Paper
-                elevation={0}
+              <Box
                 sx={{
                   p: 6,
                   textAlign: 'center',
@@ -516,100 +754,164 @@ const PaginaPrincipalRepartidor = () => {
                   bgcolor: 'white',
                 }}
               >
-                <CheckCircle sx={{ fontSize: 48, color: '#10B981', mb: 2 }} />
-                <Typography variant="h6" color="#0F172A" gutterBottom>
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <CheckCircle sx={{ fontSize: 64, color: '#10B981', mb: 2 }} />
+                </motion.div>
+                <Typography variant="h5" color="#0F172A" fontWeight={700} gutterBottom>
                   ¡Excelente trabajo!
                 </Typography>
-                <Typography variant="body2" color="#64748B">
-                  No tienes pedidos pendientes por entregar
+                <Typography variant="body1" color="#64748B">
+                  No tienes pedidos pendientes por entregar.
                 </Typography>
-              </Paper>
+              </Box>
             ) : (
-              <Grid container spacing={2}>
-                {pedidosActivos.slice(0, 4).map((pedido, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <ScrollReveal delay={index * 0.05}>
-                      <Paper
-                        elevation={0}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                  gap: 2,
+                }}
+              >
+                {pedidosActivos.slice(0, 6).map((pedido, index) => {
+                  const statusColors = {
+                    'Pendiente': { bg: '#FEF3C7', color: '#D97706', icon: '⏳' },
+                    'Asignado': { bg: '#DBEAFE', color: '#2563EB', icon: '📋' },
+                    'En preparación': { bg: '#FCE7F3', color: '#DB2777', icon: '👨‍🍳' },
+                    'En camino': { bg: '#D1FAE5', color: '#059669', icon: '🚚' },
+                    'Entregado': { bg: '#D1FAE5', color: '#059669', icon: '✅' },
+                    'Cancelado': { bg: '#FEE2E2', color: '#DC2626', icon: '❌' },
+                  }
+                  const status = pedido.estado || 'Pendiente'
+                  const statusStyle = statusColors[status] || statusColors['Pendiente']
+
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04, duration: 0.4 }}
+                      whileHover={{ y: -3, transition: { duration: 0.15 } }}
+                    >
+                      <Box
                         sx={{
                           p: 2.5,
                           borderRadius: 3,
-                          border: '1px solid #E2E8F0',
+                          border: `1px solid ${alpha('#E2E8F0', 0.8)}`,
                           bgcolor: 'white',
-                          transition: 'all 0.2s ease',
+                          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                          cursor: 'pointer',
                           '&:hover': {
-                            borderColor: '#94A3B8',
-                            boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+                            borderColor: '#3B82F6',
+                            boxShadow: '0 8px 30px rgba(59, 130, 246, 0.08)',
                           },
                         }}
+                        onClick={() => navigate('/repartidor/entregas')}
                       >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                bgcolor: '#F1F5F9',
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 1.5,
+                                fontWeight: 600,
+                                color: '#475569',
+                                fontSize: '0.7rem',
+                              }}
+                            >
+                              #{pedido.id_pedido}
+                            </Typography>
+                          </Box>
                           <Chip
-                            label={`#${pedido.id_pedido}`}
+                            label={`${statusStyle.icon} ${status}`}
                             size="small"
                             sx={{
-                              bgcolor: '#F1F5F9',
-                              color: '#475569',
-                              fontWeight: 500,
-                              fontSize: '0.7rem',
-                              height: 22,
-                            }}
-                          />
-                          <Chip
-                            label={pedido.estado}
-                            size="small"
-                            sx={{
-                              bgcolor: '#FEF3C7',
-                              color: '#D97706',
-                              fontWeight: 500,
+                              bgcolor: statusStyle.bg,
+                              color: statusStyle.color,
+                              fontWeight: 600,
                               fontSize: '0.65rem',
-                              height: 20,
+                              height: 24,
+                              borderRadius: 2,
                             }}
                           />
                         </Box>
-                        <Typography variant="subtitle1" fontWeight={600} color="#0F172A" gutterBottom noWrap>
+
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight={700}
+                          color="#0F172A"
+                          gutterBottom
+                          sx={{ fontSize: '1rem' }}
+                        >
                           {pedido.nombre_cliente}
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <LocationOn sx={{ fontSize: 14, mr: 1, color: '#94A3B8' }} />
-                          <Typography variant="body2" color="#64748B" noWrap sx={{ fontSize: '0.85rem' }}>
+
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
+                          <LocationOn sx={{ fontSize: 16, color: '#94A3B8', mt: 0.3 }} />
+                          <Typography
+                            variant="body2"
+                            color="#64748B"
+                            sx={{ fontSize: '0.85rem', lineHeight: 1.4 }}
+                          >
                             {pedido.direccion_entrega}
                           </Typography>
                         </Box>
-                        <Button
-                          fullWidth
-                          variant="contained"
-                          onClick={() => navigate('/repartidor/entregas')}
-                          sx={{
-                            borderRadius: 2,
-                            textTransform: 'none',
-                            bgcolor: '#3B82F6',
-                            py: 0.8,
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            '&:hover': { bgcolor: '#2563EB' },
-                          }}
-                        >
-                          Ver Detalles
-                        </Button>
-                      </Paper>
-                    </ScrollReveal>
-                  </Grid>
-                ))}
-              </Grid>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Timer sx={{ fontSize: 14, color: '#94A3B8' }} />
+                              <Typography variant="caption" color="#94A3B8">
+                                {pedido.hora_entrega || 'Pendiente'}
+                              </Typography>
+                            </Box>
+                            {pedido.total && (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <AttachMoney sx={{ fontSize: 14, color: '#F59E0B' }} />
+                                <Typography variant="caption" fontWeight={600} color="#F59E0B">
+                                  ${pedido.total}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              bgcolor: alpha('#3B82F6', 0.08),
+                              color: '#3B82F6',
+                              '&:hover': { bgcolor: alpha('#3B82F6', 0.15) },
+                            }}
+                          >
+                            <NavigateNext fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </motion.div>
+                  )
+                })}
+              </Box>
             )}
           </Grid>
 
           {/* Carga del Día */}
           <Grid item xs={12} lg={4}>
-            <ScrollReveal>
-              <Typography variant="h6" fontWeight={700} color="#0F172A" sx={{ mb: 2 }}>
-                📦 Carga del Día
-              </Typography>
-            </ScrollReveal>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              color="#0F172A"
+              sx={{ mb: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}
+            >
+              <Box component="span" sx={{ fontSize: '1.4rem' }}>📦</Box>
+              Carga del Día
+            </Typography>
 
-            <Paper
-              elevation={0}
+            <Box
               sx={{
                 borderRadius: 3,
                 border: '1px solid #E2E8F0',
@@ -617,14 +919,26 @@ const PaginaPrincipalRepartidor = () => {
                 overflow: 'hidden',
               }}
             >
-              <Box sx={{ px: 3, py: 2, bgcolor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                <Typography variant="caption" color="#64748B" fontWeight={500}>
+              <Box
+                sx={{
+                  px: 3,
+                  py: 2,
+                  bgcolor: '#F8FAFC',
+                  borderBottom: '1px solid #E2E8F0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Inventory sx={{ fontSize: 20, color: '#64748B' }} />
+                <Typography variant="body2" color="#64748B" fontWeight={500}>
                   Total acumulado de tus entregas activas
                 </Typography>
               </Box>
+
               {resumenCarga.length === 0 ? (
                 <Box sx={{ p: 4, textAlign: 'center' }}>
-                  <Inventory sx={{ fontSize: 36, color: '#CBD5E1', mb: 1 }} />
+                  <Inventory sx={{ fontSize: 48, color: '#CBD5E1', mb: 1 }} />
                   <Typography variant="body2" color="#94A3B8">
                     No hay productos por cargar
                   </Typography>
@@ -633,9 +947,16 @@ const PaginaPrincipalRepartidor = () => {
                 <List sx={{ py: 0 }}>
                   {resumenCarga.map((item, index) => (
                     <React.Fragment key={index}>
-                      <ListItem sx={{ py: 2, px: 3 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Storefront sx={{ color: '#64748B', fontSize: 20 }} />
+                      <ListItem
+                        sx={{
+                          py: 2.5,
+                          px: 3,
+                          transition: 'background 0.2s ease',
+                          '&:hover': { bgcolor: '#F8FAFC' },
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                          <Storefront sx={{ color: '#64748B', fontSize: 24 }} />
                         </ListItemIcon>
                         <ListItemText
                           primary={
@@ -645,7 +966,7 @@ const PaginaPrincipalRepartidor = () => {
                           }
                           secondary={
                             <Typography variant="caption" color="#94A3B8">
-                              Cantidad necesaria para rutas
+                              Cantidad necesaria
                             </Typography>
                           }
                         />
@@ -655,8 +976,8 @@ const PaginaPrincipalRepartidor = () => {
                             bgcolor: '#EFF6FF',
                             color: '#3B82F6',
                             fontWeight: 700,
-                            fontSize: '0.8rem',
-                            height: 28,
+                            fontSize: '0.85rem',
+                            height: 30,
                             borderRadius: 2,
                           }}
                         />
@@ -666,106 +987,124 @@ const PaginaPrincipalRepartidor = () => {
                   ))}
                 </List>
               )}
-            </Paper>
+            </Box>
           </Grid>
         </Grid>
 
-        {/* Información del Repartidor */}
-        <ScrollReveal>
-          <Paper
-            elevation={0}
+        {/* ============================================= */}
+        {/* PERFIL DE SOCIO - FULL WIDTH */}
+        {/* ============================================= */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <Box
             sx={{
               borderRadius: 3,
               border: '1px solid #E2E8F0',
               bgcolor: 'white',
               overflow: 'hidden',
-              mb: 4,
+              p: 3.5,
             }}
           >
-            <Box sx={{ p: 3 }}>
-              <Grid container spacing={3} alignItems="center">
-                <Grid item xs={12} md={8}>
-                  <Typography variant="h6" fontWeight={700} color="#0F172A" gutterBottom>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item xs={12} md={8}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                  <Shield sx={{ color: '#3B82F6', fontSize: 24 }} />
+                  <Typography variant="h6" fontWeight={700} color="#0F172A">
                     Tu Perfil de Socio
                   </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 2,
-                            bgcolor: '#EFF6FF',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Email sx={{ fontSize: 18, color: '#3B82F6' }} />
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color="#94A3B8" display="block">
-                            Correo
-                          </Typography>
-                          <Typography variant="body2" fontWeight={500} color="#0F172A">
-                            {user?.Correo || "N/A"}
-                          </Typography>
-                        </Box>
+                </Box>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 2.5,
+                          bgcolor: '#EFF6FF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Email sx={{ fontSize: 22, color: '#3B82F6' }} />
                       </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: 2,
-                            bgcolor: '#ECFDF5',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <Phone sx={{ fontSize: 18, color: '#10B981' }} />
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color="#94A3B8" display="block">
-                            Teléfono
-                          </Typography>
-                          <Typography variant="body2" fontWeight={500} color="#0F172A">
-                            {user?.Telefono || "N/A"}
-                          </Typography>
-                        </Box>
+                      <Box>
+                        <Typography variant="caption" color="#94A3B8" display="block" fontWeight={500}>
+                          Correo
+                        </Typography>
+                        <Typography variant="body1" fontWeight={600} color="#0F172A">
+                          {user?.Correo || "N/A"}
+                        </Typography>
                       </Box>
-                    </Grid>
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 2.5,
+                          bgcolor: '#ECFDF5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Phone sx={{ fontSize: 22, color: '#10B981' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="#94A3B8" display="block" fontWeight={500}>
+                          Teléfono
+                        </Typography>
+                        <Typography variant="body1" fontWeight={600} color="#0F172A">
+                          {user?.Telefono || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </Grid>
                 </Grid>
-                <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+              </Grid>
+
+              <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     variant="outlined"
+                    startIcon={<Person />}
                     onClick={() => navigate('/repartidor/perfilusuario')}
                     sx={{
-                      borderRadius: 2,
-                      px: 3,
-                      py: 0.8,
+                      borderRadius: 3,
+                      px: 4,
+                      py: 1.3,
                       textTransform: 'none',
                       borderColor: '#E2E8F0',
                       color: '#475569',
-                      fontWeight: 500,
-                      '&:hover': { borderColor: '#94A3B8', bgcolor: '#F8FAFC' },
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      '&:hover': {
+                        borderColor: '#3B82F6',
+                        color: '#3B82F6',
+                        bgcolor: '#EFF6FF',
+                      },
                     }}
                   >
                     Editar Perfil
                   </Button>
-                </Grid>
+                </motion.div>
               </Grid>
-            </Box>
-          </Paper>
-        </ScrollReveal>
+            </Grid>
+          </Box>
+        </motion.div>
+
       </Container>
     </Box>
-  );
-};
+  )
+}
 
-export default PaginaPrincipalRepartidor;
+export default PaginaPrincipalRepartidor

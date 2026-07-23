@@ -33,7 +33,7 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://backenddulceria.onrender.com";
 
 // Paleta calida (marron/dorado) — identidad publica de la dulceria
 const C = {

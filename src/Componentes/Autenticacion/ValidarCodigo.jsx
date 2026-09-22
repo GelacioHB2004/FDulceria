@@ -149,8 +149,9 @@ function ValidarCodigo() {
         >
         <Box
           component="img"
-          src="/login-bg.png"
+          src="/login-bg.webp"
           alt=""
+          loading="lazy"
           sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
         <Box

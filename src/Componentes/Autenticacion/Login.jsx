@@ -144,8 +144,9 @@ function Login() {
           {/* Background image */}
           <Box
             component="img"
-            src="/login-bg.png" // Asegúrate de que esta imagen exista en public/
+            src="/login-bg.webp"
             alt="Login Background"
+            fetchpriority="high"
             sx={{
               position: 'absolute',
               inset: 0,

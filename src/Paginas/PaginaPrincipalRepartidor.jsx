@@ -97,7 +97,7 @@ const PaginaPrincipalRepartidor = () => {
       <Box sx={{
         minHeight: '100vh',
         bgcolor: '#F8FAFC',
-        backgroundImage: 'url("/login-bg.png")',
+        backgroundImage: 'url("/login-bg.webp")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -121,7 +121,7 @@ const PaginaPrincipalRepartidor = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      backgroundImage: 'url("/login-bg.png")',
+      backgroundImage: 'url("/login-bg.webp")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
@@ -159,7 +159,7 @@ const PaginaPrincipalRepartidor = () => {
               boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             }}
           >
-            {/* Imagen de fondo login-bg.png */}
+            {/* Imagen de fondo login-bg.webp */}
             <Box
               sx={{
                 position: 'absolute',
@@ -167,7 +167,7 @@ const PaginaPrincipalRepartidor = () => {
                 right: 0,
                 width: { xs: '100%', md: '55%' },
                 height: '100%',
-                backgroundImage: 'url("/login-bg.png")',
+                backgroundImage: 'url("/login-bg.webp")',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 opacity: { xs: 0.08, md: 0.12 },

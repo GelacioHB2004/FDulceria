@@ -745,6 +745,8 @@ const CatalogoPublico = () => {
                           component="img"
                           src={producto.imagen}
                           alt={producto.nombre}
+                          loading="lazy"
+                          decoding="async"
                           sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 3, flexShrink: 0 }}
                         />
                         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -835,4 +837,3 @@ const CatalogoPublico = () => {
 };
 
 export default CatalogoPublico;
-

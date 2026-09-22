@@ -145,6 +145,8 @@ function SafeImg({ src, alt, height = 220, borderRadius = 0, zoom = false }) {
         component="img"
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         onError={() => setErr(true)}
         sx={{
           width: "100%",
@@ -1045,7 +1047,7 @@ export default function PaginaPrincipal() {
             alignItems: "center",
             overflow: "hidden",
             color: "white",
-            backgroundImage: "url('/login-bg.png')",
+            backgroundImage: "url('/login-bg.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             "&::after": {
@@ -1252,7 +1254,7 @@ export default function PaginaPrincipal() {
           sx={{
             position: "relative",
             py: { xs: 6, md: 8 },
-            backgroundImage: "url('/login-bg.png')",
+            backgroundImage: "url('/login-bg.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             "&::after": {
@@ -1645,7 +1647,7 @@ export default function PaginaPrincipal() {
                 position: "relative",
                 borderRadius: "24px",
                 overflow: "hidden",
-                backgroundImage: "url('/login-bg.png')",
+                backgroundImage: "url('/login-bg.webp')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 "&::after": {
@@ -1787,7 +1789,7 @@ export default function PaginaPrincipal() {
             py: { xs: 9, md: 12 },
             textAlign: "center",
             overflow: "hidden",
-            backgroundImage: "url('/login-bg.png')",
+            backgroundImage: "url('/login-bg.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             "&::after": {
@@ -1902,4 +1904,3 @@ export default function PaginaPrincipal() {
     </MotionConfig>
   );
 }
-

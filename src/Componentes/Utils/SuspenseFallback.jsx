@@ -1,8 +1,8 @@
-﻿import React from "react";
+import React from "react";
 
 /* ================================================================
-   SuspenseFallback — Spinner mientras carga cada chunk de ruta
-   Sin dependencias de MUI ni librerías externas para no inflar
+   SuspenseFallback - Spinner mientras carga cada chunk de ruta
+   Sin dependencias de MUI ni librerias externas para no inflar
    el bundle inicial. CSS inline puro.
    ================================================================ */
 const SuspenseFallback = () => (
@@ -32,7 +32,7 @@ const SuspenseFallback = () => (
     </p>
     <style>{`
       @keyframes spin {
-        0%   { transform: rotate(0deg); }
+        0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
     `}</style>

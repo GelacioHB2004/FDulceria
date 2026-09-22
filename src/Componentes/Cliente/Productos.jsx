@@ -131,6 +131,8 @@ const ProductCard = ({ producto, promo, precioFinal, onView, onAddCart }) => {
         <img
           src={producto.imagen}
           alt={producto.nombre}
+          loading="lazy"
+          decoding="async"
           style={{
             width: "100%", height: 240, objectFit: "cover", display: "block",
             transition: "transform 0.4s ease",

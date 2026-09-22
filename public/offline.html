@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f06292" />
+  <title>Sin conexion - Dulceria Angelitos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --accent: #e91e6c;
+      --accent-soft: #fce4ec;
+      --text: #2d2d2d;
+      --muted: #6b6b6b;
+      --bg: #fff7fa;
+      --border: rgba(233, 30, 108, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(233, 30, 108, 0.12), transparent 32rem),
+        linear-gradient(135deg, var(--bg), #ffffff);
+      color: var(--text);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    main {
+      width: min(100%, 440px);
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 18px 50px rgba(233, 30, 108, 0.12);
+      text-align: center;
+    }
+
+    img {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 18px;
+      border: 3px solid var(--accent-soft);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.45rem, 6vw, 2rem);
+      line-height: 1.15;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    button,
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button {
+      border: 0;
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 8px 20px rgba(233, 30, 108, 0.25);
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/logo192.png" alt="Dulceria Angelitos" />
+    <h1>Sin conexion</h1>
+    <p>
+      No pudimos cargar esta pagina ahora. Revisa tu conexion e intenta de nuevo.
+      Algunas partes ya visitadas pueden seguir disponibles.
+    </p>
+    <div class="actions">
+      <button type="button" onclick="window.location.reload()">Reintentar</button>
+      <a href="/">Ir al inicio</a>
+    </div>
+  </main>
+</body>
+</html>

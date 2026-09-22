@@ -415,6 +415,8 @@ const CarritoCompras = () => {
                             component="img"
                             src={item.imagen}
                             alt={item.nombre}
+                            loading="lazy"
+                            decoding="async"
                             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         ) : (
@@ -743,6 +745,8 @@ const CarritoCompras = () => {
                           className="img-hover"
                           src={rec.imagen}
                           alt={rec.nombre}
+                          loading="lazy"
+                          decoding="async"
                           sx={{
                             width: '100%',
                             height: '100%',

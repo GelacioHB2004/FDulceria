@@ -177,7 +177,7 @@ export default function DulceriaFooter() {
           setEmpresa(resEmpresa.data[0])
         }
 
-        const resRedes = await axios.get(`${API_BASE_URL}/api/redes-sociales`)
+        const resRedes = await axios.get(`${API_BASE_URL}/api/redes_sociales`)
         const redesActivas = resRedes.data.filter((r) => r.estado === "Activo")
         setRedes(redesActivas)
       } catch (error) {

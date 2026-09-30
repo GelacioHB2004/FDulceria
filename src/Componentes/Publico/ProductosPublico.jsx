@@ -27,7 +27,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Fade,
   Tooltip,
   ToggleButton,
   ToggleButtonGroup,
@@ -93,161 +92,163 @@ const ProductCard = ({ producto, promo, precioFinal, onNavigate, onAddCart }) =>
   const [hovered, setHovered] = useState(false);
 
   return (
-    <Fade in>
-      <Card
-        elevation={0}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onClick={() => onNavigate(producto.id_producto)}
-        sx={{
-          cursor: "pointer",
-          borderRadius: 4,
-          border: `1px solid ${hovered ? C.primary : C.border}`,
-          overflow: "hidden",
-          transition: "all 0.25s ease",
-          transform: hovered ? "translateY(-6px)" : "none",
-          boxShadow: hovered ? `0 16px 40px rgba(212,163,115,0.18)` : "none",
-          bgcolor: C.surface,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* Imagen */}
-        <Box sx={{ position: "relative", overflow: "hidden", height: 220 }}>
-          <CardMedia
-            component="img"
-            image={producto.imagen}
-            alt={producto.nombre}
+    <Card
+      elevation={0}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => onNavigate(producto.id_producto)}
+      sx={{
+        cursor: "pointer",
+        borderRadius: 4,
+        border: `1px solid ${hovered ? C.primary : C.border}`,
+        overflow: "hidden",
+        transition: "all 0.25s ease",
+        transform: hovered ? "translateY(-6px)" : "none",
+        boxShadow: hovered ? `0 16px 40px rgba(212,163,115,0.18)` : "none",
+        bgcolor: C.surface,
+        display: "flex",
+        flexDirection: "column",
+        contentVisibility: "auto",
+        containIntrinsicSize: "auto 360px",
+      }}
+    >
+      {/* Imagen */}
+      <Box sx={{ position: "relative", overflow: "hidden", height: 220 }}>
+        <CardMedia
+          component="img"
+          image={producto.imagen}
+          alt={producto.nombre}
+          loading="lazy"
+          decoding="async"
+          sx={{
+            height: 220,
+            objectFit: "cover",
+            transition: "transform 0.4s ease",
+            transform: hovered ? "scale(1.06)" : "scale(1)",
+          }}
+        />
+        {/* Badge de promo */}
+        {promo && (
+          <Box
             sx={{
-              height: 220,
-              objectFit: "cover",
-              transition: "transform 0.4s ease",
-              transform: hovered ? "scale(1.06)" : "scale(1)",
-            }}
-          />
-          {/* Badge de promo */}
-          {promo && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 12,
-                left: 12,
-                bgcolor: C.promoRed,
-                color: "white",
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 2,
-                fontWeight: 800,
-                fontSize: 12,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                boxShadow: "0 4px 12px rgba(229,57,53,0.3)",
-              }}
-            >
-              <FireOutlined />
-              {promo.tipo_descuento === "Porcentaje"
-                ? `${Math.round(promo.valor_descuento)}% OFF`
-                : "OFERTA"}
-            </Box>
-          )}
-          {/* Overlay agotado */}
-          {producto.stock === 0 && (
-            <Box
-              sx={{
-                position: "absolute",
-                inset: 0,
-                bgcolor: "rgba(255,255,255,0.65)",
-                backdropFilter: "blur(3px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontWeight: 900,
-                  fontSize: 13,
-                  letterSpacing: 2,
-                  color: C.promoRed,
-                  bgcolor: "white",
-                  px: 2,
-                  py: 0.8,
-                  borderRadius: 2,
-                  border: `1.5px solid ${C.promoRed}`,
-                }}
-              >
-                AGOTADO
-              </Typography>
-            </Box>
-          )}
-        </Box>
-
-        {/* Contenido */}
-        <Box sx={{ p: 2.5, flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-          <Typography
-            variant="body2"
-            sx={{ color: C.textSecondary, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8 }}
-          >
-            {producto.categoria}
-          </Typography>
-
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 700, color: C.textPrimary, lineHeight: 1.3 }}
-            title={producto.nombre}
-          >
-            {producto.nombre.length > 38
-              ? producto.nombre.substring(0, 38) + "…"
-              : producto.nombre}
-          </Typography>
-
-          {/* Precio */}
-          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, mt: "auto", pt: 1 }}>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 900, color: promo ? C.promoRed : C.primary, lineHeight: 1 }}
-            >
-              ${precioFinal}
-            </Typography>
-            {promo && (
-              <Typography
-                variant="caption"
-                sx={{ textDecoration: "line-through", color: C.textSecondary, fontSize: 13 }}
-              >
-                ${parseFloat(producto.precio).toFixed(2)}
-              </Typography>
-            )}
-          </Box>
-
-          <StockBadge stock={producto.stock} />
-        </Box>
-
-        {/* CTA */}
-        <Box sx={{ px: 2.5, pb: 2.5 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            disabled={producto.stock < 1}
-            onClick={(e) => onAddCart(e, producto, precioFinal)}
-            startIcon={<ShoppingCartOutlined />}
-            sx={{
-              py: 1.2,
-              borderRadius: 3,
-              fontWeight: 700,
-              fontSize: 13,
-              bgcolor: C.primary,
+              position: "absolute",
+              top: 12,
+              left: 12,
+              bgcolor: C.promoRed,
               color: "white",
-              boxShadow: "none",
-              "&:hover": { bgcolor: C.primaryDark, boxShadow: "none" },
-              "&:disabled": { bgcolor: C.border, color: C.textSecondary },
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 2,
+              fontWeight: 800,
+              fontSize: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              boxShadow: "0 4px 12px rgba(229,57,53,0.3)",
             }}
           >
-            {producto.stock < 1 ? "Sin disponibilidad" : "Añadir al Carrito"}
-          </Button>
+            <FireOutlined />
+            {promo.tipo_descuento === "Porcentaje"
+              ? `${Math.round(promo.valor_descuento)}% OFF`
+              : "OFERTA"}
+          </Box>
+        )}
+        {/* Overlay agotado */}
+        {producto.stock === 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              bgcolor: "rgba(255,255,255,0.65)",
+              backdropFilter: "blur(3px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 900,
+                fontSize: 13,
+                letterSpacing: 2,
+                color: C.promoRed,
+                bgcolor: "white",
+                px: 2,
+                py: 0.8,
+                borderRadius: 2,
+                border: `1.5px solid ${C.promoRed}`,
+              }}
+            >
+              AGOTADO
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Contenido */}
+      <Box sx={{ p: 2.5, flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{ color: C.textSecondary, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.8 }}
+        >
+          {producto.categoria}
+        </Typography>
+
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 700, color: C.textPrimary, lineHeight: 1.3 }}
+          title={producto.nombre}
+        >
+          {producto.nombre.length > 38
+            ? producto.nombre.substring(0, 38) + "…"
+            : producto.nombre}
+        </Typography>
+
+        {/* Precio */}
+        <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5, mt: "auto", pt: 1 }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 900, color: promo ? C.promoRed : C.primary, lineHeight: 1 }}
+          >
+            ${precioFinal}
+          </Typography>
+          {promo && (
+            <Typography
+              variant="caption"
+              sx={{ textDecoration: "line-through", color: C.textSecondary, fontSize: 13 }}
+            >
+              ${parseFloat(producto.precio).toFixed(2)}
+            </Typography>
+          )}
         </Box>
-      </Card>
-    </Fade>
+
+        <StockBadge stock={producto.stock} />
+      </Box>
+
+      {/* CTA */}
+      <Box sx={{ px: 2.5, pb: 2.5 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          disabled={producto.stock < 1}
+          onClick={(e) => onAddCart(e, producto, precioFinal)}
+          startIcon={<ShoppingCartOutlined />}
+          sx={{
+            py: 1.2,
+            borderRadius: 3,
+            fontWeight: 700,
+            fontSize: 13,
+            bgcolor: C.primary,
+            color: "white",
+            boxShadow: "none",
+            "&:hover": { bgcolor: C.primaryDark, boxShadow: "none" },
+            "&:disabled": { bgcolor: C.border, color: C.textSecondary },
+          }}
+        >
+          {producto.stock < 1 ? "Sin disponibilidad" : "Añadir al Carrito"}
+        </Button>
+      </Box>
+    </Card>
   );
 };
 
@@ -722,72 +723,73 @@ const CatalogoPublico = () => {
 
                 if (viewMode === "list") {
                   return (
-                    <Fade in key={producto.id_producto}>
+                    <Box
+                      key={producto.id_producto}
+                      onClick={() => handleNavigate(producto.id_producto)}
+                      sx={{
+                        display: "flex",
+                        gap: 3,
+                        alignItems: "center",
+                        p: 2,
+                        bgcolor: C.surface,
+                        borderRadius: 4,
+                        border: `1px solid ${C.border}`,
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        contentVisibility: "auto",
+                        containIntrinsicSize: "auto 115px",
+                        "&:hover": {
+                          borderColor: C.primary,
+                          boxShadow: `0 4px 20px rgba(212,163,115,0.15)`,
+                        },
+                      }}
+                    >
                       <Box
-                        onClick={() => handleNavigate(producto.id_producto)}
+                        component="img"
+                        src={producto.imagen}
+                        alt={producto.nombre}
+                        loading="lazy"
+                        decoding="async"
+                        sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 3, flexShrink: 0 }}
+                      />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ color: C.textSecondary, fontSize: 11, textTransform: "uppercase", fontWeight: 600 }}>
+                          {producto.categoria}
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: C.textPrimary }} noWrap>
+                          {producto.nombre}
+                        </Typography>
+                        <StockBadge stock={producto.stock} />
+                      </Box>
+                      <Box sx={{ textAlign: "right", flexShrink: 0 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 900, color: promo ? C.promoRed : C.primary }}>
+                          ${precioFinal}
+                        </Typography>
+                        {promo && (
+                          <Typography variant="caption" sx={{ textDecoration: "line-through", color: C.textSecondary }}>
+                            ${parseFloat(producto.precio).toFixed(2)}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={producto.stock < 1}
+                        onClick={(e) => agregarAlCarritoRápido(e, producto, precioFinal)}
+                        startIcon={<ShoppingCartOutlined />}
                         sx={{
-                          display: "flex",
-                          gap: 3,
-                          alignItems: "center",
-                          p: 2,
-                          bgcolor: C.surface,
-                          borderRadius: 4,
-                          border: `1px solid ${C.border}`,
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            borderColor: C.primary,
-                            boxShadow: `0 4px 20px rgba(212,163,115,0.15)`,
-                          },
+                          flexShrink: 0,
+                          borderRadius: 3,
+                          bgcolor: C.primary,
+                          boxShadow: "none",
+                          fontWeight: 700,
+                          "&:hover": { bgcolor: C.primaryDark, boxShadow: "none" },
+                          "&:disabled": { bgcolor: C.border, color: C.textSecondary },
                         }}
                       >
-                        <Box
-                          component="img"
-                          src={producto.imagen}
-                          alt={producto.nombre}
-                          loading="lazy"
-                          decoding="async"
-                          sx={{ width: 80, height: 80, objectFit: "cover", borderRadius: 3, flexShrink: 0 }}
-                        />
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" sx={{ color: C.textSecondary, fontSize: 11, textTransform: "uppercase", fontWeight: 600 }}>
-                            {producto.categoria}
-                          </Typography>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: C.textPrimary }} noWrap>
-                            {producto.nombre}
-                          </Typography>
-                          <StockBadge stock={producto.stock} />
-                        </Box>
-                        <Box sx={{ textAlign: "right", flexShrink: 0 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 900, color: promo ? C.promoRed : C.primary }}>
-                            ${precioFinal}
-                          </Typography>
-                          {promo && (
-                            <Typography variant="caption" sx={{ textDecoration: "line-through", color: C.textSecondary }}>
-                              ${parseFloat(producto.precio).toFixed(2)}
-                            </Typography>
-                          )}
-                        </Box>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          disabled={producto.stock < 1}
-                          onClick={(e) => agregarAlCarritoRápido(e, producto, precioFinal)}
-                          startIcon={<ShoppingCartOutlined />}
-                          sx={{
-                            flexShrink: 0,
-                            borderRadius: 3,
-                            bgcolor: C.primary,
-                            boxShadow: "none",
-                            fontWeight: 700,
-                            "&:hover": { bgcolor: C.primaryDark, boxShadow: "none" },
-                            "&:disabled": { bgcolor: C.border, color: C.textSecondary },
-                          }}
-                        >
-                          Agregar
-                        </Button>
-                      </Box>
-                    </Fade>
+                        Agregar
+                      </Button>
+                    </Box>
                   );
                 }
 

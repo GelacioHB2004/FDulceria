@@ -37,19 +37,30 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUser);
           setToken(storedToken);
 
-          await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
-            headers: { Authorization: `Bearer ${storedToken}` },
-            timeout: 8000
-          });
+          try {
+            await axios.get('https://backenddulceria.onrender.com/api/login1/ping', {
+              headers: { Authorization: `Bearer ${storedToken}` },
+              timeout: 6000
+            });
+          } catch (pingError) {
+            // Si el servidor responde explícitamente con 401 o 403, la sesión expiró
+            if (pingError.response && (pingError.response.status === 401 || pingError.response.status === 403)) {
+              localStorage.clear();
+              setUser(null);
+              setToken(null);
+              setLoading(false);
+              return;
+            }
+            // Si es un error de red o desconexión (offline), mantenemos la sesión para permitir navegación
+            console.warn('[Auth] No se pudo conectar con el servidor (posible modo offline). Manteniendo sesión local activa.');
+          }
 
           const publicRoutes = ['/', '/login', '/registro', '/verificar-correo', '/validarcorreo'];
           if (publicRoutes.includes(location.pathname)) {
             redirectBasedOnUserType(parsedUser.TipoUsuario);
           }
         } catch (error) {
-          localStorage.clear();
-          setUser(null);
-          setToken(null);
+          console.error('[Auth] Error al procesar credenciales almacenadas:', error);
         }
       }
       setLoading(false);

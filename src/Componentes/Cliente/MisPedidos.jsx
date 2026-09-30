@@ -3,7 +3,7 @@ import axios from "axios";
 import {
   Container, Typography, Box, Button,
   Skeleton, IconButton, Stepper, Step, StepLabel, StepConnector,
-  stepConnectorClasses, styled, Fade, alpha, Stack, Card, Divider, Chip
+  stepConnectorClasses, styled, alpha, Stack, Card, Divider, Chip
 } from "@mui/material";
 import { CarOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, InboxOutlined, ReloadOutlined, CreditCardOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -138,64 +138,62 @@ const MisPedidos = () => {
                 const config = getStatusConfig(p.estado);
 
                 return (
-                  <Fade in key={p.id_pedido}>
-                    <Card elevation={0} sx={{ borderRadius: 5, border: '1px solid #eee', overflow: 'hidden', bgcolor: 'white' }}>
-                      <Box sx={{ p: 4 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
-                          <Box>
-                            <Typography variant="caption" fontWeight="bold" color="textSecondary">ORDEN #{p.id_pedido}</Typography>
-                            <Typography variant="h6" fontWeight="bold">{new Date(p.fecha_creacion).toLocaleDateString()}</Typography>
-                          </Box>
-                          <Chip
-                            icon={config.icon}
-                            label={config.label}
-                            sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 'bold', p: 1 }}
-                          />
+                  <Card key={p.id_pedido} elevation={0} sx={{ borderRadius: 5, border: '1px solid #eee', overflow: 'hidden', bgcolor: 'white', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
+                    <Box sx={{ p: 4 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
+                        <Box>
+                          <Typography variant="caption" fontWeight="bold" color="textSecondary">ORDEN #{p.id_pedido}</Typography>
+                          <Typography variant="h6" fontWeight="bold">{new Date(p.fecha_creacion).toLocaleDateString()}</Typography>
                         </Box>
-
-                        {p.estado !== 'Cancelado' && (
-                          <Box sx={{ mb: 4, mt: 2 }}>
-                            <Stepper alternativeLabel activeStep={stepIdx} connector={<ColorlibConnector />}>
-                              {steps.map((label) => (
-                                <Step key={label}>
-                                  <StepLabel StepIconComponent={ColorlibStepIcon} sx={{ '& .MuiStepLabel-label': { fontWeight: 'bold', fontSize: '0.75rem' } }}>
-                                    {label}
-                                  </StepLabel>
-                                </Step>
-                              ))}
-                            </Stepper>
-                          </Box>
-                        )}
-
-                        <Divider sx={{ my: 3 }} />
-
-                        <Stack spacing={2}>
-                          {p.detalles?.slice(0, 2).map(d => (
-                            <Box key={d.id_producto} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Typography variant="body2">{d.cantidad}x {d.producto_nombre}</Typography>
-                              <Typography variant="body2" fontWeight="bold">${d.subtotal}</Typography>
-                            </Box>
-                          ))}
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2, borderTop: '1px dashed #eee' }}>
-                            <Typography variant="h6" fontWeight="bold">Total Pagado</Typography>
-                            <Typography variant="h5" fontWeight="900" color={COLORES.exito}>${p.total}</Typography>
-                          </Box>
-                        </Stack>
+                        <Chip
+                          icon={config.icon}
+                          label={config.label}
+                          sx={{ bgcolor: alpha(config.color, 0.1), color: config.color, fontWeight: 'bold', p: 1 }}
+                        />
                       </Box>
 
-                      <Box sx={{ bgcolor: alpha(COLORES.primario, 0.03), p: 2, px: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CarOutlined style={{ color: COLORES.secundario }} />
-                          <Typography variant="caption" color="textSecondary">{p.direccion_entrega}</Typography>
+                      {p.estado !== 'Cancelado' && (
+                        <Box sx={{ mb: 4, mt: 2 }}>
+                          <Stepper alternativeLabel activeStep={stepIdx} connector={<ColorlibConnector />}>
+                            {steps.map((label) => (
+                              <Step key={label}>
+                                <StepLabel StepIconComponent={ColorlibStepIcon} sx={{ '& .MuiStepLabel-label': { fontWeight: 'bold', fontSize: '0.75rem' } }}>
+                                  {label}
+                                </StepLabel>
+                              </Step>
+                            ))}
+                          </Stepper>
                         </Box>
-                        {p.estado === 'En camino' && (
-                          <Typography variant="caption" sx={{ color: COLORES.info, fontWeight: 'bold' }}>
-                            🚚 ¡Tu pedido ya salió a entrega!
-                          </Typography>
-                        )}
+                      )}
+
+                      <Divider sx={{ my: 3 }} />
+
+                      <Stack spacing={2}>
+                        {p.detalles?.slice(0, 2).map(d => (
+                          <Box key={d.id_producto} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2">{d.cantidad}x {d.producto_nombre}</Typography>
+                            <Typography variant="body2" fontWeight="bold">${d.subtotal}</Typography>
+                          </Box>
+                        ))}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2, borderTop: '1px dashed #eee' }}>
+                          <Typography variant="h6" fontWeight="bold">Total Pagado</Typography>
+                          <Typography variant="h5" fontWeight="900" color={COLORES.exito}>${p.total}</Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+
+                    <Box sx={{ bgcolor: alpha(COLORES.primario, 0.03), p: 2, px: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CarOutlined style={{ color: COLORES.secundario }} />
+                        <Typography variant="caption" color="textSecondary">{p.direccion_entrega}</Typography>
                       </Box>
-                    </Card>
-                  </Fade>
+                      {p.estado === 'En camino' && (
+                        <Typography variant="caption" sx={{ color: COLORES.info, fontWeight: 'bold' }}>
+                          🚚 ¡Tu pedido ya salió a entrega!
+                        </Typography>
+                      )}
+                    </Box>
+                  </Card>
                 );
               })}
             </Stack>

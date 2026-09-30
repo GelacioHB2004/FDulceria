@@ -1254,6 +1254,7 @@ export default function PaginaPrincipal() {
           sx={{
             position: "relative",
             py: { xs: 6, md: 8 },
+            contentVisibility: "auto",
             backgroundImage: "url('/login-bg.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -1271,17 +1272,17 @@ export default function PaginaPrincipal() {
               {[
                 {
                   icon: <UserOutlined />,
-                  valor: loading ? "—" : `+${Number(stats.clientes).toLocaleString()}`,
+                  valor: `+${Number(stats.clientes).toLocaleString()}`,
                   label: "Clientes Felices",
                 },
                 {
                   icon: <ShopOutlined />,
-                  valor: loading ? "—" : `+${Number(stats.dulcesVendidos).toLocaleString()}`,
+                  valor: `+${Number(stats.dulcesVendidos).toLocaleString()}`,
                   label: "Dulces Vendidos",
                 },
                 {
                   icon: <AppstoreOutlined />,
-                  valor: loading ? "—" : Number(stats.variedad).toLocaleString(),
+                  valor: Number(stats.variedad).toLocaleString(),
                   label: "Variedades Activas",
                 },
               ].map((s, i) => (
@@ -1317,10 +1318,14 @@ export default function PaginaPrincipal() {
                           color: C.text,
                           lineHeight: 1.1,
                           fontSize: { xs: "2.2rem", md: "2.8rem" },
+                          minHeight: { xs: "2.4rem", md: "3rem" },
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
                         }}
-                        aria-label={`${s.valor} ${s.label}`}
+                        aria-label={loading ? "Cargando datos" : `${s.valor} ${s.label}`}
                       >
-                        {s.valor}
+                        {loading ? <Skeleton width={100} sx={{ bgcolor: 'rgba(233,30,140,0.1)' }} /> : s.valor}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -1349,7 +1354,7 @@ export default function PaginaPrincipal() {
           <Box
             component="section"
             aria-labelledby="beneficios-titulo"
-            sx={{ mb: { xs: 8, md: 12 } }}
+            sx={{ mb: { xs: 8, md: 12 }, contentVisibility: "auto" }}
           >
             <Box sx={{ textAlign: "center", mb: 5 }}>
               <Typography

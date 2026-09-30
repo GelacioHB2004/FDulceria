@@ -9,7 +9,6 @@ import {
   Box,
   Divider,
   Chip,
-  Fade,
   Skeleton
 } from '@mui/material';
 import {
@@ -237,237 +236,236 @@ const CarritoCompras = () => {
         </Box>
 
         {carrito.length === 0 ? (
-          <Fade in>
-            <Card
-              elevation={0}
+          <Card
+            elevation={0}
+            sx={{
+              textAlign: 'center',
+              py: 8,
+              px: 4,
+              borderRadius: 4,
+              bgcolor: 'white',
+              border: `1px solid ${colors.primaryLight}`
+            }}
+          >
+            <Box
               sx={{
-                textAlign: 'center',
-                py: 8,
-                px: 4,
-                borderRadius: 4,
-                bgcolor: 'white',
-                border: `1px solid ${colors.primaryLight}`
+                width: 100,
+                height: 100,
+                borderRadius: '50%',
+                bgcolor: colors.accent,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3
               }}
             >
-              <Box
-                sx={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: '50%',
-                  bgcolor: colors.accent,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 3
-                }}
-              >
-                <ShoppingCartOutlined style={{ fontSize: 48, color: colors.textLight }} />
-              </Box>
-              <Typography variant="h5" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
-                Tu carrito esta vacio
-              </Typography>
-              <Typography variant="body1" sx={{ color: colors.textLight, mb: 4 }}>
-                Explora nuestro catalogo y encuentra productos deliciosos
-              </Typography>
-              <Button
-                variant="contained"
-                href="/productos"
-                sx={{
-                  bgcolor: colors.primary,
-                  color: 'white',
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: 3,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  '&:hover': { bgcolor: colors.primaryDark }
-                }}
-              >
-                Ir al Catalogo
-              </Button>
-            </Card>
-          </Fade>
+              <ShoppingCartOutlined style={{ fontSize: 48, color: colors.textLight }} />
+            </Box>
+            <Typography variant="h5" sx={{ color: colors.text, fontWeight: 600, mb: 1 }}>
+              Tu carrito esta vacio
+            </Typography>
+            <Typography variant="body1" sx={{ color: colors.textLight, mb: 4 }}>
+              Explora nuestro catalogo y encuentra productos deliciosos
+            </Typography>
+            <Button
+              variant="contained"
+              href="/productos"
+              sx={{
+                bgcolor: colors.primary,
+                color: 'white',
+                px: 4,
+                py: 1.5,
+                borderRadius: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+                '&:hover': { bgcolor: colors.primaryDark }
+              }}
+            >
+              Ir al Catalogo
+            </Button>
+          </Card>
         ) : (
           <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', md: 'row' } }}>
             {/* Lista de productos */}
             <Box sx={{ flex: 2 }}>
-              {carrito.map((item, index) => (
-                <Fade in key={item.id_producto} style={{ transitionDelay: `${index * 50}ms` }}>
-                  <Card
-                    elevation={0}
-                    sx={{
-                      mb: 2,
-                      borderRadius: 3,
-                      bgcolor: 'white',
-                      border: `1px solid ${colors.primaryLight}`,
-                      overflow: 'hidden',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        borderColor: colors.primary,
-                        boxShadow: `0 4px 20px ${colors.primaryLight}`
-                      }
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5 }}>
-                      {/* Imagen */}
-                      <Box
-                        sx={{
-                          width: 90,
-                          height: 90,
-                          borderRadius: 2,
-                          overflow: 'hidden',
-                          flexShrink: 0,
-                          bgcolor: colors.accent
-                        }}
-                      >
-                        {item.imagen ? (
-                          <Box
-                            component="img"
-                            src={item.imagen}
-                            alt={item.nombre}
-                            loading="lazy"
-                            decoding="async"
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <GiftOutlined style={{ fontSize: 28, color: colors.textLight }} />
-                          </Box>
-                        )}
-                      </Box>
-
-                      {/* Info */}
-                      <CardContent sx={{ flex: 1, py: '0 !important', px: 2.5 }}>
-                        <Typography
-                          variant="subtitle1"
+              {carrito.map((item) => (
+                <Card
+                  key={item.id_producto}
+                  elevation={0}
+                  sx={{
+                    mb: 2,
+                    borderRadius: 3,
+                    bgcolor: 'white',
+                    border: `1px solid ${colors.primaryLight}`,
+                    overflow: 'hidden',
+                    transition: 'all 0.2s ease',
+                    contentVisibility: 'auto',
+                    containIntrinsicSize: 'auto 110px',
+                    '&:hover': {
+                      borderColor: colors.primary,
+                      boxShadow: `0 4px 20px ${colors.primaryLight}`
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', p: 2.5 }}>
+                    {/* Imagen */}
+                    <Box
+                      sx={{
+                        width: 90,
+                        height: 90,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        bgcolor: colors.accent
+                      }}
+                    >
+                      {item.imagen ? (
+                        <Box
+                          component="img"
+                          src={item.imagen}
+                          alt={item.nombre}
+                          loading="lazy"
+                          decoding="async"
                           sx={{
-                            fontWeight: 600,
-                            color: colors.text,
-                            mb: 0.5
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
                           }}
-                        >
-                          {item.nombre}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: 700,
-                              color: item.tienesPromo ? '#FF4D4F' : colors.primary
-                            }}
-                          >
-                            ${parseFloat(item.precio || 0).toFixed(2)}
-                          </Typography>
-                          {item.tienesPromo && (
-                            <Typography
-                              sx={{
-                                textDecoration: 'line-through',
-                                color: colors.textLight,
-                                fontSize: '0.9rem'
-                              }}
-                            >
-                              ${parseFloat(item.precioOriginal).toFixed(2)}
-                            </Typography>
-                          )}
-                        </Box>
-
-                        {/* Controles de cantidad */}
+                        />
+                      ) : (
                         <Box
                           sx={{
-                            display: 'inline-flex',
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
                             alignItems: 'center',
-                            bgcolor: colors.accent,
-                            borderRadius: 2,
-                            p: 0.5
+                            justifyContent: 'center'
                           }}
                         >
-                          <IconButton
-                            size="small"
-                            onClick={() => actualizarCantidad(item.id_producto, item.cantidad - 1)}
-                            sx={{
-                              color: colors.text,
-                              '&:hover': { bgcolor: colors.primaryLight }
-                            }}
-                          >
-                            <MinusOutlined style={{ fontSize: 14 }} />
-                          </IconButton>
-                          <Typography
-                            sx={{
-                              mx: 2,
-                              minWidth: 24,
-                              textAlign: 'center',
-                              fontWeight: 600,
-                              color: colors.text
-                            }}
-                          >
-                            {item.cantidad}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() => actualizarCantidad(item.id_producto, item.cantidad + 1)}
-                            sx={{
-                              color: colors.text,
-                              '&:hover': { bgcolor: colors.primaryLight }
-                            }}
-                          >
-                            <PlusOutlined style={{ fontSize: 14 }} />
-                          </IconButton>
+                          <GiftOutlined style={{ fontSize: 28, color: colors.textLight }} />
                         </Box>
+                      )}
+                    </Box>
 
-                        {item.error && (
-                          <Chip
-                            label={item.error}
-                            size="small"
-                            sx={{
-                              mt: 1.5,
-                              bgcolor: '#fce4e4',
-                              color: colors.error,
-                              fontWeight: 500
-                            }}
-                          />
-                        )}
-                      </CardContent>
-
-                      {/* Subtotal y eliminar */}
-                      <Box sx={{ textAlign: 'right', pr: 1 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: colors.textLight, mb: 0.5 }}
-                        >
-                          Subtotal
-                        </Typography>
+                    {/* Info */}
+                    <CardContent sx={{ flex: 1, py: '0 !important', px: 2.5 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 600,
+                          color: colors.text,
+                          mb: 0.5
+                        }}
+                      >
+                        {item.nombre}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                         <Typography
                           variant="h6"
-                          sx={{ fontWeight: 700, color: colors.text, mb: 1 }}
-                        >
-                          ${(parseFloat(item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
-                        </Typography>
-                        <IconButton
-                          onClick={() => eliminarProducto(item.id_producto)}
                           sx={{
-                            color: colors.textLight,
-                            '&:hover': { color: colors.error, bgcolor: '#fce4e4' }
+                            fontWeight: 700,
+                            color: item.tienesPromo ? '#FF4D4F' : colors.primary
                           }}
                         >
-                          <DeleteOutlined style={{ fontSize: 18 }} />
+                          ${parseFloat(item.precio || 0).toFixed(2)}
+                        </Typography>
+                        {item.tienesPromo && (
+                          <Typography
+                            sx={{
+                              textDecoration: 'line-through',
+                              color: colors.textLight,
+                              fontSize: '0.9rem'
+                            }}
+                          >
+                            ${parseFloat(item.precioOriginal).toFixed(2)}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {/* Controles de cantidad */}
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          bgcolor: colors.accent,
+                          borderRadius: 2,
+                          p: 0.5
+                        }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => actualizarCantidad(item.id_producto, item.cantidad - 1)}
+                          sx={{
+                            color: colors.text,
+                            '&:hover': { bgcolor: colors.primaryLight }
+                          }}
+                        >
+                          <MinusOutlined style={{ fontSize: 14 }} />
+                        </IconButton>
+                        <Typography
+                          sx={{
+                            mx: 2,
+                            minWidth: 24,
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            color: colors.text
+                          }}
+                        >
+                          {item.cantidad}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() => actualizarCantidad(item.id_producto, item.cantidad + 1)}
+                          sx={{
+                            color: colors.text,
+                            '&:hover': { bgcolor: colors.primaryLight }
+                          }}
+                        >
+                          <PlusOutlined style={{ fontSize: 14 }} />
                         </IconButton>
                       </Box>
+
+                      {item.error && (
+                        <Chip
+                          label={item.error}
+                          size="small"
+                          sx={{
+                            mt: 1.5,
+                            bgcolor: '#fce4e4',
+                            color: colors.error,
+                            fontWeight: 500
+                          }}
+                        />
+                      )}
+                    </CardContent>
+
+                    {/* Subtotal y eliminar */}
+                    <Box sx={{ textAlign: 'right', pr: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: colors.textLight, mb: 0.5 }}
+                      >
+                        Subtotal
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 700, color: colors.text, mb: 1 }}
+                      >
+                        ${(parseFloat(item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
+                      </Typography>
+                      <IconButton
+                        onClick={() => eliminarProducto(item.id_producto)}
+                        sx={{
+                          color: colors.textLight,
+                          '&:hover': { color: colors.error, bgcolor: '#fce4e4' }
+                        }}
+                      >
+                        <DeleteOutlined style={{ fontSize: 18 }} />
+                      </IconButton>
                     </Box>
-                  </Card>
-                </Fade>
+                  </Box>
+                </Card>
               ))}
             </Box>
 
@@ -580,114 +578,112 @@ const CarritoCompras = () => {
 
         {/* =============== SECCIÓN DE RECOMENDACIONES PREDICTIVAS =============== */}
         {recomendaciones.length > 0 && (
-          <Fade in timeout={800}>
-            <Box sx={{ mt: { xs: 6, md: 8 }, mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
-                <Typography variant="h5" sx={{ fontWeight: 800, color: colors.text, letterSpacing: '-0.5px' }}>
-                  Dulces que te pueden interesar
-                </Typography>
-              </Box>
+          <Box sx={{ mt: { xs: 6, md: 8 }, mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, gap: 1.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: colors.text, letterSpacing: '-0.5px' }}>
+                Dulces que te pueden interesar
+              </Typography>
+            </Box>
 
-              <Box sx={{
-                display: 'flex',
-                gap: 3,
-                overflowX: 'auto',
-                pb: 3,
-                pt: 1,
-                px: 1,
-                '::-webkit-scrollbar': { height: 8 },
-                '::-webkit-scrollbar-thumb': { bgcolor: colors.primaryLight, borderRadius: 4 }
-              }}>
-                {recomendaciones.map((rec, index) => (
-                  <Card
-                    key={rec.id_producto}
-                    elevation={0}
+            <Box sx={{
+              display: 'flex',
+              gap: 3,
+              overflowX: 'auto',
+              pb: 3,
+              pt: 1,
+              px: 1,
+              '::-webkit-scrollbar': { height: 8 },
+              '::-webkit-scrollbar-thumb': { bgcolor: colors.primaryLight, borderRadius: 4 }
+            }}>
+              {recomendaciones.map((rec, index) => (
+                <Card
+                  key={rec.id_producto}
+                  elevation={0}
+                  sx={{
+                    minWidth: 260,
+                    maxWidth: 260,
+                    borderRadius: 4,
+                    border: `1px solid ${colors.primaryLight}`,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    flexShrink: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    cursor: 'pointer',
+                    bgcolor: 'white',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: `0 12px 28px ${colors.primaryLight}`,
+                      borderColor: colors.primary,
+                      '& .img-hover': { transform: 'scale(1.08)' }
+                    }
+                  }}
+                >
+                  <Box
                     sx={{
-                      minWidth: 260,
-                      maxWidth: 260,
-                      borderRadius: 4,
-                      border: `1px solid ${colors.primaryLight}`,
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      flexShrink: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      cursor: 'pointer',
-                      bgcolor: 'white',
-                      '&:hover': {
-                        transform: 'translateY(-8px)',
-                        boxShadow: `0 12px 28px ${colors.primaryLight}`,
-                        borderColor: colors.primary,
-                        '& .img-hover': { transform: 'scale(1.08)' }
-                      }
+                      height: 180,
+                      bgcolor: colors.accent,
+                      overflow: 'hidden',
+                      position: 'relative'
                     }}
                   >
-                    <Box
-                      sx={{
-                        height: 180,
-                        bgcolor: colors.accent,
-                        overflow: 'hidden',
-                        position: 'relative'
-                      }}
-                    >
-                      {rec.imagen ? (
-                        <Box
-                          component="img"
-                          className="img-hover"
-                          src={rec.imagen}
-                          alt={rec.nombre}
-                          loading="lazy"
-                          decoding="async"
-                          sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            transition: 'transform 0.5s ease-out',
-                          }}
-                        />
-                      ) : (
-                        <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <GiftOutlined style={{ fontSize: 40, color: colors.textLight }} />
-                        </Box>
-                      )}
-                    </Box>
-
-                    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.text, mb: 1, lineHeight: 1.3 }}>
-                        {rec.nombre}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: colors.textLight, mb: 2, display: 'block' }}>
-                        En base a tu selección actual
-                      </Typography>
-
-                      <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: colors.primary }}>
-                          ${parseFloat(rec.precio || 0).toFixed(2)}
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => agregarRecomendacion(rec)}
-                          sx={{
-                            bgcolor: colors.primary,
-                            borderRadius: '50%',
-                            minWidth: 42,
-                            width: 42,
-                            height: 42,
-                            p: 0,
-                            boxShadow: `0 4px 12px ${colors.primaryLight}`,
-                            transition: 'all 0.2s',
-                            '&:hover': { bgcolor: colors.primaryDark, transform: 'scale(1.1)' }
-                          }}
-                        >
-                          <PlusOutlined style={{ fontSize: 18 }} />
-                        </Button>
+                    {rec.imagen ? (
+                      <Box
+                        component="img"
+                        className="img-hover"
+                        src={rec.imagen}
+                        alt={rec.nombre}
+                        loading="lazy"
+                        decoding="async"
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.5s ease-out',
+                        }}
+                      />
+                    ) : (
+                      <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <GiftOutlined style={{ fontSize: 40, color: colors.textLight }} />
                       </Box>
-                    </CardContent>
-                  </Card>
-                ))}
-              </Box>
+                    )}
+                  </Box>
+
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2.5 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.text, mb: 1, lineHeight: 1.3 }}>
+                      {rec.nombre}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: colors.textLight, mb: 2, display: 'block' }}>
+                      En base a tu selección actual
+                    </Typography>
+
+                    <Box sx={{ mt: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: colors.primary }}>
+                        ${parseFloat(rec.precio || 0).toFixed(2)}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => agregarRecomendacion(rec)}
+                        sx={{
+                          bgcolor: colors.primary,
+                          borderRadius: '50%',
+                          minWidth: 42,
+                          width: 42,
+                          height: 42,
+                          p: 0,
+                          boxShadow: `0 4px 12px ${colors.primaryLight}`,
+                          transition: 'all 0.2s',
+                          '&:hover': { bgcolor: colors.primaryDark, transform: 'scale(1.1)' }
+                        }}
+                      >
+                        <PlusOutlined style={{ fontSize: 18 }} />
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
             </Box>
-          </Fade>
+          </Box>
         )}
       </Container>
     </Box>

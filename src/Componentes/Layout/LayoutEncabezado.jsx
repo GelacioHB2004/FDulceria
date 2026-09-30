@@ -9,6 +9,7 @@ import PieDePaginaAdmin from '../Compartidos/PieDePaginaAdministrador.jsx';
 import PieDePagina from '../Compartidos/PieDePaginaPublico.jsx';
 import PieDePaginaRepartidor from '../Compartidos/PieDePaginaRepartidor.jsx';
 import Breadcrumbs from '../Compartidos/Breadcrumbs.jsx';
+import IndicadorConexion from '../Compartidos/IndicadorConexion.jsx';
 import { useTheme } from '../Temas/ThemeContext.jsx';
 import { useAuth } from '../Autenticacion/AuthContext.js';
 
@@ -97,7 +98,8 @@ const LayoutConEncabezado = ({ children }) => {
 
   return (
     <div className={`layout-container ${theme}`}>
-   {encabezado}
+      <IndicadorConexion />
+      {encabezado}
 
 <main className="content">
   <Breadcrumbs />

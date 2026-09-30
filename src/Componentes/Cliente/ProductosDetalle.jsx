@@ -99,7 +99,6 @@ const ProductosDetalle = () => {
   const [promo, setPromo] = useState(null);
   const [cantidad, setCantidad] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [imgLoaded, setImgLoaded] = useState(false);
 
   const obtenerDatos = useCallback(async () => {
     try {
@@ -212,10 +211,6 @@ const ProductosDetalle = () => {
     <>
       <style>{`
         @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.45} }
-        @keyframes fadeInUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        .detail-img { animation: fadeIn 0.5s ease both; }
-        .detail-info { animation: fadeInUp 0.45s ease 0.1s both; }
         .qty-btn:hover { background: ${C.borderLight} !important; }
         .cart-btn:hover:not(:disabled) { background: ${C.roseDark} !important; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(214,24,92,0.32) !important; }
         .back-btn:hover { color: ${C.text} !important; }
@@ -260,16 +255,12 @@ const ProductosDetalle = () => {
                 <img
                   src={producto.imagen}
                   alt={producto.nombre}
-                  onLoad={() => setImgLoaded(true)}
+                  fetchPriority="high"
+                  loading="eager"
                   style={{
                     width: "100%", height: 520, objectFit: "cover", display: "block",
-                    opacity: imgLoaded ? 1 : 0,
-                    transition: "opacity 0.4s ease",
                   }}
                 />
-                {!imgLoaded && (
-                  <div style={{ position: "absolute", inset: 0, background: "#F3F0ED", animation: "pulse 1.5s ease-in-out infinite" }} />
-                )}
 
                 {/* Promo badge */}
                 {promo && (

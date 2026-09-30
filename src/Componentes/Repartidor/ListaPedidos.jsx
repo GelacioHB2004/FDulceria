@@ -137,7 +137,7 @@ const ListaPedidos = () => {
                 <Grid container spacing={3}>
                     {pedidos.map((p) => (
                         <Grid item xs={12} key={p.id_pedido}>
-                            <Card sx={{ borderRadius: 4, border: '1px solid #EDEDED', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'visible' }}>
+                            <Card sx={{ borderRadius: 4, border: '1px solid #EDEDED', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', position: 'relative', overflow: 'visible', contentVisibility: 'auto', containIntrinsicSize: 'auto 350px' }}>
                                 {p.estado === 'En camino' && (
                                     <Chip
                                         label="En Camino"

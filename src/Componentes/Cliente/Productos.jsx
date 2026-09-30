@@ -344,7 +344,6 @@ const Catalogo = () => {
       <style>{`
         @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.45 } }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
-        .prod-card { animation: fadeIn 0.35s ease both; }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0 }
         select { appearance: none; -webkit-appearance: none; }
@@ -499,7 +498,7 @@ const Catalogo = () => {
                     const promo = getPromoInfo(producto.id_producto);
                     const precioFinal = calcularPrecioFinal(producto.precio, promo);
                     return (
-                      <div className="prod-card" key={producto.id_producto} style={{ animationDelay: `${idx * 40}ms` }}>
+                      <div key={producto.id_producto} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 380px' }}>
                         <ProductCard
                           producto={producto}
                           promo={promo}

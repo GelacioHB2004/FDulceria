@@ -112,15 +112,11 @@ function Login() {
       }}
     >
       <Box
-        component={motion.div}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
         sx={{
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           width: '100%',
-          maxWidth: '1000px', // Ancho máximo de la tarjeta
+          maxWidth: '1000px',
           minHeight: { md: '600px' },
           bgcolor: '#ffffff',
           borderRadius: '24px',
@@ -146,7 +142,8 @@ function Login() {
             component="img"
             src="/login-bg.webp"
             alt="Login Background"
-            fetchpriority="high"
+            fetchPriority="high"
+            loading="eager"
             sx={{
               position: 'absolute',
               inset: 0,
@@ -180,10 +177,6 @@ function Login() {
             }}
           >
             <Box
-              component={motion.div}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
               sx={{
                 width: 38,
                 height: 38,
@@ -208,10 +201,6 @@ function Login() {
           </Box>
 
           <Box
-            component={motion.div}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
             sx={{ position: 'relative', zIndex: 2, textAlign: 'center' }}
           >
             <Typography
@@ -379,9 +368,6 @@ function Login() {
               fullWidth
               variant="contained"
               disabled={isLoading}
-              component={motion.button}
-              whileHover={!isLoading ? { scale: 1.015 } : {}}
-              whileTap={!isLoading ? { scale: 0.98 } : {}}
               sx={{
                 py: 1.6,
                 mt: 0.5,
@@ -393,11 +379,13 @@ function Login() {
                 letterSpacing: '0.02em',
                 textTransform: 'none',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
-                transition: 'background-color 0.2s, box-shadow 0.2s',
+                transition: 'background-color 0.2s, box-shadow 0.2s, transform 0.15s',
                 '&:hover': {
                   bgcolor: '#1f2937',
                   boxShadow: '0 6px 20px rgba(0,0,0,0.28)',
+                  transform: 'scale(1.015)',
                 },
+                '&:active': { transform: 'scale(0.98)' },
                 '&:disabled': {
                   bgcolor: '#374151',
                   color: 'rgba(255,255,255,0.6)',

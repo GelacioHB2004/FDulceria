@@ -982,7 +982,11 @@ const PaginaPrincipalRepartidor = () => {
                           }}
                         />
                       </ListItem>
-                      {index < resumenCarga.length - 1 && <Divider sx={{ mx: 3 }} />}
+                      {index < resumenCarga.length - 1 && (
+                        <ListItem sx={{ p: 0 }}>
+                          <Divider sx={{ mx: 3, width: '100%' }} />
+                        </ListItem>
+                      )}
                     </React.Fragment>
                   ))}
                 </List>

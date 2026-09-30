@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 const PerfilUsuario = () => {
@@ -9,11 +9,7 @@ const PerfilUsuario = () => {
 
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    obtenerPerfil();
-  });
-
-  const obtenerPerfil = async () => {
+  const obtenerPerfil = useCallback(async () => {
     try {
       const res = await axios.get("https://backenddulceria.onrender.com/api/perfil_usuario", {
         headers: {
@@ -27,7 +23,11 @@ const PerfilUsuario = () => {
       console.error(error);
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    obtenerPerfil();
+  }, [obtenerPerfil]);
 
   const handleChange = (e) => {
     setPerfil({

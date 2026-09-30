@@ -15,12 +15,16 @@ root.render(
   </React.StrictMode>
 );
 
-// ── Registro del Service Worker (solo en producción con HTTPS) ──────
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// ── Registro del Service Worker (PWA: Desarrollo y Producción) ──────
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
-      .then((reg) => console.log('[SW] Registrado correctamente:', reg.scope))
-      .catch((err) => console.warn('[SW] Error al registrar:', err));
+      .then((reg) => {
+        console.log('[SW] Service Worker registrado exitosamente en el ámbito:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('[SW] Error al registrar Service Worker:', err);
+      });
   });
 }

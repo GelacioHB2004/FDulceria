@@ -12,7 +12,6 @@ import {
   Chip,
   Skeleton,
   Divider,
-  Fade,
   Breadcrumbs,
   Link,
 } from "@mui/material";
@@ -111,7 +110,7 @@ const DetalleProducto = () => {
       setLoading(true);
       const resProd = await axios.get(`${API_BASE_URL}/api/productos/catalogo/detalle/${id}`);
       setProducto(resProd.data);
-      
+
       try {
         const resPromos = await axios.get(`${API_BASE_URL}/api/promociones`);
         setPromo(getPromoParaProducto(resPromos.data || [], id));
@@ -197,7 +196,7 @@ const DetalleProducto = () => {
               variant="rounded"
               sx={{
                 width: { xs: "100%", md: 480 },
-                height: 480,
+                height: { xs: 320, md: 480 },
                 borderRadius: 5,
                 flexShrink: 0,
               }}
@@ -274,333 +273,331 @@ const DetalleProducto = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 } }}>
-        <Fade in>
-          <Box
-            sx={{
-              display: "flex",
-              gap: { xs: 0, md: 7 },
-              flexDirection: { xs: "column", md: "row" },
-            }}
-          >
-            {/* ── Imagen ─────────────────────────────────────────────────── */}
-            <Box sx={{ width: { xs: "100%", md: 480 }, flexShrink: 0 }}>
-              <Card
-                elevation={0}
+        <Box
+          sx={{
+            display: "flex",
+            gap: { xs: 0, md: 7 },
+            flexDirection: { xs: "column", md: "row" },
+          }}
+        >
+          {/* ── Imagen ─────────────────────────────────────────────────── */}
+          <Box sx={{ width: { xs: "100%", md: 480 }, flexShrink: 0 }}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 5,
+                overflow: "hidden",
+                border: `1px solid ${C.border}`,
+                position: "relative",
+                bgcolor: C.surface,
+              }}
+            >
+              <Box
+                component="img"
+                src={producto.imagen}
+                alt={producto.nombre}
+                fetchPriority="high"
+                loading="eager"
                 sx={{
-                  borderRadius: 5,
-                  overflow: "hidden",
-                  border: `1px solid ${C.border}`,
-                  position: "relative",
-                  bgcolor: C.surface,
+                  width: "100%",
+                  height: { xs: 320, md: 480 },
+                  objectFit: "cover",
+                  display: "block",
                 }}
-              >
+              />
+              {/* Badge de promo */}
+              {promo && (
                 <Box
-                  component="img"
-                  src={producto.imagen}
-                  alt={producto.nombre}
                   sx={{
-                    width: "100%",
-                    height: { xs: 320, md: 480 },
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-                {/* Badge de promo */}
-                {promo && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 18,
-                      left: 18,
-                      bgcolor: C.promoRed,
-                      color: "white",
-                      px: 2,
-                      py: 1,
-                      borderRadius: 3,
-                      fontWeight: 800,
-                      fontSize: 13,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      boxShadow: "0 6px 18px rgba(229,57,53,0.35)",
-                    }}
-                  >
-                    <PercentageOutlined />
-                    {promo.tipo_descuento === "Porcentaje"
-                      ? `${Math.round(promo.valor_descuento)}% OFF`
-                      : "SÚPER OFERTA"}
-                  </Box>
-                )}
-                {/* Overlay agotado */}
-                {producto.stock === 0 && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      inset: 0,
-                      bgcolor: "rgba(255,255,255,0.72)",
-                      backdropFilter: "blur(3px)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Chip
-                      label="AGOTADO"
-                      sx={{
-                        bgcolor: C.promoRed,
-                        color: "white",
-                        fontWeight: 900,
-                        fontSize: 14,
-                        px: 1,
-                        height: 36,
-                      }}
-                    />
-                  </Box>
-                )}
-              </Card>
-            </Box>
-
-            {/* ── Info ───────────────────────────────────────────────────── */}
-            <Fade in style={{ transitionDelay: "80ms" }}>
-              <Box sx={{ flex: 1, pt: { xs: 4, md: 0 } }}>
-                {/* Categoria */}
-                <Chip
-                  icon={<TagOutlined style={{ fontSize: 12 }} />}
-                  label={producto.categoria}
-                  size="small"
-                  sx={{
-                    bgcolor: C.primaryLight,
-                    color: C.textSecondary,
-                    fontWeight: 700,
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    mb: 2,
-                  }}
-                />
-
-                {/* Nombre */}
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 900,
-                    color: C.textPrimary,
-                    mb: 3,
-                    fontSize: { xs: "1.8rem", md: "2.2rem" },
-                    lineHeight: 1.2,
+                    position: "absolute",
+                    top: 18,
+                    left: 18,
+                    bgcolor: C.promoRed,
+                    color: "white",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 3,
+                    fontWeight: 800,
+                    fontSize: 13,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    boxShadow: "0 6px 18px rgba(229,57,53,0.35)",
                   }}
                 >
-                  {producto.nombre}
-                </Typography>
+                  <PercentageOutlined />
+                  {promo.tipo_descuento === "Porcentaje"
+                    ? `${Math.round(promo.valor_descuento)}% OFF`
+                    : "SÚPER OFERTA"}
+                </Box>
+              )}
+              {/* Overlay agotado */}
+              {producto.stock === 0 && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    bgcolor: "rgba(255,255,255,0.72)",
+                    backdropFilter: "blur(3px)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Chip
+                    label="AGOTADO"
+                    sx={{
+                      bgcolor: C.promoRed,
+                      color: "white",
+                      fontWeight: 900,
+                      fontSize: 14,
+                      px: 1,
+                      height: 36,
+                    }}
+                  />
+                </Box>
+              )}
+            </Card>
+          </Box>
 
-                {/* Bloque de precio */}
+          {/* ── Info ───────────────────────────────────────────────────── */}
+          <Box sx={{ flex: 1, pt: { xs: 4, md: 0 } }}>
+            {/* Categoria */}
+            <Chip
+              icon={<TagOutlined style={{ fontSize: 12 }} />}
+              label={producto.categoria}
+              size="small"
+              sx={{
+                bgcolor: C.primaryLight,
+                color: C.textSecondary,
+                fontWeight: 700,
+                fontSize: 11,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                mb: 2,
+              }}
+            />
+
+            {/* Nombre */}
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: C.textPrimary,
+                mb: 3,
+                fontSize: { xs: "1.8rem", md: "2.2rem" },
+                lineHeight: 1.2,
+              }}
+            >
+              {producto.nombre}
+            </Typography>
+
+            {/* Bloque de precio */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-end",
+                gap: 2,
+                mb: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 900,
+                  color: promo ? C.promoRed : C.primary,
+                  fontSize: { xs: "2.4rem", md: "3rem" },
+                  lineHeight: 1,
+                }}
+              >
+                ${precioFinal}
+              </Typography>
+              {promo && (
+                <Box sx={{ pb: 0.5 }}>
+                  <Typography
+                    sx={{
+                      textDecoration: "line-through",
+                      color: C.textSecondary,
+                      fontSize: "1.1rem",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    ${parseFloat(producto.precio).toFixed(2)}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Ahorro */}
+            {ahorro && (
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  bgcolor: "#fce4e4",
+                  color: C.promoRed,
+                  px: 2,
+                  py: 0.8,
+                  borderRadius: 2.5,
+                  fontWeight: 800,
+                  fontSize: 13,
+                  mb: 3,
+                }}
+              >
+                Ahorras ${ahorro} con esta promoción
+              </Box>
+            )}
+
+            {/* Descripcion */}
+            <Typography
+              variant="body1"
+              sx={{
+                color: C.textSecondary,
+                mb: 3,
+                lineHeight: 1.8,
+                mt: ahorro ? 0 : 3,
+              }}
+            >
+              {producto.descripcion}
+            </Typography>
+
+            {/* Stock badge */}
+            <Chip
+              label={stockStatus.label}
+              sx={{
+                bgcolor: stockStatus.bg,
+                color: stockStatus.color,
+                fontWeight: 700,
+                mb: 4,
+              }}
+            />
+
+            <Divider sx={{ mb: 4, borderColor: C.border }} />
+
+            {/* Cantidad + CTA */}
+            {producto.stock > 0 && (
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{ color: C.textSecondary, fontWeight: 600, mb: 1.5 }}
+                >
+                  Cantidad
+                </Typography>
                 <Box
                   sx={{
                     display: "flex",
-                    alignItems: "flex-end",
-                    gap: 2,
-                    mb: 1,
+                    alignItems: "center",
+                    gap: 3,
+                    mb: 5,
                     flexWrap: "wrap",
                   }}
                 >
-                  <Typography
-                    variant="h2"
-                    sx={{
-                      fontWeight: 900,
-                      color: promo ? C.promoRed : C.primary,
-                      fontSize: { xs: "2.4rem", md: "3rem" },
-                      lineHeight: 1,
-                    }}
-                  >
-                    ${precioFinal}
-                  </Typography>
-                  {promo && (
-                    <Box sx={{ pb: 0.5 }}>
-                      <Typography
-                        sx={{
-                          textDecoration: "line-through",
-                          color: C.textSecondary,
-                          fontSize: "1.1rem",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        ${parseFloat(producto.precio).toFixed(2)}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Ahorro */}
-                {ahorro && (
+                  {/* Stepper */}
                   <Box
                     sx={{
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
-                      gap: 1,
-                      bgcolor: "#fce4e4",
-                      color: C.promoRed,
-                      px: 2,
-                      py: 0.8,
-                      borderRadius: 2.5,
-                      fontWeight: 800,
-                      fontSize: 13,
-                      mb: 3,
+                      bgcolor: C.primaryLight,
+                      borderRadius: 3,
+                      border: `1px solid ${C.border}`,
+                      p: 0.5,
+                      gap: 0.5,
                     }}
                   >
-                    Ahorras ${ahorro} con esta promoción
-                  </Box>
-                )}
-
-                {/* Descripcion */}
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: C.textSecondary,
-                    mb: 3,
-                    lineHeight: 1.8,
-                    mt: ahorro ? 0 : 3,
-                  }}
-                >
-                  {producto.descripcion}
-                </Typography>
-
-                {/* Stock badge */}
-                <Chip
-                  label={stockStatus.label}
-                  sx={{
-                    bgcolor: stockStatus.bg,
-                    color: stockStatus.color,
-                    fontWeight: 700,
-                    mb: 4,
-                  }}
-                />
-
-                <Divider sx={{ mb: 4, borderColor: C.border }} />
-
-                {/* Cantidad + CTA */}
-                {producto.stock > 0 && (
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: C.textSecondary, fontWeight: 600, mb: 1.5 }}
+                    <IconButton
+                      onClick={() => setCantidad(Math.max(1, cantidad - 1))}
+                      size="small"
+                      sx={{ color: C.textPrimary, "&:hover": { bgcolor: C.border } }}
                     >
-                      Cantidad
-                    </Typography>
-                    <Box
+                      <MinusOutlined />
+                    </IconButton>
+                    <Typography
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 3,
-                        mb: 5,
-                        flexWrap: "wrap",
+                        px: 2.5,
+                        fontWeight: 800,
+                        fontSize: "1.2rem",
+                        color: C.textPrimary,
+                        minWidth: 40,
+                        textAlign: "center",
                       }}
                     >
-                      {/* Stepper */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          bgcolor: C.primaryLight,
-                          borderRadius: 3,
-                          border: `1px solid ${C.border}`,
-                          p: 0.5,
-                          gap: 0.5,
-                        }}
-                      >
-                        <IconButton
-                          onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                          size="small"
-                          sx={{ color: C.textPrimary, "&:hover": { bgcolor: C.border } }}
-                        >
-                          <MinusOutlined />
-                        </IconButton>
-                        <Typography
-                          sx={{
-                            px: 2.5,
-                            fontWeight: 800,
-                            fontSize: "1.2rem",
-                            color: C.textPrimary,
-                            minWidth: 40,
-                            textAlign: "center",
-                          }}
-                        >
-                          {cantidad}
-                        </Typography>
-                        <IconButton
-                          onClick={() =>
-                            setCantidad(Math.min(producto.stock, cantidad + 1))
-                          }
-                          size="small"
-                          sx={{ color: C.textPrimary, "&:hover": { bgcolor: C.border } }}
-                        >
-                          <PlusOutlined />
-                        </IconButton>
-                      </Box>
-
-                      {/* CTA */}
-                      <Button
-                        variant="contained"
-                        size="large"
-                        onClick={agregarAlCarrito}
-                        startIcon={<ShoppingCartOutlined />}
-                        sx={{
-                          flex: 1,
-                          minWidth: 200,
-                          py: 1.8,
-                          borderRadius: 4,
-                          fontWeight: 800,
-                          fontSize: "1rem",
-                          bgcolor: C.primary,
-                          boxShadow: `0 8px 24px rgba(212,163,115,0.35)`,
-                          "&:hover": {
-                            bgcolor: C.primaryDark,
-                            boxShadow: `0 12px 30px rgba(212,163,115,0.4)`,
-                          },
-                        }}
-                      >
-                        Añadir al carrito · ${(
-                          parseFloat(precioFinal) * cantidad
-                        ).toFixed(2)}
-                      </Button>
-                    </Box>
+                      {cantidad}
+                    </Typography>
+                    <IconButton
+                      onClick={() =>
+                        setCantidad(Math.min(producto.stock, cantidad + 1))
+                      }
+                      size="small"
+                      sx={{ color: C.textPrimary, "&:hover": { bgcolor: C.border } }}
+                    >
+                      <PlusOutlined />
+                    </IconButton>
                   </Box>
-                )}
 
-                {/* Beneficios */}
-                <Card
-                  elevation={0}
-                  sx={{
-                    bgcolor: C.accent,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 4,
-                    p: 3,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2.5,
-                  }}
-                >
-                  <BenefitRow
-                    icon={<CarOutlined style={{ fontSize: 18, color: C.primary }} />}
-                    title="Envío a domicilio"
-                    subtitle="Recibe tu pedido en 24–48 horas"
-                  />
-                  <Divider sx={{ borderColor: C.border }} />
-                  <BenefitRow
-                    icon={<SafetyOutlined style={{ fontSize: 18, color: C.primary }} />}
-                    title="Compra segura"
-                    subtitle="Pago protegido y garantizado"
-                  />
-                  <Divider sx={{ borderColor: C.border }} />
-                  <BenefitRow
-                    icon={<GiftOutlined style={{ fontSize: 18, color: C.primary }} />}
-                    title="Mayoreo disponible"
-                    subtitle="Precios especiales en cantidad"
-                  />
-                </Card>
+                  {/* CTA */}
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={agregarAlCarrito}
+                    startIcon={<ShoppingCartOutlined />}
+                    sx={{
+                      flex: 1,
+                      minWidth: 200,
+                      py: 1.8,
+                      borderRadius: 4,
+                      fontWeight: 800,
+                      fontSize: "1rem",
+                      bgcolor: C.primary,
+                      boxShadow: `0 8px 24px rgba(212,163,115,0.35)`,
+                      "&:hover": {
+                        bgcolor: C.primaryDark,
+                        boxShadow: `0 12px 30px rgba(212,163,115,0.4)`,
+                      },
+                    }}
+                  >
+                    Añadir al carrito · ${(
+                      parseFloat(precioFinal) * cantidad
+                    ).toFixed(2)}
+                  </Button>
+                </Box>
               </Box>
-            </Fade>
+            )}
+
+            {/* Beneficios */}
+            <Card
+              elevation={0}
+              sx={{
+                bgcolor: C.accent,
+                border: `1px solid ${C.border}`,
+                borderRadius: 4,
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2.5,
+              }}
+            >
+              <BenefitRow
+                icon={<CarOutlined style={{ fontSize: 18, color: C.primary }} />}
+                title="Envío a domicilio"
+                subtitle="Recibe tu pedido en 24–48 horas"
+              />
+              <Divider sx={{ borderColor: C.border }} />
+              <BenefitRow
+                icon={<SafetyOutlined style={{ fontSize: 18, color: C.primary }} />}
+                title="Compra segura"
+                subtitle="Pago protegido y garantizado"
+              />
+              <Divider sx={{ borderColor: C.border }} />
+              <BenefitRow
+                icon={<GiftOutlined style={{ fontSize: 18, color: C.primary }} />}
+                title="Mayoreo disponible"
+                subtitle="Precios especiales en cantidad"
+              />
+            </Card>
           </Box>
-        </Fade>
+        </Box>
       </Container>
     </Box>
   );

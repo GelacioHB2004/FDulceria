@@ -53,7 +53,7 @@ const HistorialEntregas = () => {
                         </TableHead>
                         <TableBody>
                             {pedidos.map((p) => (
-                                <TableRow key={p.id_pedido} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableRow key={p.id_pedido} hover sx={{ '&:last-child td, &:last-child th': { border: 0 }, contentVisibility: 'auto', containIntrinsicSize: 'auto 60px' }}>
                                     <TableCell sx={{ fontWeight: 'bold' }}>#{p.id_pedido}</TableCell>
                                     <TableCell>{p.nombre_cliente}</TableCell>
                                     <TableCell>{new Date(p.fecha_entrega).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>

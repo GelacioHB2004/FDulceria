@@ -32,7 +32,18 @@ instance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Para errores graves (500 o desconexión), sí avisamos
+    // Si el dispositivo está sin internet, avisar amigablemente sin alarmar
+    if (!navigator.onLine) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Modo sin conexión',
+        text: 'Estás navegando en modo sin conexión. Esta acción requiere acceso a internet.',
+        confirmButtonColor: '#e91e6c',
+      });
+      return Promise.reject(error);
+    }
+
+    // Para errores graves (500 o desconexión en línea), sí avisamos
     let message = 'Ocurrió un error inesperado';
     if (!error.response) {
       message = 'No se pudo conectar con el servidor. ¿Está encendido el backend?';

@@ -22,6 +22,20 @@ if ('serviceWorker' in navigator) {
       .register('/sw.js')
       .then((reg) => {
         console.log('[SW] Service Worker registrado exitosamente en el ámbito:', reg.scope);
+
+        // Comprueba si hay una versión actualizada en el servidor al cargar
+        reg.update();
+
+        reg.addEventListener('updatefound', () => {
+          const installingWorker = reg.installing;
+          if (installingWorker) {
+            installingWorker.addEventListener('statechange', () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[SW] Nueva versión de la app lista para activarse.');
+              }
+            });
+          }
+        });
       })
       .catch((err) => {
         console.warn('[SW] Error al registrar Service Worker:', err);

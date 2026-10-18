@@ -1,8 +1,8 @@
 {
-  "name": "Dulcer\u00eda Angelitos",
+  "name": "Dulcería Angelitos",
   "short_name": "Angelitos",
   "id": "/",
-  "description": "Tienda en l\u00ednea de dulces y golosinas - Dulcer\u00eda Angelitos.",
+  "description": "Tienda en línea de dulces y golosinas - Dulcería Angelitos.",
   "lang": "es-MX",
   "dir": "ltr",
   "start_url": "/",
@@ -23,13 +23,79 @@
       "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "logo192-maskable.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "logo512-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Catálogo de Dulces",
+      "short_name": "Catálogo",
+      "description": "Explora nuestro catálogo de dulces y promociones",
+      "url": "/productos",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Carrito de Compras",
+      "short_name": "Carrito",
+      "description": "Ver los dulces agregados a tu carrito",
+      "url": "/carrito",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mis Pedidos",
+      "short_name": "Pedidos",
+      "description": "Consulta el estado y seguimiento de tus pedidos",
+      "url": "/cliente/mispedidos",
+      "icons": [
+        {
+          "src": "logo192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Portada y catálogo en escritorio"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Experiencia móvil Dulcería Angelitos"
     }
   ]
 }

@@ -247,6 +247,21 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       localStorage.removeItem("user");
       localStorage.removeItem("token");
+
+      // Limpieza de datos privados en la caché de la PWA (seguridad offline)
+      if ('caches' in window) {
+        try {
+          const cacheKeys = await caches.keys();
+          await Promise.all(
+            cacheKeys
+              .filter((key) => key.startsWith('angelitos-data-'))
+              .map((key) => caches.delete(key))
+          );
+        } catch (cacheErr) {
+          console.warn('[PWA] Error al limpiar caché en logout:', cacheErr);
+        }
+      }
+
       // NO borramos 'intentional_logout' aquí → lo hace el interceptor
       navigate('/', { replace: true });
     }

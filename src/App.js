@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LayoutConEncabezado from './Componentes/Layout/LayoutEncabezado.jsx';
 import { ThemeProvider } from './Componentes/Temas/ThemeContext';
@@ -6,63 +6,67 @@ import { AuthProvider } from './Componentes/Autenticacion/AuthContext';
 import ErrorBoundary from './Componentes/Utils/ErrorBoundary.jsx';
 import SuspenseFallback from './Componentes/Utils/SuspenseFallback.jsx';
 
-const PaginaPrincipal = lazy(() => import('./Paginas/PaginaPrincipal'));
-const PaginaPrincipalAdministrativa = lazy(() => import('./Paginas/PaginaPrincipalAdministrativo'));
-const PaginaPrincipalCliente = lazy(() => import('./Paginas/PaginaPrincipalCliente'));
-const PaginaPrincipalRepartidor = lazy(() => import('./Paginas/PaginaPrincipalRepartidor'));
+// Importaciones directas de rutas para evitar cualquier ChunkLoadError en modo offline
+import PaginaPrincipal from './Paginas/PaginaPrincipal';
+import Login from './Componentes/Autenticacion/Login';
+import Registro from './Componentes/Autenticacion/Registro';
+import VerificarCorreo from './Componentes/Autenticacion/VerificarCorreo';
+import ValidarCorreo from './Componentes/Autenticacion/ValidarCorreo';
+import ValidarCodigo from './Componentes/Autenticacion/ValidarCodigo';
+import CambiarPassword from './Componentes/Autenticacion/CambiarPassword';
+import ProductosPublico from './Componentes/Publico/ProductosPublico.jsx';
+import ProductosDetallePublico from './Componentes/Publico/ProductosDetallePublico.jsx';
+import CarritoComprasPublico from './Componentes/Publico/CarritoCompras.jsx';
+import PoliticasDePrivacidad from './Componentes/Publico/PoliticasDePrivacidad.jsx';
+import PoliticasDePrivacidadAdmin from './Componentes/Administrativo/PoliticasDePrivacidad.jsx';
+import TerminosCondicionesAdmin from './Componentes/Administrativo/TerminosCondiciones.jsx';
+import Mision from './Componentes/Administrativo/Mision.jsx';
+import Vision from './Componentes/Administrativo/Vision.jsx';
 
-const Login = lazy(() => import('./Componentes/Autenticacion/Login'));
-const Registro = lazy(() => import('./Componentes/Autenticacion/Registro'));
-const VerificarCorreo = lazy(() => import('./Componentes/Autenticacion/VerificarCorreo'));
-const ValidarCorreo = lazy(() => import('./Componentes/Autenticacion/ValidarCorreo'));
-const ValidarCodigo = lazy(() => import('./Componentes/Autenticacion/ValidarCodigo'));
-const CambiarPassword = lazy(() => import('./Componentes/Autenticacion/CambiarPassword'));
-const ProductosPublico = lazy(() => import('./Componentes/Publico/ProductosPublico.jsx'));
-const ProductosDetallePublico = lazy(() => import('./Componentes/Publico/ProductosDetallePublico.jsx'));
-const PoliticasDePrivacidad = lazy(() => import('./Componentes/Publico/PoliticasDePrivacidad.jsx'));
-const CarritoComprasPublico = lazy(() => import('./Componentes/Publico/CarritoCompras.jsx'));
+// Rutas de Administrador
+import PaginaPrincipalAdministrativa from './Paginas/PaginaPrincipalAdministrativo';
+import PerfilEmpresa from './Componentes/Administrativo/Perfil_Empresa';
+import PerfilUsuarioAdmin from './Componentes/Administrativo/PerfilUsuario.jsx';
+import RedesSociales from './Componentes/Administrativo/RedesSociales.jsx';
+import Categorias from './Componentes/Administrativo/Categorias.jsx';
+import ProductosAdmin from './Componentes/Administrativo/Productos.jsx';
+import Reportes from './Componentes/Administrativo/Reportes.jsx';
+import GestionPedidos from './Componentes/Administrativo/GestionPedidos.jsx';
+import InventarioMovimientos from './Componentes/Administrativo/InventarioMovimiento.jsx';
+import GestionUsuarios from './Componentes/Administrativo/GestionUsuarios.jsx';
+import RespaldoBD from './Componentes/Administrativo/RespaldoBD.jsx';
+import PoliticasEmpresa from './Componentes/Administrativo/PoliticasEmpresa.jsx';
+import TerminosEmpresa from './Componentes/Administrativo/TerminosEmpresa.jsx';
+import MisionEmpresa from './Componentes/Administrativo/MisionEmpresa.jsx';
+import VisionEmpresa from './Componentes/Administrativo/VisionEmpresa.jsx';
+import ExportacionImportacion from './Componentes/Administrativo/ExportacionImportacion.jsx';
+import MonitoreoBD from './Componentes/Administrativo/MonitoreoBD.jsx';
+import Promociones from './Componentes/Administrativo/Promociones.jsx';
 
-const PerfilRepartidor = lazy(() => import('./Componentes/Repartidor/PerfilRepartidor.jsx'));
-const ListaPedidosRepartidor = lazy(() => import('./Componentes/Repartidor/ListaPedidos.jsx'));
-const HistorialEntregasRepartidor = lazy(() => import('./Componentes/Repartidor/HistorialEntregas.jsx'));
+// Rutas de Cliente
+import PaginaPrincipalCliente from './Paginas/PaginaPrincipalCliente';
+import PerfilUsuario from './Componentes/Cliente/PerfilUsuario.jsx';
+import Productos from './Componentes/Cliente/Productos.jsx';
+import ProductoDetalle from './Componentes/Cliente/ProductosDetalle.jsx';
+import CarritoComprasCliente from './Componentes/Cliente/CarritoCompras.jsx';
+import MisPedidos from './Componentes/Cliente/MisPedidos.jsx';
 
-const PerfilUsuario = lazy(() => import('./Componentes/Cliente/PerfilUsuario.jsx'));
-const Productos = lazy(() => import('./Componentes/Cliente/Productos.jsx'));
-const ProductoDetalle = lazy(() => import('./Componentes/Cliente/ProductosDetalle.jsx'));
-const CarritoComprasCliente = lazy(() => import('./Componentes/Cliente/CarritoCompras.jsx'));
-const MisPedidos = lazy(() => import('./Componentes/Cliente/MisPedidos.jsx'));
+// Rutas de Repartidor
+import PaginaPrincipalRepartidor from './Paginas/PaginaPrincipalRepartidor';
+import PerfilRepartidor from './Componentes/Repartidor/PerfilRepartidor.jsx';
+import ListaPedidosRepartidor from './Componentes/Repartidor/ListaPedidos.jsx';
+import HistorialEntregasRepartidor from './Componentes/Repartidor/HistorialEntregas.jsx';
 
-const PerfilEmpresa = lazy(() => import('./Componentes/Administrativo/Perfil_Empresa'));
-const PerfilUsuarioAdmin = lazy(() => import('./Componentes/Administrativo/PerfilUsuario.jsx'));
-const RedesSociales = lazy(() => import('./Componentes/Administrativo/RedesSociales.jsx'));
-const Categorias = lazy(() => import('./Componentes/Administrativo/Categorias.jsx'));
-const ProductosAdmin = lazy(() => import('./Componentes/Administrativo/Productos.jsx'));
-const Reportes = lazy(() => import('./Componentes/Administrativo/Reportes.jsx'));
-const GestionPedidos = lazy(() => import('./Componentes/Administrativo/GestionPedidos.jsx'));
-const InventarioMovimientos = lazy(() => import('./Componentes/Administrativo/InventarioMovimiento.jsx'));
-const GestionUsuarios = lazy(() => import('./Componentes/Administrativo/GestionUsuarios.jsx'));
-const RespaldoBD = lazy(() => import('./Componentes/Administrativo/RespaldoBD.jsx'));
-const PoliticasEmpresa = lazy(() => import('./Componentes/Administrativo/PoliticasEmpresa.jsx'));
-const PoliticasDePrivacidadAdmin = lazy(() => import('./Componentes/Administrativo/PoliticasDePrivacidad.jsx'));
-const TerminosEmpresa = lazy(() => import('./Componentes/Administrativo/TerminosEmpresa.jsx'));
-const TerminosCondicionesAdmin = lazy(() => import('./Componentes/Administrativo/TerminosCondiciones.jsx'));
-const MisionEmpresa = lazy(() => import('./Componentes/Administrativo/MisionEmpresa.jsx'));
-const Mision = lazy(() => import('./Componentes/Administrativo/Mision.jsx'));
-const VisionEmpresa = lazy(() => import('./Componentes/Administrativo/VisionEmpresa.jsx'));
-const Vision = lazy(() => import('./Componentes/Administrativo/Vision.jsx'));
-const ExportacionImportacion = lazy(() => import('./Componentes/Administrativo/ExportacionImportacion.jsx'));
-const MonitoreoBD = lazy(() => import('./Componentes/Administrativo/MonitoreoBD.jsx'));
-const Promociones = lazy(() => import('./Componentes/Administrativo/Promociones.jsx'));
-
-const NotFound = lazy(() => import('./Paginas/NotFound.jsx'));
-const Error500 = lazy(() => import('./Paginas/Error500'));
+// Páginas de Error
+import NotFound from './Paginas/NotFound.jsx';
+import Error500 from './Paginas/Error500';
 
 const App = () => {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <ErrorBoundary>
-          <LayoutConEncabezado>
+        <LayoutConEncabezado>
+          <ErrorBoundary>
             <Suspense fallback={<SuspenseFallback />}>
               <Routes>
                 {/* Rutas publicas */}
@@ -75,12 +79,11 @@ const App = () => {
                 <Route path="/cambiarpassword" element={<CambiarPassword />} />
                 <Route path="/productos" element={<ProductosPublico />} />
                 <Route path="/detalleproducto/:id" element={<ProductosDetallePublico />} />
-                <Route path="/politicas" element={<PoliticasDePrivacidad />} />
                 <Route path="/carrito" element={<CarritoComprasPublico />} />
+                <Route path="/politicas" element={<PoliticasDePrivacidad />} />
                 <Route path="/mision" element={<Mision />} />
                 <Route path="/vision" element={<Vision />} />
                 <Route path="/terminos" element={<TerminosCondicionesAdmin />} />
-                <Route path="/politicas" element={<PoliticasDePrivacidadAdmin />} />
 
                 {/* Rutas administrador */}
                 <Route path="/admin" element={<PaginaPrincipalAdministrativa />} />
@@ -125,8 +128,8 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </LayoutConEncabezado>
-        </ErrorBoundary>
+          </ErrorBoundary>
+        </LayoutConEncabezado>
       </ThemeProvider>
     </AuthProvider>
   );

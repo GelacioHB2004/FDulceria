@@ -10,6 +10,7 @@ import PieDePagina from '../Compartidos/PieDePaginaPublico.jsx';
 import PieDePaginaRepartidor from '../Compartidos/PieDePaginaRepartidor.jsx';
 import Breadcrumbs from '../Compartidos/Breadcrumbs.jsx';
 import IndicadorConexion from '../Compartidos/IndicadorConexion.jsx';
+import BotonInstalarPWA from '../Compartidos/BotonInstalarPWA.jsx';
 import { useTheme } from '../Temas/ThemeContext.jsx';
 import { useAuth } from '../Autenticacion/AuthContext.js';
 
@@ -99,6 +100,7 @@ const LayoutConEncabezado = ({ children }) => {
   return (
     <div className={`layout-container ${theme}`}>
       <IndicadorConexion />
+      <BotonInstalarPWA />
       {encabezado}
 
 <main className="content">

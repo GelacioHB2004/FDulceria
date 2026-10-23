@@ -34,6 +34,7 @@ import Reportes from './Componentes/Administrativo/Reportes.jsx';
 import GestionPedidos from './Componentes/Administrativo/GestionPedidos.jsx';
 import InventarioMovimientos from './Componentes/Administrativo/InventarioMovimiento.jsx';
 import GestionUsuarios from './Componentes/Administrativo/GestionUsuarios.jsx';
+import GestionRepartidores from './Componentes/Administrativo/GestionRepartidores.jsx';
 import RespaldoBD from './Componentes/Administrativo/RespaldoBD.jsx';
 import PoliticasEmpresa from './Componentes/Administrativo/PoliticasEmpresa.jsx';
 import TerminosEmpresa from './Componentes/Administrativo/TerminosEmpresa.jsx';
@@ -96,6 +97,7 @@ const App = () => {
                 <Route path="/admin/pedidos" element={<GestionPedidos />} />
                 <Route path="/admin/inventario" element={<InventarioMovimientos />} />
                 <Route path="/admin/gestion_usuarios" element={<GestionUsuarios />} />
+                <Route path="/admin/repartidores" element={<GestionRepartidores />} />
                 <Route path="/admin/respaldo_bd" element={<RespaldoBD />} />
                 <Route path="/admin/politicasempresa" element={<PoliticasEmpresa />} />
                 <Route path="/admin/politicasprivacidad" element={<PoliticasDePrivacidadAdmin />} />

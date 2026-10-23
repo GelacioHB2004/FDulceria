@@ -14,7 +14,9 @@ import {
   Visibility,
   LocalShipping,
   Person,
-  Assignment
+  Assignment,
+  PhotoCamera,
+  LocationOn
 } from "@mui/icons-material";
 import Swal from "sweetalert2";
 
@@ -33,6 +35,8 @@ const GestionPedidos = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [pedidoActivo, setPedidoActivo] = useState(null);
   const [incidenciasActivas, setIncidenciasActivas] = useState([]);
+  const [evidenciaActiva, setEvidenciaActiva] = useState(null);
+  const [cargandoEvidencia, setCargandoEvidencia] = useState(false);
 
   const [selectedRepartidor, setSelectedRepartidor] = useState("");
   const [selectedEstado, setSelectedEstado] = useState("");
@@ -84,6 +88,7 @@ const GestionPedidos = () => {
     setPedidoActivo(pedido);
     setSelectedEstado(pedido.estado);
     setSelectedRepartidor(pedido.id_repartidor || "");
+    setEvidenciaActiva(null);
 
     // Cargar incidencias si existen
     if (pedido.num_incidencias > 0) {
@@ -96,6 +101,21 @@ const GestionPedidos = () => {
       } catch (err) { console.error(err); }
     } else {
       setIncidenciasActivas([]);
+    }
+
+    if (pedido.tiene_evidencia) {
+      setCargandoEvidencia(true);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`${API_BASE_URL}/api/gestion_pedidos/evidencia/${pedido.id_pedido}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setEvidenciaActiva(res.data);
+      } catch (err) {
+        console.error('Error al cargar evidencia:', err);
+      } finally {
+        setCargandoEvidencia(false);
+      }
     }
 
     setModalOpen(true);
@@ -213,6 +233,11 @@ const GestionPedidos = () => {
                         }}
                         size="small"
                       />
+                      {Boolean(p.tiene_evidencia) && (
+                        <Tooltip title="Evidencia de entrega disponible">
+                          <PhotoCamera sx={{ ml: 1, color: '#2E7D32', fontSize: 20, verticalAlign: 'middle' }} />
+                        </Tooltip>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Button
@@ -283,6 +308,29 @@ const GestionPedidos = () => {
                       <Typography variant="body2">{i.descripcion}</Typography>
                     </Box>
                   ))}
+                </Box>
+              )}
+
+              {pedidoActivo?.estado === 'Entregado' && (
+                <Box sx={{ mt: 3, p: 2, bgcolor: '#F0FDF4', borderRadius: 2, border: '1px solid #BBF7D0' }}>
+                  <Typography variant="subtitle2" color="success.main" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PhotoCamera fontSize="small" /> Evidencia de Entrega
+                  </Typography>
+                  {cargandoEvidencia ? (
+                    <Typography variant="body2" color="text.secondary">Cargando evidencia...</Typography>
+                  ) : evidenciaActiva ? (
+                    <Box>
+                      <Box component="img" src={evidenciaActiva.url_foto} alt={`Evidencia del pedido ${pedidoActivo.id_pedido}`} sx={{ width: '100%', maxHeight: 260, objectFit: 'cover', borderRadius: 2, border: '1px solid #DCFCE7', mb: 1.5 }} />
+                      <Typography variant="body2"><b>Recibió:</b> {evidenciaActiva.nombre_receptor}</Typography>
+                      <Typography variant="body2" sx={{ mt: 0.5 }}><b>Repartidor:</b> {evidenciaActiva.nombre_repartidor || 'No disponible'} {evidenciaActiva.apellido_repartidor || ''}</Typography>
+                      <Typography variant="body2" sx={{ mt: 0.5 }}><b>Fecha:</b> {evidenciaActiva.fecha_entrega ? new Date(evidenciaActiva.fecha_entrega).toLocaleString('es-MX') : 'No disponible'}</Typography>
+                      <Button size="small" variant="outlined" color="success" startIcon={<LocationOn />} sx={{ mt: 1.5, textTransform: 'none' }} onClick={() => window.open(`https://www.google.com/maps?q=${evidenciaActiva.latitud},${evidenciaActiva.longitud}`, '_blank', 'noopener,noreferrer')}>
+                        Ver ubicación en Google Maps
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">Este pedido no cuenta con evidencia de entrega.</Typography>
+                  )}
                 </Box>
               )}
             </Grid>

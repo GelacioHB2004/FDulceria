@@ -116,6 +116,7 @@ const menuItems = [
     ],
   },
   { key: "gestionusuarios", label: "Usuarios", icon: <TeamOutlined /> },
+  { key: "repartidores", label: "Repartidores", icon: <TeamOutlined /> },
   { key: "perfilusuarioadmin", label: "Mi Perfil", icon: <UserOutlined /> },
 ];
 
@@ -140,6 +141,7 @@ const routes = {
   pedidos: "/admin/pedidos",
   respaldobd: "/admin/respaldo_bd",
   gestionusuarios: "/admin/gestion_usuarios",
+  repartidores: "/admin/repartidores",
   perfilusuarioadmin: "/admin/perfilusuarioadmin",
   exportacionimportacion: "/admin/exportacion_importacion",
   monitoreobd: "/admin/monitoreo_bd",

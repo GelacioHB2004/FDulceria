@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DisconnectOutlined, CloseOutlined, CheckCircleFilled } from '@ant-design/icons';
 
 const IndicadorConexion = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showRestored, setShowRestored] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showCachedData, setShowCachedData] = useState(false);
+  const cachedDataTimer = useRef(null);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -31,7 +33,23 @@ const IndicadorConexion = () => {
     };
   }, []);
 
-  if (isOnline && !showRestored) {
+  useEffect(() => {
+    const handleServiceWorkerMessage = (event) => {
+      if (event.data?.type !== 'PWA_CACHED_DATA') return;
+
+      setShowCachedData(true);
+      clearTimeout(cachedDataTimer.current);
+      cachedDataTimer.current = setTimeout(() => setShowCachedData(false), 6000);
+    };
+
+    navigator.serviceWorker?.addEventListener('message', handleServiceWorkerMessage);
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', handleServiceWorkerMessage);
+      clearTimeout(cachedDataTimer.current);
+    };
+  }, []);
+
+  if (isOnline && !showRestored && !showCachedData) {
     return null;
   }
 
@@ -81,6 +99,11 @@ const IndicadorConexion = () => {
           border: 1px solid rgba(76, 175, 80, 0.4);
           color: #e8f5e9;
         }
+        .offline-floating-pill.cached {
+          background: rgba(68, 45, 8, 0.94);
+          border: 1px solid rgba(255, 183, 77, 0.45);
+          color: #fff8e1;
+        }
         .offline-floating-pill:hover {
           box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
           transform: translate(-50%, -2px);
@@ -103,7 +126,7 @@ const IndicadorConexion = () => {
       `}</style>
 
       <div
-        className={`offline-floating-pill ${!isOnline ? 'offline' : 'online'}`}
+        className={`offline-floating-pill ${!isOnline ? 'offline' : showCachedData ? 'cached' : 'online'}`}
         role="status"
         aria-live="polite"
       >
@@ -168,12 +191,19 @@ const IndicadorConexion = () => {
               </div>
             )}
           </>
+        ) : showCachedData ? (
+          <>
+            <span className="offline-pulse-dot orange" />
+            <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>
+              Mostrando contenido guardado; puede estar desactualizado.
+            </span>
+          </>
         ) : (
           <>
             <span className="offline-pulse-dot green" />
             <CheckCircleFilled style={{ fontSize: '15px', color: '#81c784' }} />
             <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>
-              ¡Conexión Restablecida! Sincronizando datos...
+              ¡Conexión restablecida!
             </span>
           </>
         )}

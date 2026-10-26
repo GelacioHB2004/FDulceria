@@ -15,6 +15,8 @@ const BotonInstalarPWA = () => {
   const [showIOSModal, setShowIOSModal] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [installedSuccess, setInstalledSuccess] = useState(false);
+  const [updateRegistration, setUpdateRegistration] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     // 1. Si la aplicación ya se ejecuta en modo standalone (instalada), no mostrar nada
@@ -33,7 +35,8 @@ const BotonInstalarPWA = () => {
 
     // 3. Detección de iOS Safari
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isIPadOS = /macintosh/.test(userAgent) && window.navigator.maxTouchPoints > 1;
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || isIPadOS;
     const isSafari =
       /safari/.test(userAgent) &&
       !/chrome|crios|fxios|edgios/.test(userAgent);
@@ -66,6 +69,15 @@ const BotonInstalarPWA = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleUpdateAvailable = (event) => {
+      setUpdateRegistration(event.detail.registration);
+    };
+
+    window.addEventListener('pwaUpdateAvailable', handleUpdateAvailable);
+    return () => window.removeEventListener('pwaUpdateAvailable', handleUpdateAvailable);
+  }, []);
+
   const handleInstallClick = async () => {
     if (isIOS) {
       setShowIOSModal(true);
@@ -89,13 +101,81 @@ const BotonInstalarPWA = () => {
     sessionStorage.setItem('pwa_install_dismissed', 'true');
   };
 
+  const handleUpdate = () => {
+    const waitingWorker = updateRegistration?.waiting;
+    if (!waitingWorker) {
+      setUpdateRegistration(null);
+      return;
+    }
+
+    setIsUpdating(true);
+    let hasReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hasReloaded) return;
+      hasReloaded = true;
+      window.location.reload();
+    });
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+  };
+
   // Si ya se descartó en esta sesión y no hay éxito que celebrar, no renderizar
-  if ((isDismissed || (!canInstall && !isIOS)) && !installedSuccess) {
+  if ((isDismissed || (!canInstall && !isIOS)) && !installedSuccess && !updateRegistration) {
     return null;
   }
 
   return (
     <>
+      {updateRegistration && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10002,
+            width: 'min(92%, 460px)',
+            padding: '14px 16px',
+            borderRadius: '14px',
+            background: '#ffffff',
+            border: '1px solid rgba(233, 30, 108, 0.25)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}
+        >
+          <div>
+            <strong style={{ display: 'block', color: '#2d2d2d', marginBottom: '2px' }}>
+              Nueva versión disponible
+            </strong>
+            <span style={{ color: '#666', fontSize: '0.82rem' }}>
+              Actualiza para obtener las mejoras más recientes.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleUpdate}
+            disabled={isUpdating}
+            style={{
+              flexShrink: 0,
+              border: 'none',
+              borderRadius: '20px',
+              padding: '9px 15px',
+              background: '#e91e6c',
+              color: '#ffffff',
+              fontWeight: '700',
+              cursor: isUpdating ? 'wait' : 'pointer',
+              opacity: isUpdating ? 0.7 : 1
+            }}
+          >
+            {isUpdating ? 'Actualizando…' : 'Actualizar'}
+          </button>
+        </div>
+      )}
+
       {/* Toast de instalación exitosa */}
       {installedSuccess && (
         <div

@@ -26,12 +26,10 @@ import {
   Chip,
   Divider,
   Container,
-  Paper,
   Badge,
 } from "@mui/material"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
-import BusquedaSimple from "./BusquedaSimple.jsx"
 
 const API_BASE_URL = "https://backenddulceria.onrender.com"
 
@@ -309,28 +307,6 @@ const EncabezadoCliente = () => {
               </Box>
             </Box>
 
-            {/* BUSCADOR DESKTOP */}
-            <Box sx={{ display: { xs: "none", md: "flex" }, flex: 1, maxWidth: 400, mx: 3 }}>
-              <Paper
-                elevation={0}
-                sx={{
-                  width: "100%",
-                  borderRadius: "10px",
-                  border: `1px solid ${COLORS.divider}`,
-                  overflow: "hidden",
-                  "&:hover": {
-                    borderColor: COLORS.accentLight,
-                  },
-                }}
-              >
-                <BusquedaSimple
-                  placeholder="Buscar productos..."
-                  fullWidth
-                  onSearch={(term) => navigate("/cliente/productos", { state: { searchQuery: term } })}
-                />
-              </Paper>
-            </Box>
-
             {/* MENÚ DESKTOP */}
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
               {menuItems.map((item, index) => {
@@ -492,27 +468,6 @@ const EncabezadoCliente = () => {
               </Box>
 
               <Divider sx={{ borderColor: COLORS.divider }} />
-
-              {/* Buscador en móvil */}
-              <Box sx={{ p: 2 }}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    borderRadius: "10px",
-                    border: `1px solid ${COLORS.divider}`,
-                    overflow: "hidden",
-                  }}
-                >
-                  <BusquedaSimple
-                    placeholder="Buscar productos..."
-                    fullWidth
-                    onSearch={(term) => {
-                      navigate("/cliente/productos", { state: { searchQuery: term } })
-                      setIsMobileMenuOpen(false)
-                    }}
-                  />
-                </Paper>
-              </Box>
 
               {/* Menú móvil */}
               <List sx={{ px: 1.5, flex: 1 }} disablePadding>

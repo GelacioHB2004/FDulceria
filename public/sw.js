@@ -7,10 +7,17 @@
    - Manejo seguro de modo sin conexión sin pantallas blancas
    ================================================================ */
 
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v11';
 const CACHE_STATIC = `angelitos-static-${CACHE_VERSION}`;
 const CACHE_DATA = `angelitos-data-${CACHE_VERSION}`;
 const CACHE_IMAGES = `angelitos-images-${CACHE_VERSION}`;
+const CACHE_METADATA = `angelitos-metadata-${CACHE_VERSION}`;
+
+const DATA_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const IMAGE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const DATA_MAX_ENTRIES = 60;
+const IMAGE_MAX_ENTRIES = 120;
+const CACHED_AT_HEADER = 'x-angelitos-cached-at';
 
 const OFFLINE_URL = '/offline.html';
 
@@ -26,6 +33,22 @@ const BYPASS_CACHE_PATHS = [
   '/api/recomendaciones/ping-modelo'
 ];
 
+// Solo estas rutas públicas pueden almacenarse para consulta offline.
+// Cualquier otra API, especialmente las rutas privadas o administrativas,
+// se atiende exclusivamente desde la red.
+const CACHEABLE_PUBLIC_API_PATHS = [
+  '/api/paginaprincipal',
+  '/api/perfil_empresa',
+  '/api/redes_sociales',
+  '/api/mision/empresa/',
+  '/api/vision/empresa/',
+  '/api/politicas/activa/',
+  '/api/terminos/activo/',
+  '/api/promociones',
+  '/api/productos/catalogo/publico/',
+  '/api/productos/catalogo/detalle/'
+];
+
 // Recursos críticos de App Shell, scripts, páginas públicas y estáticas
 const PRECACHE_ASSETS = [
   '/',
@@ -38,12 +61,12 @@ const PRECACHE_ASSETS = [
   '/logo192-maskable.png',
   '/logo512.png',
   '/logo512-maskable.png',
+  '/product-placeholder.svg',
   '/Logoss.jpg',
   '/login-bg.webp',
   '/login-bg.png',
   '/screenshot-desktop.png',
   '/screenshot-mobile.png',
-  '/static/js/bundle.js', // Bundle esencial para que React nunca quede en blanco offline
   // Rutas públicas y de pie de página para auditoría visual en DevTools
   '/mision',
   '/vision',
@@ -134,7 +157,12 @@ self.addEventListener('install', (event) => {
             try {
               const response = await fetch(apiUrl, { mode: 'cors' });
               if (response.ok) {
-                await cache.put(apiUrl, response);
+                await putWithExpiration(
+                  CACHE_DATA,
+                  apiUrl,
+                  response,
+                  DATA_MAX_ENTRIES
+                );
               }
             } catch (err) {
               console.warn('[SW] No se pudo precachear datos estáticos API:', apiUrl, err);
@@ -144,17 +172,22 @@ self.addEventListener('install', (event) => {
       })
     ])
   );
-  self.skipWaiting();
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 /* ── 2. Activación: Limpieza de cachés antiguas ── */
 self.addEventListener('activate', (event) => {
-  const currentCaches = [CACHE_STATIC, CACHE_DATA, CACHE_IMAGES];
+  const currentCaches = [CACHE_STATIC, CACHE_DATA, CACHE_IMAGES, CACHE_METADATA];
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys
-          .filter((key) => !currentCaches.includes(key))
+          .filter((key) => key.startsWith('angelitos-') && !currentCaches.includes(key))
           .map((key) => {
             console.log('[SW] Eliminando caché obsoleta:', key);
             return caches.delete(key);
@@ -179,6 +212,92 @@ function fetchWithTimeout(request, timeoutMs = 3500) {
       clearTimeout(timeoutId);
       throw error;
     });
+}
+
+function isCacheablePublicApi(url) {
+  return CACHEABLE_PUBLIC_API_PATHS.some((path) =>
+    path.endsWith('/') ? url.pathname.startsWith(path) : url.pathname === path
+  );
+}
+
+function addCacheTimestamp(response) {
+  if (response.type === 'opaque') return response.clone();
+
+  const headers = new Headers(response.headers);
+  headers.set(CACHED_AT_HEADER, Date.now().toString());
+  return new Response(response.clone().body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+
+function getMetadataRequest(cacheName, request) {
+  const requestUrl = typeof request === 'string'
+    ? new URL(request, self.location.origin).href
+    : request.url;
+  return `${self.location.origin}/__pwa_cache_meta__/${encodeURIComponent(cacheName)}/${encodeURIComponent(requestUrl)}`;
+}
+
+async function putWithExpiration(cacheName, request, response, maxEntries) {
+  const cache = await caches.open(cacheName);
+  const metadataCache = await caches.open(CACHE_METADATA);
+  const metadataRequest = getMetadataRequest(cacheName, request);
+  const cachedAt = Date.now().toString();
+
+  await Promise.all([
+    cache.delete(request),
+    metadataCache.delete(metadataRequest)
+  ]);
+  await Promise.all([
+    cache.put(request, addCacheTimestamp(response)),
+    metadataCache.put(metadataRequest, new Response(cachedAt))
+  ]);
+
+  const keys = await cache.keys();
+  const excessEntries = keys.length - maxEntries;
+  if (excessEntries > 0) {
+    await Promise.all(keys.slice(0, excessEntries).flatMap((key) => [
+      cache.delete(key),
+      metadataCache.delete(getMetadataRequest(cacheName, key))
+    ]));
+  }
+}
+
+async function matchFreshCache(cacheName, request, maxAgeMs) {
+  const cache = await caches.open(cacheName);
+  const cachedResponse = await cache.match(request);
+  if (!cachedResponse) return null;
+
+  let cachedAt = Number(cachedResponse.headers.get(CACHED_AT_HEADER));
+  if (!cachedAt) {
+    const metadataCache = await caches.open(CACHE_METADATA);
+    const metadataResponse = await metadataCache.match(getMetadataRequest(cacheName, request));
+    cachedAt = metadataResponse ? Number(await metadataResponse.text()) : 0;
+  }
+
+  if (!cachedAt || Date.now() - cachedAt > maxAgeMs) {
+    const metadataCache = await caches.open(CACHE_METADATA);
+    await Promise.all([
+      cache.delete(request),
+      metadataCache.delete(getMetadataRequest(cacheName, request))
+    ]);
+    return null;
+  }
+
+  return cachedResponse;
+}
+
+async function notifyCachedData(request, cachedResponse) {
+  const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const cachedAt = Number(cachedResponse.headers.get(CACHED_AT_HEADER)) || null;
+  clients.forEach((client) => {
+    client.postMessage({
+      type: 'PWA_CACHED_DATA',
+      url: request.url,
+      cachedAt
+    });
+  });
 }
 
 /* ── 3. Intercepción de Peticiones (Fetch) ── */
@@ -209,7 +328,10 @@ self.addEventListener('fetch', (event) => {
   if (isApi) {
     // Si la URL coincide con alguna ruta que debe evitar la caché, va directo a la red
     const shouldBypass = BYPASS_CACHE_PATHS.some((path) => url.pathname.includes(path));
-    if (shouldBypass) {
+    const isAuthenticated = request.headers.has('Authorization');
+    const canUseOfflineCache = isCacheablePublicApi(url);
+
+    if (shouldBypass || isAuthenticated || !canUseOfflineCache) {
       return; // El navegador gestiona la llamada directa a la red (Network-Only)
     }
 
@@ -238,9 +360,10 @@ async function handleNavigation(request) {
     const networkResponse = await fetchWithTimeout(request, 3500);
     if (networkResponse && networkResponse.ok) {
       const cache = await caches.open(CACHE_STATIC);
-      cache.put(request, networkResponse.clone());
-      // Refrescamos la entrada de /index.html en caché
-      cache.put('/index.html', networkResponse.clone());
+      await Promise.allSettled([
+        cache.put(request, networkResponse.clone()),
+        cache.put('/index.html', networkResponse.clone())
+      ]);
       return networkResponse;
     }
   } catch (error) {
@@ -265,24 +388,32 @@ async function handleNavigation(request) {
 async function handleApiRequest(request) {
   try {
     // Intentar ir a la red
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetchWithTimeout(request, 10000);
     if (networkResponse && networkResponse.status === 200) {
-      // Guardar copia fresca en la caché de datos
-      const cache = await caches.open(CACHE_DATA);
-      cache.put(request, networkResponse.clone());
+      try {
+        await putWithExpiration(
+          CACHE_DATA,
+          request,
+          networkResponse.clone(),
+          DATA_MAX_ENTRIES
+        );
+      } catch (cacheError) {
+        console.warn('[SW] No se pudo actualizar la caché de API:', request.url, cacheError);
+      }
       return networkResponse;
     }
     return networkResponse;
   } catch (error) {
     // Sin internet o error de red: consultar la caché de datos
     console.log('[SW] Recuperando datos de API desde la caché para:', request.url);
-    const cachedResponse = await caches.match(request);
+    const cachedResponse = await matchFreshCache(CACHE_DATA, request, DATA_MAX_AGE_MS);
 
     if (cachedResponse) {
+      await notifyCachedData(request, cachedResponse);
       return cachedResponse;
     }
 
-    // Si no estaba en caché, devolver respuesta JSON limpia con status 200 para no romper renderizadores
+    // Si no estaba en caché, informar correctamente que el servicio no está disponible offline
     return new Response(
       JSON.stringify({
         exito: false,
@@ -290,7 +421,8 @@ async function handleApiRequest(request) {
         mensaje: 'Sin conexión a internet y sin datos guardados previamente en caché.'
       }),
       {
-        status: 200,
+        status: 503,
+        statusText: 'Service Unavailable',
         headers: { 'Content-Type': 'application/json' }
       }
     );
@@ -299,20 +431,31 @@ async function handleApiRequest(request) {
 
 /* ── Estrategia C: Imágenes (Cache-First con Network Fallback) ── */
 async function handleImageRequest(request) {
-  const cached = await caches.match(request);
+  const cached = await matchFreshCache(CACHE_IMAGES, request, IMAGE_MAX_AGE_MS);
   if (cached) return cached;
+
+  const staticCache = await caches.open(CACHE_STATIC);
+  const staticImage = await staticCache.match(request);
+  if (staticImage) return staticImage;
 
   try {
     const networkResponse = await fetch(request);
     if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
-      const cache = await caches.open(CACHE_IMAGES);
-      cache.put(request, networkResponse.clone());
+      try {
+        await putWithExpiration(
+          CACHE_IMAGES,
+          request,
+          networkResponse.clone(),
+          IMAGE_MAX_ENTRIES
+        );
+      } catch (cacheError) {
+        console.warn('[SW] No se pudo guardar la imagen en caché:', request.url, cacheError);
+      }
     }
     return networkResponse;
   } catch (err) {
-    // Retornar logo pre-cachead si falla
-    const fallbackLogo = await caches.match('/logo192.png');
-    if (fallbackLogo) return fallbackLogo;
+    const productPlaceholder = await caches.match('/product-placeholder.svg');
+    if (productPlaceholder) return productPlaceholder;
     return new Response('', { status: 404, statusText: 'Not Found' });
   }
 }
@@ -325,7 +468,11 @@ async function handleStaticAsset(request) {
     .then(async (networkResponse) => {
       if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
         const cache = await caches.open(CACHE_STATIC);
-        cache.put(request, networkResponse.clone());
+        try {
+          await cache.put(request, networkResponse.clone());
+        } catch (cacheError) {
+          console.warn('[SW] No se pudo actualizar el recurso estático:', request.url, cacheError);
+        }
       }
       return networkResponse;
     })

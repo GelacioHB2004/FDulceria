@@ -38,6 +38,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:pwa": "node scripts/check-pwa.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

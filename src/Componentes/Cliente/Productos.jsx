@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import useReconocimientoVoz from "../Hooks/useReconocimientoVoz";
+import { coincideProducto } from "../Utils/busquedaProductos";
 
 const API_BASE_URL = "https://backenddulceria.onrender.com";
 
@@ -225,6 +227,13 @@ const SearchIcon = () => (
     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
+
+const MicIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="9" y="2" width="6" height="12" rx="3" />
+    <path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8" />
+  </svg>
+);
 const FilterIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
@@ -253,6 +262,12 @@ const Catalogo = () => {
 
   // ── Filters (preserved)
   const [searchLocal, setSearchLocal] = useState("");
+  const {
+    error: voiceError,
+    isListening,
+    isSupported: isVoiceSupported,
+    toggleListening,
+  } = useReconocimientoVoz({ onResult: setSearchLocal });
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
   const [soloPromos, setSoloPromos] = useState(false);
@@ -293,8 +308,8 @@ const Catalogo = () => {
 
   const aplicarFiltros = useCallback(() => {
     let data = [...productosOriginales];
-    const q = (searchQuery || searchLocal).toLowerCase().trim();
-    if (q) data = data.filter((p) => p.nombre.toLowerCase().includes(q));
+    const q = searchLocal || searchQuery;
+    if (q) data = data.filter((producto) => coincideProducto(producto, q));
     if (precioMin) data = data.filter((p) => p.precio >= parseFloat(precioMin));
     if (precioMax) data = data.filter((p) => p.precio <= parseFloat(precioMax));
     if (soloPromos) data = data.filter((p) => getPromoInfo(p.id_producto));
@@ -344,6 +359,7 @@ const Catalogo = () => {
       <style>{`
         @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.45 } }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes voicePulse { 50% { transform:translateY(-50%) scale(1.15) } }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0 }
         select { appearance: none; -webkit-appearance: none; }
@@ -384,7 +400,7 @@ const Catalogo = () => {
                   onChange={(e) => setSearchLocal(e.target.value)}
                   style={{
                     width: "100%", boxSizing: "border-box",
-                    padding: "12px 14px 12px 42px",
+                    padding: `12px ${isVoiceSupported ? 48 : 14}px 12px 42px`,
                     border: `1.5px solid ${C.border}`,
                     borderRadius: 12, fontSize: 14, background: C.bg,
                     color: C.text, outline: "none",
@@ -394,6 +410,38 @@ const Catalogo = () => {
                   onFocus={(e) => (e.target.style.borderColor = C.rose)}
                   onBlur={(e) => (e.target.style.borderColor = C.border)}
                 />
+                {isVoiceSupported && (
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    aria-label={isListening ? "Detener búsqueda por voz" : "Buscar productos por voz"}
+                    aria-pressed={isListening}
+                    title={isListening ? "Detener escucha" : "Buscar productos por voz"}
+                    style={{
+                      position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                      width: 34, height: 34, borderRadius: "50%", border: "none",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: isListening ? "#fff" : C.slateLight,
+                      background: isListening ? C.rose : "transparent",
+                      cursor: "pointer", transition: "all 0.2s",
+                      animation: isListening ? "voicePulse 1.2s ease-in-out infinite" : "none",
+                    }}
+                  >
+                    <MicIcon />
+                  </button>
+                )}
+                {(isListening || voiceError) && (
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    style={{
+                      display: "block", marginTop: 7, fontSize: 12, fontWeight: 600,
+                      color: voiceError ? "#DC2626" : C.rose,
+                    }}
+                  >
+                    {voiceError || "Escuchando… di el nombre de un producto."}
+                  </span>
+                )}
               </div>
             </div>
 

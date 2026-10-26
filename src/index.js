@@ -23,6 +23,16 @@ if ('serviceWorker' in navigator) {
       .then((reg) => {
         console.log('[SW] Service Worker registrado exitosamente en el ámbito:', reg.scope);
 
+        const notifyUpdateAvailable = () => {
+          window.dispatchEvent(
+            new CustomEvent('pwaUpdateAvailable', { detail: { registration: reg } })
+          );
+        };
+
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          notifyUpdateAvailable();
+        }
+
         // Comprueba si hay una versión actualizada en el servidor al cargar
         reg.update();
 
@@ -32,6 +42,7 @@ if ('serviceWorker' in navigator) {
             installingWorker.addEventListener('statechange', () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('[SW] Nueva versión de la app lista para activarse.');
+                notifyUpdateAvailable();
               }
             });
           }

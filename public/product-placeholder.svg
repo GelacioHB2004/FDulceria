@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Imagen de producto no disponible</title>
+  <desc id="description">Ilustración de un dulce envuelto</desc>
+  <rect width="512" height="512" rx="48" fill="#fff7fa"/>
+  <circle cx="256" cy="256" r="118" fill="#fce4ec"/>
+  <path d="M149 219 82 174v164l67-45m214-74 67-45v164l-67-45" fill="#f8a8c2" stroke="#e91e63" stroke-width="16" stroke-linejoin="round"/>
+  <rect x="145" y="174" width="222" height="164" rx="68" fill="#f06292" stroke="#e91e63" stroke-width="16"/>
+  <path d="M208 199c31-18 72-18 103 0" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".72"/>
+</svg>

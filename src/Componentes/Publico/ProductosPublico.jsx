@@ -8,6 +8,7 @@ import {
   ThunderboltOutlined,
   FireOutlined,
   SearchOutlined,
+  AudioOutlined,
   SortAscendingOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
@@ -28,9 +29,12 @@ import {
   FormControl,
   InputLabel,
   Tooltip,
+  IconButton,
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
+import useReconocimientoVoz from "../Hooks/useReconocimientoVoz";
+import { coincideProducto } from "../Utils/busquedaProductos";
 
 const API_BASE_URL = "https://backenddulceria.onrender.com";
 
@@ -262,6 +266,12 @@ const CatalogoPublico = () => {
   const [error, setError] = useState(false);
 
   const [search, setSearch] = useState("");
+  const {
+    error: voiceError,
+    isListening,
+    isSupported: isVoiceSupported,
+    toggleListening,
+  } = useReconocimientoVoz({ onResult: setSearch });
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
   const [soloPromos, setSoloPromos] = useState(false);
@@ -336,9 +346,7 @@ const CatalogoPublico = () => {
     let data = [...productosOriginales];
 
     if (search)
-      data = data.filter((p) =>
-        p.nombre.toLowerCase().includes(search.toLowerCase())
-      );
+      data = data.filter((producto) => coincideProducto(producto, search));
     if (categoriaActiva !== "Todas")
       data = data.filter((p) => p.categoria === categoriaActiva);
     if (precioMin)
@@ -474,14 +482,35 @@ const CatalogoPublico = () => {
                   <SearchOutlined style={{ color: C.textSecondary, fontSize: 18 }} />
                 </InputAdornment>
               ),
-              endAdornment: search ? (
+              endAdornment: (search || isVoiceSupported) ? (
                 <InputAdornment position="end">
-                  <Box
-                    onClick={() => setSearch("")}
-                    sx={{ cursor: "pointer", color: C.textSecondary, display: "flex" }}
-                  >
-                    <ClearOutlined style={{ fontSize: 16 }} />
-                  </Box>
+                  {search && (
+                    <IconButton
+                      size="small"
+                      onClick={() => setSearch("")}
+                      aria-label="Limpiar búsqueda"
+                      sx={{ color: C.textSecondary }}
+                    >
+                      <ClearOutlined style={{ fontSize: 16 }} />
+                    </IconButton>
+                  )}
+                  {isVoiceSupported && (
+                    <Tooltip title={isListening ? "Detener escucha" : "Buscar productos por voz"}>
+                      <IconButton
+                        size="small"
+                        onClick={toggleListening}
+                        aria-label={isListening ? "Detener búsqueda por voz" : "Buscar productos por voz"}
+                        aria-pressed={isListening}
+                        sx={{
+                          color: isListening ? C.accent : C.textSecondary,
+                          bgcolor: isListening ? "rgba(233, 30, 108, 0.1)" : "transparent",
+                          animation: isListening ? "voicePulse 1.2s ease-in-out infinite" : "none",
+                        }}
+                      >
+                        <AudioOutlined style={{ fontSize: 18 }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </InputAdornment>
               ) : null,
             }}
@@ -498,6 +527,17 @@ const CatalogoPublico = () => {
               },
             }}
           />
+          {(isListening || voiceError) && (
+            <Typography
+              role="status"
+              aria-live="polite"
+              variant="caption"
+              sx={{ display: "block", mt: 1, color: voiceError ? C.promoRed : C.accent, fontWeight: 600 }}
+            >
+              {voiceError || "Escuchando… di el nombre de un producto."}
+            </Typography>
+          )}
+          <style>{`@keyframes voicePulse { 50% { transform: scale(1.15); } }`}</style>
         </Container>
       </Box>
 
